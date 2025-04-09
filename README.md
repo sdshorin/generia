@@ -102,9 +102,7 @@ github.com/sdshorin/generia/
 │   ├── database/      # Database connections
 │   ├── discovery/     # Service discovery
 │   ├── logger/        # Logging utilities
-│   ├── middleware/    # Shared middleware
-│   ├── models/        # Shared data models
-│   └── tracing/       # Distributed tracing
+│   └── models/        # Shared data models
 ├── services/          # Microservices
 │   ├── api-gateway/   # API Gateway service
 │   ├── auth-service/  # Authentication service
