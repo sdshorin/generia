@@ -52,6 +52,7 @@ message PostInfo {
   int64 created_at = 5; // Unix timestamp
   UserInfo user = 6;
   PostStats stats = 7;
+  string media_url = 8; // URL для доступа к медиафайлу
 }
 
 message UserInfo {

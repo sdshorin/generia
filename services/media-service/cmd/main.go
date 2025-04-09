@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -21,6 +23,9 @@ import (
 	"github.com/sdshorin/generia/pkg/database"
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/media-service/internal/models"
+	"github.com/sdshorin/generia/services/media-service/internal/repository"
+	"github.com/sdshorin/generia/services/media-service/internal/service"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -46,131 +51,359 @@ type MediaService struct {
 	authClient  authpb.AuthServiceClient
 	minioClient *minio.Client
 	db          *sqlx.DB
+	bucket      string
 }
 
 // UploadMedia implements the UploadMedia method (streaming)
 func (s *MediaService) UploadMedia(stream mediapb.MediaService_UploadMediaServer) error {
-	// Placeholder implementation
+	ctx := stream.Context()
 	s.logger.Info("UploadMedia called (stream)")
 	
-	// In a real implementation, we would:
-	// 1. Receive first message with metadata
-	// 2. Receive subsequent messages with data chunks
-	// 3. Save to MinIO
-	// 4. Return response with media ID and variants
+	// Get metadata from first message
+	req, err := stream.Recv()
+	if err != nil {
+		s.logger.Error("Failed to receive initial message", zap.Error(err))
+		return err
+	}
 	
-	// Just return a placeholder response
+	metadata, ok := req.Data.(*mediapb.UploadMediaRequest_Metadata)
+	if !ok {
+		s.logger.Error("First message is not metadata")
+		return fmt.Errorf("first message must contain metadata")
+	}
+	
+	s.logger.Info("Received metadata", 
+		zap.String("user_id", metadata.Metadata.UserId),
+		zap.String("filename", metadata.Metadata.Filename),
+		zap.String("content_type", metadata.Metadata.ContentType),
+		zap.Int64("size", metadata.Metadata.Size))
+	
+	// Generate a unique ID using the exported function from service package
+	id, err := service.GenerateID()
+	if err != nil {
+		s.logger.Error("Failed to generate ID", zap.Error(err))
+		return err
+	}
+	
+	// Generate object name for MinIO
+	objectName := fmt.Sprintf("%s/%s%s", 
+		metadata.Metadata.UserId,
+		id, 
+		filepath.Ext(metadata.Metadata.Filename))
+	
+	// Create PutObject options
+	opts := minio.PutObjectOptions{
+		ContentType: metadata.Metadata.ContentType,
+	}
+	
+	// Create a pipe to connect the gRPC stream to the MinIO upload
+	pr, pw := io.Pipe()
+	
+	// Start uploading to MinIO in a goroutine
+	minioErrCh := make(chan error, 1)
+	go func() {
+		_, err := s.minioClient.PutObject(
+			ctx,
+			s.bucket,
+			objectName,
+			pr,
+			metadata.Metadata.Size,
+			opts,
+		)
+		if err != nil {
+			s.logger.Error("Failed to upload to MinIO", zap.Error(err))
+			minioErrCh <- err
+			_ = pr.CloseWithError(err)
+			return
+		}
+		minioErrCh <- nil
+	}()
+	
+	// Read chunks from the stream and write to the pipe
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			// End of stream
+			break
+		}
+		if err != nil {
+			s.logger.Error("Failed to receive chunk", zap.Error(err))
+			_ = pw.CloseWithError(err)
+			return err
+		}
+		
+		chunk, ok := req.Data.(*mediapb.UploadMediaRequest_Chunk)
+		if !ok {
+			s.logger.Error("Message is not a chunk")
+			_ = pw.CloseWithError(fmt.Errorf("expected chunk data"))
+			return fmt.Errorf("expected chunk data")
+		}
+		
+		_, err = pw.Write(chunk.Chunk)
+		if err != nil {
+			s.logger.Error("Failed to write chunk to pipe", zap.Error(err))
+			return err
+		}
+	}
+	
+	// Close the pipe to signal the end of the data
+	_ = pw.Close()
+	
+	// Wait for MinIO upload to complete
+	if err := <-minioErrCh; err != nil {
+		return err
+	}
+	
+	// Create media record in the database
+	media := &models.Media{
+		ID:          id,
+		UserID:      metadata.Metadata.UserId,
+		Filename:    metadata.Metadata.Filename,
+		ContentType: metadata.Metadata.ContentType,
+		Size:        metadata.Metadata.Size,
+		BucketName:  s.bucket,
+		ObjectName:  objectName,
+	}
+	
+	repo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
+	err = repo.CreateMedia(ctx, media)
+	if err != nil {
+		s.logger.Error("Failed to store media in database", zap.Error(err))
+		return err
+	}
+	
+	// Prepare response
 	return stream.SendAndClose(&mediapb.UploadMediaResponse{
-		MediaId: "media-id-placeholder",
+		MediaId: id,
 		Variants: []*mediapb.MediaVariant{
 			{
 				Name:   "original",
-				Url:    "http://placeholder/media/original.jpg",
-				Width:  1080,
-				Height: 1080,
-			},
-			{
-				Name:   "thumbnail",
-				Url:    "http://placeholder/media/thumbnail.jpg",
-				Width:  320,
-				Height: 320,
+				Width:  0, // We don't know the dimensions yet
+				Height: 0,
 			},
 		},
 	})
 }
 
+// GetPresignedUploadURL generates a presigned URL for direct upload to storage
+func (s *MediaService) GetPresignedUploadURL(ctx context.Context, req *mediapb.GetPresignedUploadURLRequest) (*mediapb.GetPresignedUploadURLResponse, error) {
+	s.logger.Info("GetPresignedUploadURL called", 
+		zap.String("user_id", req.UserId), 
+		zap.String("filename", req.Filename),
+		zap.String("content_type", req.ContentType),
+		zap.Int64("size", req.Size))
+	
+	// Create media service instance
+	mediaRepo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
+	mediaService := service.NewMediaService(mediaRepo, s.minioClient, s.bucket, s.logger)
+	
+	// Generate presigned URL
+	media, presignedURL, expiresAt, err := mediaService.GeneratePresignedPutURL(
+		ctx, 
+		req.UserId, 
+		req.Filename, 
+		req.ContentType, 
+		req.Size,
+	)
+	if err != nil {
+		s.logger.Error("Failed to generate presigned URL", zap.Error(err))
+		return nil, err
+	}
+	
+	return &mediapb.GetPresignedUploadURLResponse{
+		MediaId:   media.ID,
+		UploadUrl: presignedURL,
+		ExpiresAt: expiresAt.Unix(),
+	}, nil
+}
+
+// ConfirmUpload confirms that a media file has been uploaded via presigned URL
+func (s *MediaService) ConfirmUpload(ctx context.Context, req *mediapb.ConfirmUploadRequest) (*mediapb.ConfirmUploadResponse, error) {
+	s.logger.Info("ConfirmUpload called", 
+		zap.String("media_id", req.MediaId),
+		zap.String("user_id", req.UserId))
+	
+	// Create media service instance
+	mediaRepo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
+	mediaService := service.NewMediaService(mediaRepo, s.minioClient, s.bucket, s.logger)
+	
+	// Check if media exists and belongs to the user
+	media, err := mediaRepo.GetMediaByID(ctx, req.MediaId)
+	if err != nil {
+		s.logger.Error("Failed to get media from database", zap.Error(err))
+		return nil, fmt.Errorf("failed to get media from database: %w", err)
+	}
+	
+	if media.UserID != req.UserId {
+		s.logger.Error("Media does not belong to user", 
+			zap.String("media_id", req.MediaId),
+			zap.String("media_user_id", media.UserID),
+			zap.String("request_user_id", req.UserId))
+		return nil, fmt.Errorf("media does not belong to user")
+	}
+	
+	// Confirm upload
+	err = mediaService.ConfirmMediaUpload(ctx, req.MediaId)
+	if err != nil {
+		s.logger.Error("Failed to confirm upload", zap.Error(err))
+		return nil, err
+	}
+	
+	// Generate variants asynchronously (in a real application, this could be done via Kafka)
+	// For now, we'll just generate them synchronously
+	variants, err := mediaService.GenerateVariants(ctx, req.MediaId, []string{"thumbnail", "medium"})
+	if err != nil {
+		s.logger.Error("Failed to generate variants", zap.Error(err))
+		// Continue even if variant generation fails
+	}
+	
+	// Return response with variants (if any)
+	variantsProto := make([]*mediapb.MediaVariant, 0, len(variants))
+	for _, v := range variants {
+		variantsProto = append(variantsProto, &mediapb.MediaVariant{
+			Name:   v.Name,
+			Url:    v.URL,
+			Width:  v.Width,
+			Height: v.Height,
+		})
+	}
+	
+	// Add the original as a variant
+	urlStr, _, err := mediaService.GetPresignedURL(ctx, media, "original", time.Hour)
+	if err == nil {
+		variantsProto = append(variantsProto, &mediapb.MediaVariant{
+			Name: "original",
+			Url:  urlStr,
+		})
+	}
+	
+	return &mediapb.ConfirmUploadResponse{
+		Success:  true,
+		Variants: variantsProto,
+	}, nil
+}
+
 // GetMedia implements the GetMedia method
 func (s *MediaService) GetMedia(ctx context.Context, req *mediapb.GetMediaRequest) (*mediapb.Media, error) {
-	// Placeholder implementation
-	s.logger.Info("GetMedia called")
+	s.logger.Info("GetMedia called", zap.String("media_id", req.MediaId))
+	
+	// Create media service instance
+	mediaRepo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
+	mediaService := service.NewMediaService(mediaRepo, s.minioClient, s.bucket, s.logger)
+	
+	// Get media from database
+	media, variants, err := mediaService.GetMedia(ctx, req.MediaId)
+	if err != nil {
+		s.logger.Error("Failed to get media", zap.Error(err))
+		return nil, fmt.Errorf("failed to get media: %w", err)
+	}
+	
+	// Convert variants to proto format
+	variantsProto := make([]*mediapb.MediaVariant, 0, len(variants))
+	for _, v := range variants {
+		variantsProto = append(variantsProto, &mediapb.MediaVariant{
+			Name:   v.Name,
+			Url:    v.URL,
+			Width:  v.Width,
+			Height: v.Height,
+		})
+	}
+	
+	// Add the original as a variant if not already included
+	originalExists := false
+	for _, v := range variantsProto {
+		if v.Name == "original" {
+			originalExists = true
+			break
+		}
+	}
+	
+	if !originalExists {
+		// Generate a URL for the original
+		urlStr, _, err := mediaService.GetPresignedURL(ctx, media, "original", time.Hour)
+		if err == nil {
+			variantsProto = append(variantsProto, &mediapb.MediaVariant{
+				Name: "original",
+				Url:  urlStr,
+			})
+		}
+	}
+	
 	return &mediapb.Media{
-		MediaId:      req.MediaId,
-		UserId:      "user-id-placeholder",
-		Filename:    "placeholder.jpg",
-		ContentType: "image/jpeg",
-		Size:        1024,
-		Variants: []*mediapb.MediaVariant{
-			{
-				Name:   "original",
-				Url:    "http://placeholder/media/original.jpg",
-				Width:  1080,
-				Height: 1080,
-			},
-			{
-				Name:   "thumbnail",
-				Url:    "http://placeholder/media/thumbnail.jpg",
-				Width:  320,
-				Height: 320,
-			},
-		},
-		CreatedAt: time.Now().Format(time.RFC3339),
+		MediaId:     media.ID,
+		UserId:      media.UserID,
+		Filename:    media.Filename,
+		ContentType: media.ContentType,
+		Size:        media.Size,
+		Variants:    variantsProto,
+		CreatedAt:   media.CreatedAt.Format(time.RFC3339),
 	}, nil
 }
 
 // GetMediaURL implements the GetMediaURL method
 func (s *MediaService) GetMediaURL(ctx context.Context, req *mediapb.GetMediaURLRequest) (*mediapb.GetMediaURLResponse, error) {
-	// Placeholder implementation
 	s.logger.Info("GetMediaURL called", 
 		zap.String("media_id", req.MediaId), 
 		zap.String("variant", req.Variant),
 		zap.Int64("expires_in", req.ExpiresIn))
 	
-	// Generate a presigned URL for the media
-	// In a real implementation, we would fetch the media details from the database
-	// and generate a presigned URL for the appropriate object in MinIO
+	// Create media service instance
+	mediaRepo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
+	mediaService := service.NewMediaService(mediaRepo, s.minioClient, s.bucket, s.logger)
 	
-	var url string
-	switch req.Variant {
-	case "thumbnail":
-		url = "http://placeholder/media/thumbnail.jpg"
-	case "medium":
-		url = "http://placeholder/media/medium.jpg"
-	case "original":
-		url = "http://placeholder/media/original.jpg"
-	default:
-		url = "http://placeholder/media/medium.jpg"
+	// Get media from database
+	media, err := mediaRepo.GetMediaByID(ctx, req.MediaId)
+	if err != nil {
+		s.logger.Error("Failed to get media from database", zap.Error(err))
+		return nil, fmt.Errorf("failed to get media from database: %w", err)
+	}
+	
+	// Generate presigned URL
+	expiresIn := time.Duration(req.ExpiresIn) * time.Second
+	if expiresIn <= 0 {
+		expiresIn = time.Hour // Default expiry
+	}
+	
+	urlStr, expiresAt, err := mediaService.GetPresignedURL(ctx, media, req.Variant, expiresIn)
+	if err != nil {
+		s.logger.Error("Failed to generate presigned URL", zap.Error(err))
+		return nil, fmt.Errorf("failed to generate presigned URL: %w", err)
 	}
 	
 	return &mediapb.GetMediaURLResponse{
-		Url:       url,
-		ExpiresAt: time.Now().Add(time.Duration(req.ExpiresIn) * time.Second).Unix(),
+		Url:       urlStr,
+		ExpiresAt: expiresAt.Unix(),
 	}, nil
 }
 
 // OptimizeImage implements the OptimizeImage method
 func (s *MediaService) OptimizeImage(ctx context.Context, req *mediapb.OptimizeImageRequest) (*mediapb.OptimizeImageResponse, error) {
-	// Placeholder implementation
 	s.logger.Info("OptimizeImage called", zap.String("media_id", req.MediaId))
 	
-	// In a real implementation, we would fetch the original media, generate the requested variants,
-	// save them to MinIO, and return the details
+	// Create media service instance
+	mediaRepo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
+	mediaService := service.NewMediaService(mediaRepo, s.minioClient, s.bucket, s.logger)
 	
-	variants := make([]*mediapb.MediaVariant, 0)
+	// Generate variants
+	variants, err := mediaService.GenerateVariants(ctx, req.MediaId, req.VariantsToCreate)
+	if err != nil {
+		s.logger.Error("Failed to generate variants", zap.Error(err))
+		return nil, fmt.Errorf("failed to generate variants: %w", err)
+	}
 	
-	for _, variantName := range req.VariantsToCreate {
-		var width, height int32
-		
-		switch variantName {
-		case "thumbnail":
-			width, height = 320, 320
-		case "medium":
-			width, height = 768, 768
-		case "large":
-			width, height = 1024, 1024
-		default:
-			width, height = 500, 500
-		}
-		
-		variants = append(variants, &mediapb.MediaVariant{
-			Name:   variantName,
-			Url:    fmt.Sprintf("http://placeholder/media/%s.jpg", variantName),
-			Width:  width,
-			Height: height,
+	// Convert variants to proto format
+	variantsProto := make([]*mediapb.MediaVariant, 0, len(variants))
+	for _, v := range variants {
+		variantsProto = append(variantsProto, &mediapb.MediaVariant{
+			Name:   v.Name,
+			Url:    v.URL,
+			Width:  v.Width,
+			Height: v.Height,
 		})
 	}
 	
 	return &mediapb.OptimizeImageResponse{
-		Variants: variants,
+		Variants: variantsProto,
 	}, nil
 }
 
@@ -273,6 +506,7 @@ func main() {
 		authClient:  authClient,
 		minioClient: minioClient,
 		db:          db,
+		bucket:      cfg.Minio.Bucket,
 	}
 
 	// Create gRPC server with middleware

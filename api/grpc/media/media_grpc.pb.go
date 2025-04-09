@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: media/pedia.proto
+// source: media/media.proto
 
 package media
 
@@ -19,11 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MediaService_UploadMedia_FullMethodName   = "/media.MediaService/UploadMedia"
-	MediaService_GetMedia_FullMethodName      = "/media.MediaService/GetMedia"
-	MediaService_GetMediaURL_FullMethodName   = "/media.MediaService/GetMediaURL"
-	MediaService_OptimizeImage_FullMethodName = "/media.MediaService/OptimizeImage"
-	MediaService_HealthCheck_FullMethodName   = "/media.MediaService/HealthCheck"
+	MediaService_UploadMedia_FullMethodName           = "/media.MediaService/UploadMedia"
+	MediaService_GetPresignedUploadURL_FullMethodName = "/media.MediaService/GetPresignedUploadURL"
+	MediaService_ConfirmUpload_FullMethodName         = "/media.MediaService/ConfirmUpload"
+	MediaService_GetMedia_FullMethodName              = "/media.MediaService/GetMedia"
+	MediaService_GetMediaURL_FullMethodName           = "/media.MediaService/GetMediaURL"
+	MediaService_OptimizeImage_FullMethodName         = "/media.MediaService/OptimizeImage"
+	MediaService_HealthCheck_FullMethodName           = "/media.MediaService/HealthCheck"
 )
 
 // MediaServiceClient is the client API for MediaService service.
@@ -34,6 +36,10 @@ const (
 type MediaServiceClient interface {
 	// Загрузка медиафайла
 	UploadMedia(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadMediaRequest, UploadMediaResponse], error)
+	// Получение предподписанного URL для прямой загрузки в хранилище
+	GetPresignedUploadURL(ctx context.Context, in *GetPresignedUploadURLRequest, opts ...grpc.CallOption) (*GetPresignedUploadURLResponse, error)
+	// Подтверждение загрузки файла через предподписанный URL
+	ConfirmUpload(ctx context.Context, in *ConfirmUploadRequest, opts ...grpc.CallOption) (*ConfirmUploadResponse, error)
 	// Получение информации о медиафайле
 	GetMedia(ctx context.Context, in *GetMediaRequest, opts ...grpc.CallOption) (*Media, error)
 	// Получение URL для доступа к медиафайлу
@@ -64,6 +70,26 @@ func (c *mediaServiceClient) UploadMedia(ctx context.Context, opts ...grpc.CallO
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type MediaService_UploadMediaClient = grpc.ClientStreamingClient[UploadMediaRequest, UploadMediaResponse]
+
+func (c *mediaServiceClient) GetPresignedUploadURL(ctx context.Context, in *GetPresignedUploadURLRequest, opts ...grpc.CallOption) (*GetPresignedUploadURLResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPresignedUploadURLResponse)
+	err := c.cc.Invoke(ctx, MediaService_GetPresignedUploadURL_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mediaServiceClient) ConfirmUpload(ctx context.Context, in *ConfirmUploadRequest, opts ...grpc.CallOption) (*ConfirmUploadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfirmUploadResponse)
+	err := c.cc.Invoke(ctx, MediaService_ConfirmUpload_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
 
 func (c *mediaServiceClient) GetMedia(ctx context.Context, in *GetMediaRequest, opts ...grpc.CallOption) (*Media, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -113,6 +139,10 @@ func (c *mediaServiceClient) HealthCheck(ctx context.Context, in *HealthCheckReq
 type MediaServiceServer interface {
 	// Загрузка медиафайла
 	UploadMedia(grpc.ClientStreamingServer[UploadMediaRequest, UploadMediaResponse]) error
+	// Получение предподписанного URL для прямой загрузки в хранилище
+	GetPresignedUploadURL(context.Context, *GetPresignedUploadURLRequest) (*GetPresignedUploadURLResponse, error)
+	// Подтверждение загрузки файла через предподписанный URL
+	ConfirmUpload(context.Context, *ConfirmUploadRequest) (*ConfirmUploadResponse, error)
 	// Получение информации о медиафайле
 	GetMedia(context.Context, *GetMediaRequest) (*Media, error)
 	// Получение URL для доступа к медиафайлу
@@ -133,6 +163,12 @@ type UnimplementedMediaServiceServer struct{}
 
 func (UnimplementedMediaServiceServer) UploadMedia(grpc.ClientStreamingServer[UploadMediaRequest, UploadMediaResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method UploadMedia not implemented")
+}
+func (UnimplementedMediaServiceServer) GetPresignedUploadURL(context.Context, *GetPresignedUploadURLRequest) (*GetPresignedUploadURLResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPresignedUploadURL not implemented")
+}
+func (UnimplementedMediaServiceServer) ConfirmUpload(context.Context, *ConfirmUploadRequest) (*ConfirmUploadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmUpload not implemented")
 }
 func (UnimplementedMediaServiceServer) GetMedia(context.Context, *GetMediaRequest) (*Media, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMedia not implemented")
@@ -173,6 +209,42 @@ func _MediaService_UploadMedia_Handler(srv interface{}, stream grpc.ServerStream
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type MediaService_UploadMediaServer = grpc.ClientStreamingServer[UploadMediaRequest, UploadMediaResponse]
+
+func _MediaService_GetPresignedUploadURL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPresignedUploadURLRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).GetPresignedUploadURL(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_GetPresignedUploadURL_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).GetPresignedUploadURL(ctx, req.(*GetPresignedUploadURLRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MediaService_ConfirmUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmUploadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MediaServiceServer).ConfirmUpload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MediaService_ConfirmUpload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MediaServiceServer).ConfirmUpload(ctx, req.(*ConfirmUploadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
 
 func _MediaService_GetMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMediaRequest)
@@ -254,6 +326,14 @@ var MediaService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MediaServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetPresignedUploadURL",
+			Handler:    _MediaService_GetPresignedUploadURL_Handler,
+		},
+		{
+			MethodName: "ConfirmUpload",
+			Handler:    _MediaService_ConfirmUpload_Handler,
+		},
+		{
 			MethodName: "GetMedia",
 			Handler:    _MediaService_GetMedia_Handler,
 		},
@@ -277,5 +357,5 @@ var MediaService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "media/pedia.proto",
+	Metadata: "media/media.proto",
 }

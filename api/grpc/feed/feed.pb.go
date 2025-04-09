@@ -376,6 +376,7 @@ type PostInfo struct {
 	CreatedAt     int64                  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // Unix timestamp
 	User          *UserInfo              `protobuf:"bytes,6,opt,name=user,proto3" json:"user,omitempty"`
 	Stats         *PostStats             `protobuf:"bytes,7,opt,name=stats,proto3" json:"stats,omitempty"`
+	MediaUrl      string                 `protobuf:"bytes,8,opt,name=media_url,json=mediaUrl,proto3" json:"media_url,omitempty"` // URL для доступа к медиафайлу
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -457,6 +458,13 @@ func (x *PostInfo) GetStats() *PostStats {
 		return x.Stats
 	}
 	return nil
+}
+
+func (x *PostInfo) GetMediaUrl() string {
+	if x != nil {
+		return x.MediaUrl
+	}
+	return ""
 }
 
 type UserInfo struct {
@@ -778,7 +786,7 @@ const file_feed_feed_proto_rawDesc = "" +
 	"\x05posts\x18\x01 \x03(\v2\x0e.feed.PostInfoR\x05posts\x12\x1f\n" +
 	"\vnext_cursor\x18\x02 \x01(\tR\n" +
 	"nextCursor\x12\x19\n" +
-	"\bhas_more\x18\x03 \x01(\bR\ahasMore\"\xd2\x01\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\"\xef\x01\n" +
 	"\bPostInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x18\n" +
@@ -787,7 +795,8 @@ const file_feed_feed_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12\"\n" +
 	"\x04user\x18\x06 \x01(\v2\x0e.feed.UserInfoR\x04user\x12%\n" +
-	"\x05stats\x18\a \x01(\v2\x0f.feed.PostStatsR\x05stats\"f\n" +
+	"\x05stats\x18\a \x01(\v2\x0f.feed.PostStatsR\x05stats\x12\x1b\n" +
+	"\tmedia_url\x18\b \x01(\tR\bmediaUrl\"f\n" +
 	"\bUserInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12.\n" +

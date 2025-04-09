@@ -33,83 +33,176 @@ import (
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
 	feedpb "github.com/sdshorin/generia/api/grpc/feed"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
 )
 
 // FeedService implements the feed service
 type FeedService struct {
 	feedpb.UnimplementedFeedServiceServer
-	logger     *zap.Logger
-	authClient authpb.AuthServiceClient
-	postClient postpb.PostServiceClient
+	logger      *zap.Logger
+	authClient  authpb.AuthServiceClient
+	postClient  postpb.PostServiceClient
+	mediaClient mediapb.MediaServiceClient
 }
 
 // GetGlobalFeed implements the GetGlobalFeed method
 func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFeedRequest) (*feedpb.GetGlobalFeedResponse, error) {
-	// Placeholder implementation
-	s.logger.Info("GetGlobalFeed called")
+	s.logger.Info("GetGlobalFeed called", 
+		zap.String("user_id", req.UserId),
+		zap.Int32("limit", req.Limit),
+		zap.String("cursor", req.Cursor))
+
+	// Default limit if not provided
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	// Get posts from post service
+	postsResp, err := s.postClient.GetGlobalFeed(ctx, &postpb.GetGlobalFeedRequest{
+		Limit:  limit,
+		Cursor: req.Cursor,
+	})
+	if err != nil {
+		s.logger.Error("Failed to get posts from post service", zap.Error(err))
+		return nil, fmt.Errorf("failed to get posts: %w", err)
+	}
+
+	// Transform posts into feed posts
+	feedPosts := make([]*feedpb.PostInfo, 0, len(postsResp.Posts))
+	for _, post := range postsResp.Posts {
+		// Parse time string to Unix timestamp
+		createdTime, err := time.Parse(time.RFC3339, post.CreatedAt)
+		if err != nil {
+			s.logger.Warn("Failed to parse created time", 
+				zap.Error(err), 
+				zap.String("time_str", post.CreatedAt))
+			createdTime = time.Now() // Fallback to current time
+		}
+
+		// Get user profile picture if available
+		var profilePictureURL string
+		userResp, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
+			UserId: post.UserId,
+		})
+		if err == nil && userResp.ProfilePictureUrl != "" {
+			profilePictureURL = userResp.ProfilePictureUrl
+		}
+
+		// Add post to feed - the post.MediaUrl field already contains the actual URL
+		feedPost := &feedpb.PostInfo{
+			Id:        post.PostId,
+			UserId:    post.UserId,
+			Caption:   post.Caption,
+			MediaUrl:  post.MediaUrl, // MediaURL from post service already contains the fully formed URL
+			CreatedAt: createdTime.Unix(),
+			User: &feedpb.UserInfo{
+				Id:                post.UserId,
+				Username:          post.Username,
+				ProfilePictureUrl: profilePictureURL,
+			},
+			Stats: &feedpb.PostStats{
+				LikesCount:    post.LikesCount,
+				CommentsCount: post.CommentsCount,
+			},
+		}
+		
+		// No need to separately fetch media URLs since the post service already provides them
+		feedPosts = append(feedPosts, feedPost)
+	}
+
 	return &feedpb.GetGlobalFeedResponse{
-		Posts: []*feedpb.PostInfo{
-			{
-				Id:        "post-id-1",
-				UserId:    "user-id-1",
-				Caption:   "Example post 1",
-				MediaId:   "media-id-1",
-				CreatedAt: time.Now().Add(-24 * time.Hour).Unix(),
-				User: &feedpb.UserInfo{
-					Id:       "user-id-1",
-					Username: "user1",
-				},
-				Stats: &feedpb.PostStats{
-					LikesCount:    10,
-					CommentsCount: 5,
-				},
-			},
-			{
-				Id:        "post-id-2",
-				UserId:    "user-id-2",
-				Caption:   "Example post 2",
-				MediaId:   "media-id-2",
-				CreatedAt: time.Now().Add(-12 * time.Hour).Unix(),
-				User: &feedpb.UserInfo{
-					Id:       "user-id-2",
-					Username: "user2",
-				},
-				Stats: &feedpb.PostStats{
-					LikesCount:    5,
-					CommentsCount: 2,
-				},
-			},
-		},
-		NextCursor: "",
-		HasMore:    false,
+		Posts:      feedPosts,
+		NextCursor: postsResp.NextCursor,
+		HasMore:    postsResp.NextCursor != "",
 	}, nil
 }
 
 // GetUserFeed implements the GetUserFeed method
 func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRequest) (*feedpb.GetUserFeedResponse, error) {
-	// Placeholder implementation
-	s.logger.Info("GetUserFeed called")
-	return &feedpb.GetUserFeedResponse{
-		Posts: []*feedpb.PostInfo{
-			{
-				Id:        "post-id-3",
-				UserId:    "user-id-3",
-				Caption:   "Example post 3",
-				MediaId:   "media-id-3",
-				CreatedAt: time.Now().Add(-2 * time.Hour).Unix(),
-				User: &feedpb.UserInfo{
-					Id:       "user-id-3",
-					Username: "user3",
-				},
-				Stats: &feedpb.PostStats{
-					LikesCount:    20,
-					CommentsCount: 8,
-				},
+	s.logger.Info("GetUserFeed called", 
+		zap.String("user_id", req.UserId),
+		zap.String("requesting_user_id", req.RequestingUserId),
+		zap.Int32("limit", req.Limit),
+		zap.String("cursor", req.Cursor))
+
+	// Default limit if not provided
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	// Get user posts from post service
+	userPostsResp, err := s.postClient.GetUserPosts(ctx, &postpb.GetUserPostsRequest{
+		UserId: req.UserId,
+		Limit:  limit,
+		Offset: 0, // We'll need to implement cursor-based pagination
+	})
+	if err != nil {
+		s.logger.Error("Failed to get user posts", zap.Error(err))
+		return nil, fmt.Errorf("failed to get user posts: %w", err)
+	}
+
+	// Transform posts into feed posts
+	feedPosts := make([]*feedpb.PostInfo, 0, len(userPostsResp.Posts))
+	for _, post := range userPostsResp.Posts {
+		// Parse time string to Unix timestamp
+		createdTime, err := time.Parse(time.RFC3339, post.CreatedAt)
+		if err != nil {
+			s.logger.Warn("Failed to parse created time", 
+				zap.Error(err), 
+				zap.String("time_str", post.CreatedAt))
+			createdTime = time.Now() // Fallback to current time
+		}
+
+		// Get user profile picture if available
+		var profilePictureURL string
+		userResp, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
+			UserId: post.UserId,
+		})
+		if err == nil && userResp.ProfilePictureUrl != "" {
+			profilePictureURL = userResp.ProfilePictureUrl
+		}
+
+		// Add post to feed
+		feedPost := &feedpb.PostInfo{
+			Id:        post.PostId,
+			UserId:    post.UserId,
+			Caption:   post.Caption,
+			MediaUrl:  post.MediaUrl, // MediaURL from post service already contains the fully formed URL
+			CreatedAt: createdTime.Unix(),
+			User: &feedpb.UserInfo{
+				Id:                post.UserId,
+				Username:          post.Username,
+				ProfilePictureUrl: profilePictureURL,
 			},
-		},
-		NextCursor: "",
-		HasMore:    false,
+			Stats: &feedpb.PostStats{
+				LikesCount:    post.LikesCount,
+				CommentsCount: post.CommentsCount,
+				// Check if the requesting user liked this post (not implemented yet)
+				UserLiked:     false,
+			},
+		}
+		
+		feedPosts = append(feedPosts, feedPost)
+	}
+
+	// Determine if there are more posts
+	hasMore := len(feedPosts) > 0 && int32(len(feedPosts)) >= limit 
+	
+	// In a real implementation, we'd use the cursor for pagination
+	// For now, just return an empty cursor
+	nextCursor := ""
+	if hasMore && len(feedPosts) > 0 {
+		// Use the last post's ID as the cursor
+		nextCursor = feedPosts[len(feedPosts)-1].Id
+	}
+
+	return &feedpb.GetUserFeedResponse{
+		Posts:      feedPosts,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}, nil
 }
 
@@ -183,11 +276,18 @@ func main() {
 	}
 	defer postConn.Close()
 
+	mediaConn, mediaClient, err := createMediaClient(discoveryClient)
+	if err != nil {
+		logger.Logger.Fatal("Failed to create media client", zap.Error(err))
+	}
+	defer mediaConn.Close()
+
 	// Initialize feed service
 	feedService := &FeedService{
-		logger:     logger.Logger,
-		authClient: authClient,
-		postClient: postClient,
+		logger:      logger.Logger,
+		authClient:  authClient,
+		postClient:  postClient,
+		mediaClient: mediaClient,
 	}
 
 	// Create gRPC server with middleware
@@ -319,6 +419,34 @@ func createPostClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientC
 
 	// Create client
 	client := postpb.NewPostServiceClient(conn)
+
+	return conn, client, nil
+}
+
+func createMediaClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, mediapb.MediaServiceClient, error) {
+	// Get service address from Consul
+	serviceAddress, err := discoveryClient.ResolveService("media-service")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to resolve media service: %w", err)
+	}
+
+	// Create gRPC connection
+	conn, err := grpc.Dial(
+		serviceAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to connect to media service: %w", err)
+	}
+
+	// Create client
+	client := mediapb.NewMediaServiceClient(conn)
 
 	return conn, client, nil
 }

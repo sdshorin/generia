@@ -88,13 +88,13 @@ func (h *FeedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 	for _, post := range resp.Posts {
 		// Parse created time
 		createdAt := time.Unix(post.CreatedAt, 0)
-		
+
 		posts = append(posts, FeedItemResponse{
 			ID:            post.Id,
 			UserID:        post.UserId,
 			Username:      post.User.Username,
 			Caption:       post.Caption,
-			MediaURL:      "", // post.MediaUrl, // Use the media URL from the feed service
+			MediaURL:      post.MediaUrl,
 			CreatedAt:     createdAt,
 			LikesCount:    int(post.Stats.LikesCount),
 			CommentsCount: int(post.Stats.CommentsCount),

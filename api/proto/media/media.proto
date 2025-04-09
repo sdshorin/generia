@@ -10,6 +10,12 @@ service MediaService {
   // Загрузка медиафайла
   rpc UploadMedia(stream UploadMediaRequest) returns (UploadMediaResponse);
   
+  // Получение предподписанного URL для прямой загрузки в хранилище
+  rpc GetPresignedUploadURL(GetPresignedUploadURLRequest) returns (GetPresignedUploadURLResponse);
+  
+  // Подтверждение загрузки файла через предподписанный URL
+  rpc ConfirmUpload(ConfirmUploadRequest) returns (ConfirmUploadResponse);
+  
   // Получение информации о медиафайле
   rpc GetMedia(GetMediaRequest) returns (Media);
   
@@ -81,6 +87,29 @@ message OptimizeImageRequest {
 
 message OptimizeImageResponse {
   repeated MediaVariant variants = 1;
+}
+
+message GetPresignedUploadURLRequest {
+  string user_id = 1;
+  string filename = 2;
+  string content_type = 3;
+  int64 size = 4;
+}
+
+message GetPresignedUploadURLResponse {
+  string media_id = 1;
+  string upload_url = 2;
+  int64 expires_at = 3; // Unix timestamp
+}
+
+message ConfirmUploadRequest {
+  string media_id = 1;
+  string user_id = 2;
+}
+
+message ConfirmUploadResponse {
+  bool success = 1;
+  repeated MediaVariant variants = 2;
 }
 
 message HealthCheckRequest {

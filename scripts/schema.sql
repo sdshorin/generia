@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash VARCHAR(255) NOT NULL,
+    token_hash VARCHAR(255) NOT NULL UNIQUE,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -38,8 +38,19 @@ CREATE TABLE IF NOT EXISTS media (
     content_type TEXT NOT NULL,
     size BIGINT NOT NULL,
     bucket TEXT NOT NULL,
-    path TEXT NOT NULL,
-    variants JSONB NOT NULL, -- { "original": "path", "thumbnail": "path", "medium": "path" }
+    object_name TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Media variants table (used by media-service)
+CREATE TABLE IF NOT EXISTS media_variants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    media_id UUID NOT NULL REFERENCES media(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    width INT NOT NULL,
+    height INT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -49,3 +60,4 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_hash ON refresh_tokens(token
 CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at);
 CREATE INDEX IF NOT EXISTS idx_media_user_id ON media(user_id);
+CREATE INDEX IF NOT EXISTS idx_media_variants_media_id ON media_variants(media_id);

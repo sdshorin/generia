@@ -11,7 +11,7 @@ type Media struct {
 	Filename    string    `db:"filename" json:"filename"`
 	ContentType string    `db:"content_type" json:"content_type"`
 	Size        int64     `db:"size" json:"size"`
-	BucketName  string    `db:"bucket_name" json:"bucket_name"`
+	BucketName  string    `db:"bucket" json:"bucket"`
 	ObjectName  string    `db:"object_name" json:"object_name"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`

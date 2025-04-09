@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/services/post-service/internal/models"
@@ -36,31 +37,38 @@ func NewPostRepository(db *sqlx.DB) PostRepository {
 func (r *postRepository) Create(ctx context.Context, post *models.Post) error {
 	query := `
 		INSERT INTO posts (id, user_id, caption, media_id, created_at, updated_at)
-		VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5)
+		VALUES (:id, :user_id, :caption, :media_id, :created_at, :updated_at)
 		RETURNING id
 	`
 
+	// Set timestamps
 	now := time.Now()
 	post.CreatedAt = now
 	post.UpdatedAt = now
 
-	var id string
-	err := r.db.QueryRowContext(
-		ctx,
-		query,
-		post.UserID,
-		post.Caption,
-		post.MediaID,
-		post.CreatedAt,
-		post.UpdatedAt,
-	).Scan(&id)
+	// Generate UUID if not provided
+	if post.ID == "" {
+		post.ID = uuid.New().String()
+	}
 
+	// Use named parameters
+	var id string
+	rows, err := r.db.NamedQueryContext(ctx, query, post)
 	if err != nil {
 		logger.Logger.Error("Failed to create post", zap.Error(err))
 		return err
 	}
+	defer rows.Close()
 
-	post.ID = id
+	if rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			logger.Logger.Error("Failed to scan post ID", zap.Error(err))
+			return err
+		}
+		post.ID = id
+	}
+
 	return nil
 }
 
@@ -104,8 +112,8 @@ func (r *postRepository) GetByUserID(ctx context.Context, userID string, limit, 
 	posts := []*models.Post{}
 	err := r.db.SelectContext(ctx, &posts, query, userID, limit, offset)
 	if err != nil {
-		logger.Logger.Error("Failed to get posts by user ID", 
-			zap.Error(err), 
+		logger.Logger.Error("Failed to get posts by user ID",
+			zap.Error(err),
 			zap.String("user_id", userID))
 		return nil, 0, err
 	}
@@ -113,8 +121,8 @@ func (r *postRepository) GetByUserID(ctx context.Context, userID string, limit, 
 	var total int
 	err = r.db.GetContext(ctx, &total, countQuery, userID)
 	if err != nil {
-		logger.Logger.Error("Failed to count posts by user ID", 
-			zap.Error(err), 
+		logger.Logger.Error("Failed to count posts by user ID",
+			zap.Error(err),
 			zap.String("user_id", userID))
 		return nil, 0, err
 	}
@@ -155,9 +163,9 @@ func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor st
 	posts := []*models.Post{}
 	err := r.db.SelectContext(ctx, &posts, query, args...)
 	if err != nil {
-		logger.Logger.Error("Failed to get global feed", 
-			zap.Error(err), 
-			zap.String("cursor", cursor), 
+		logger.Logger.Error("Failed to get global feed",
+			zap.Error(err),
+			zap.String("cursor", cursor),
 			zap.Int("limit", limit))
 		return nil, "", err
 	}

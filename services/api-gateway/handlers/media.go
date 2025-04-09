@@ -40,11 +40,30 @@ func NewMediaHandler(
 	}
 }
 
-// UploadMediaRequest represents a request to upload media
+// UploadMediaRequest represents a request to upload media (Base64 method)
 type UploadMediaRequest struct {
 	MediaData   string `json:"media_data"` // Base64-encoded media
 	ContentType string `json:"content_type"`
 	Filename    string `json:"filename"`
+}
+
+// GetUploadURLRequest represents a request to get a presigned upload URL
+type GetUploadURLRequest struct {
+	Filename    string `json:"filename"`
+	ContentType string `json:"content_type"`
+	Size        int64  `json:"size"`
+}
+
+// GetUploadURLResponse represents a response with a presigned upload URL
+type GetUploadURLResponse struct {
+	MediaID   string `json:"media_id"`
+	UploadURL string `json:"upload_url"`
+	ExpiresAt int64  `json:"expires_at"`
+}
+
+// ConfirmUploadRequest represents a request to confirm a direct upload
+type ConfirmUploadRequest struct {
+	MediaID string `json:"media_id"`
 }
 
 // UploadMediaResponse represents a response after uploading media
@@ -219,6 +238,130 @@ type GetMediaURLsResponse struct {
 	MediaID  string            `json:"media_id"`
 	UserID   string            `json:"user_id"`
 	Variants map[string]string `json:"variants"`
+}
+
+// GetUploadURL handles requests to get a presigned upload URL
+func (h *MediaHandler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.tracer.Start(r.Context(), "MediaHandler.GetUploadURL")
+	defer span.End()
+
+	// Get user ID from context
+	userID, ok := ctx.Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	// Parse request body
+	var req GetUploadURLRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Failed to decode request body", zap.Error(err))
+		return
+	}
+
+	// Validate request
+	if req.Filename == "" {
+		http.Error(w, "Filename is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	if req.ContentType == "" {
+		// Try to determine content type from filename
+		req.ContentType = http.DetectContentType([]byte{})
+	}
+
+	// Get presigned upload URL
+	resp, err := h.mediaClient.GetPresignedUploadURL(ctx, &mediapb.GetPresignedUploadURLRequest{
+		UserId:      userID,
+		Filename:    req.Filename,
+		ContentType: req.ContentType,
+		Size:        req.Size,
+	})
+	if err != nil {
+		http.Error(w, "Failed to generate upload URL", http.StatusInternalServerError)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Failed to generate upload URL", zap.Error(err))
+		return
+	}
+
+	// Prepare response
+	response := GetUploadURLResponse{
+		MediaID:   resp.MediaId,
+		UploadURL: resp.UploadUrl,
+		ExpiresAt: resp.ExpiresAt,
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		logger.Logger.Error("Failed to encode response", zap.Error(err))
+	}
+}
+
+// ConfirmUpload handles requests to confirm a direct upload
+func (h *MediaHandler) ConfirmUpload(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.tracer.Start(r.Context(), "MediaHandler.ConfirmUpload")
+	defer span.End()
+
+	// Get user ID from context
+	userID, ok := ctx.Value(middleware.UserIDKey).(string)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	// Parse request body
+	var req ConfirmUploadRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Failed to decode request body", zap.Error(err))
+		return
+	}
+
+	// Validate request
+	if req.MediaID == "" {
+		http.Error(w, "Media ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	// Confirm upload
+	resp, err := h.mediaClient.ConfirmUpload(ctx, &mediapb.ConfirmUploadRequest{
+		MediaId: req.MediaID,
+		UserId:  userID,
+	})
+	if err != nil {
+		http.Error(w, "Failed to confirm upload", http.StatusInternalServerError)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Failed to confirm upload", zap.Error(err))
+		return
+	}
+
+	// Convert variants to map
+	variants := make(map[string]string)
+	for _, variant := range resp.Variants {
+		variants[variant.Name] = variant.Url
+	}
+
+	// Prepare response
+	response := UploadMediaResponse{
+		MediaID:  req.MediaID,
+		Variants: variants,
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		logger.Logger.Error("Failed to encode response", zap.Error(err))
+	}
 }
 
 // GetMediaURLs handles requests to get media URLs
