@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"go.uber.org/zap"
-	"instagram-clone/services/media-service/internal/models"
-	"instagram-clone/services/media-service/internal/repository"
+	"github.com/sdshorin/generia/services/media-service/internal/models"
+	"github.com/sdshorin/generia/services/media-service/internal/repository"
 	"path/filepath"
 	"time"
 )

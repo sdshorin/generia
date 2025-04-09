@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/interaction-service/internal/models"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/interaction-service/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

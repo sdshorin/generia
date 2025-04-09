@@ -785,7 +785,7 @@ const file_auth_auth_proto_rawDesc = "" +
 	"\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponse\x127\n" +
 	"\vGetUserInfo\x12\x18.auth.GetUserInfoRequest\x1a\x0e.auth.UserInfo\x12E\n" +
 	"\fRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\x12B\n" +
-	"\vHealthCheck\x12\x18.auth.HealthCheckRequest\x1a\x19.auth.HealthCheckResponseB Z\x1einstagram-clone/api/proto/authb\x06proto3"
+	"\vHealthCheck\x12\x18.auth.HealthCheckRequest\x1a\x19.auth.HealthCheckResponseB,Z*github.com/sdshorin/generia/api/proto/authb\x06proto3"
 
 var (
 	file_auth_auth_proto_rawDescOnce sync.Once

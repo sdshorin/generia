@@ -109,7 +109,7 @@ func LoadConfig() (*Config, error) {
 	dbPort := getEnv("DB_PORT", "5432")
 	dbUser := getEnv("DB_USER", "postgres")
 	dbPassword := getEnv("DB_PASSWORD", "postgres")
-	dbName := getEnv("DB_NAME", "instagram_clone")
+	dbName := getEnv("DB_NAME", "generia")
 	dbSSLMode := getEnv("DB_SSL_MODE", "disable")
 
 	// JWT configuration
@@ -137,13 +137,13 @@ func LoadConfig() (*Config, error) {
 
 	// MongoDB configuration
 	mongoURI := getEnv("MONGODB_URI", "mongodb://localhost:27017")
-	mongoDatabase := getEnv("MONGODB_DATABASE", "instagram")
+	mongoDatabase := getEnv("MONGODB_DATABASE", "generia")
 
 	// Minio configuration
 	minioEndpoint := getEnv("MINIO_ENDPOINT", "localhost:9000")
 	minioAccessKey := getEnv("MINIO_ACCESS_KEY", "minioadmin")
 	minioSecretKey := getEnv("MINIO_SECRET_KEY", "minioadmin")
-	minioBucket := getEnv("MINIO_BUCKET", "instagram-images")
+	minioBucket := getEnv("MINIO_BUCKET", "generia-images")
 	minioUseSSLStr := getEnv("MINIO_USE_SSL", "false")
 	minioUseSSL, err := strconv.ParseBool(minioUseSSLStr)
 	if err != nil {

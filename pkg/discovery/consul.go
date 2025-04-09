@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/consul/api"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.uber.org/zap"
 )
 

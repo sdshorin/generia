@@ -17,10 +17,10 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/database"
-	"instagram-clone/pkg/discovery"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/database"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -35,8 +35,8 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 
-	authpb "instagram-clone/api/grpc/auth"
-	mediapb "instagram-clone/api/grpc/media"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 )
 
 // MediaService implements the media service

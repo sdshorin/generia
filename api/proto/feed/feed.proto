@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package feed;
 
-option go_package = "instagram-clone/api/proto/feed";
+option go_package = "github.com/sdshorin/generia/api/proto/feed";
 
 // FeedService предоставляет API для получения лент
 service FeedService {

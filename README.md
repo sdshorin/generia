@@ -42,8 +42,8 @@ The application is built using a microservices architecture with the following s
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/instagram-clone.git
-cd instagram-clone
+git clone https://github.com/yourusername/github.com/sdshorin/generia.git
+cd github.com/sdshorin/generia
 ```
 
 2. Start the services with Docker Compose:
@@ -92,7 +92,7 @@ This will start all the required services, including infrastructure (PostgreSQL,
 ### Project Structure
 
 ```
-instagram-clone/
+github.com/sdshorin/generia/
 ├── api/
 │   ├── proto/         # Protocol Buffer definitions
 │   └── grpc/          # Generated gRPC code

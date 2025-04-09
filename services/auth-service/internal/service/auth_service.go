@@ -9,14 +9,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/auth-service/internal/models"
-	"instagram-clone/services/auth-service/internal/repository"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/auth-service/internal/models"
+	"github.com/sdshorin/generia/services/auth-service/internal/repository"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	authpb "instagram-clone/api/grpc/auth"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
 )
 
 // AuthService implements the auth gRPC service

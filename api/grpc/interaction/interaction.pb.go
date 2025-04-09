@@ -1223,7 +1223,7 @@ const file_interaction_interaction_proto_rawDesc = "" +
 	"\x0fGetPostComments\x12#.interaction.GetPostCommentsRequest\x1a!.interaction.PostCommentsResponse\x12P\n" +
 	"\fGetPostStats\x12 .interaction.GetPostStatsRequest\x1a\x1e.interaction.PostStatsResponse\x12S\n" +
 	"\rGetPostsStats\x12!.interaction.GetPostsStatsRequest\x1a\x1f.interaction.PostsStatsResponse\x12P\n" +
-	"\vHealthCheck\x12\x1f.interaction.HealthCheckRequest\x1a .interaction.HealthCheckResponseB'Z%instagram-clone/api/proto/interactionb\x06proto3"
+	"\vHealthCheck\x12\x1f.interaction.HealthCheckRequest\x1a .interaction.HealthCheckResponseB3Z1github.com/sdshorin/generia/api/proto/interactionb\x06proto3"
 
 var (
 	file_interaction_interaction_proto_rawDescOnce sync.Once

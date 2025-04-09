@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"time"
 
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/api-gateway/middleware"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
-	feedpb "instagram-clone/api/grpc/feed"
+	feedpb "github.com/sdshorin/generia/api/grpc/feed"
 )
 
 // FeedHandler handles feed-related HTTP requests

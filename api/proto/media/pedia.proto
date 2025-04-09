@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package media;
 
-option go_package = "instagram-clone/api/proto/media";
+option go_package = "github.com/sdshorin/generia/api/proto/media";
 
 // MediaService предоставляет API для управления медиафайлами
 service MediaService {

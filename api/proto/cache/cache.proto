@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package cache;
 
-option go_package = "instagram-clone/api/proto/cache";
+option go_package = "github.com/sdshorin/generia/api/proto/cache";
 
 // CacheService предоставляет API для кеширования данных
 service CacheService {

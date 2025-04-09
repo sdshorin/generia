@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"instagram-clone/internal/repositories"
-	"instagram-clone/pkg/auth"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/pkg/models"
+	"github.com/sdshorin/generia/internal/repositories"
+	"github.com/sdshorin/generia/pkg/auth"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/models"
 	"go.uber.org/zap"
 )
 

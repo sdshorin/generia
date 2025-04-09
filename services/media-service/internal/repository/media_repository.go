@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/jmoiron/sqlx"
 	"github.com/minio/minio-go/v7"
-	"instagram-clone/services/media-service/internal/models"
+	"github.com/sdshorin/generia/services/media-service/internal/models"
 	"time"
 )
 

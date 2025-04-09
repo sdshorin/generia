@@ -818,7 +818,7 @@ const file_feed_feed_proto_rawDesc = "" +
 	"\rGetGlobalFeed\x12\x1a.feed.GetGlobalFeedRequest\x1a\x1b.feed.GetGlobalFeedResponse\x12B\n" +
 	"\vGetUserFeed\x12\x18.feed.GetUserFeedRequest\x1a\x19.feed.GetUserFeedResponse\x12Z\n" +
 	"\x13InvalidateFeedCache\x12 .feed.InvalidateFeedCacheRequest\x1a!.feed.InvalidateFeedCacheResponse\x12B\n" +
-	"\vHealthCheck\x12\x18.feed.HealthCheckRequest\x1a\x19.feed.HealthCheckResponseB Z\x1einstagram-clone/api/proto/feedb\x06proto3"
+	"\vHealthCheck\x12\x18.feed.HealthCheckRequest\x1a\x19.feed.HealthCheckResponseB,Z*github.com/sdshorin/generia/api/proto/feedb\x06proto3"
 
 var (
 	file_feed_feed_proto_rawDescOnce sync.Once

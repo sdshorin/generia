@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"instagram-clone/internal/repositories"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/pkg/models"
+	"github.com/sdshorin/generia/internal/repositories"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/models"
 	"go.uber.org/zap"
 )
 

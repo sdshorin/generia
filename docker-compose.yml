@@ -4,19 +4,19 @@ services:
   # Infrastructure Services
   postgres:
     image: postgres:14-alpine
-    container_name: instagram-postgres
+    container_name: generia-postgres
     restart: always
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=instagram_clone
+      - POSTGRES_DB=generia
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
-      - instagram_network
+      - generia_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -25,14 +25,14 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: instagram-redis
+    container_name: generia-redis
     restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - instagram_network
+      - generia_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -41,7 +41,7 @@ services:
 
   mongodb:
     image: mongo:latest
-    container_name: instagram-mongodb
+    container_name: generia-mongodb
     restart: always
     ports:
       - "27017:27017"
@@ -51,7 +51,7 @@ services:
     volumes:
       - mongo_data:/data/db
     networks:
-      - instagram_network
+      - generia_network
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
       interval: 10s
@@ -60,7 +60,7 @@ services:
 
   minio:
     image: minio/minio
-    container_name: instagram-minio
+    container_name: generia-minio
     restart: always
     ports:
       - "9000:9000"
@@ -72,7 +72,7 @@ services:
     volumes:
       - minio_data:/data
     networks:
-      - instagram_network
+      - generia_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -81,14 +81,14 @@ services:
 
   consul:
     image: hashicorp/consul:latest
-    container_name: instagram-consul
+    container_name: generia-consul
     restart: always
     ports:
       - "8500:8500"
       - "8600:8600/udp"
     command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
     networks:
-      - instagram_network
+      - generia_network
     healthcheck:
       test: ["CMD", "consul", "info"]
       interval: 10s
@@ -97,7 +97,7 @@ services:
 
   kafka:
     image: bitnami/kafka:latest
-    container_name: instagram-kafka
+    container_name: generia-kafka
     restart: always
     ports:
       - "9092:9092"
@@ -112,33 +112,33 @@ services:
     volumes:
       - kafka_data:/bitnami/kafka
     networks:
-      - instagram_network
+      - generia_network
 
   jaeger:
     image: jaegertracing/all-in-one:latest
-    container_name: instagram-jaeger
+    container_name: generia-jaeger
     restart: always
     ports:
       - "16686:16686"  # Web UI
       - "14268:14268"  # Collector HTTP
       - "6831:6831/udp"  # Collector for Jaeger client using compact Thrift protocol
     networks:
-      - instagram_network
+      - generia_network
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: instagram-prometheus
+    container_name: generia-prometheus
     restart: always
     ports:
       - "9090:9090"
     volumes:
       - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - instagram_network
+      - generia_network
 
   grafana:
     image: grafana/grafana:latest
-    container_name: instagram-grafana
+    container_name: generia-grafana
     restart: always
     ports:
       - "3000:3000"
@@ -147,7 +147,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     networks:
-      - instagram_network
+      - generia_network
     depends_on:
       - prometheus
 
@@ -156,7 +156,7 @@ services:
     build:
       context: .
       dockerfile: services/api-gateway/Dockerfile
-    container_name: instagram-api-gateway
+    container_name: generia-api-gateway
     restart: always
     ports:
       - "8080:8080"
@@ -178,13 +178,13 @@ services:
       - JWT_SECRET=your_jwt_secret_key
       - JWT_EXPIRATION=24h
     networks:
-      - instagram_network
+      - generia_network
 
   auth-service:
     build:
       context: .
       dockerfile: services/auth-service/Dockerfile
-    container_name: instagram-auth-service
+    container_name: generia-auth-service
     restart: always
     ports:
       - "8081:8081"
@@ -207,19 +207,19 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=instagram_clone
+      - DB_NAME=generia
       - DB_SSL_MODE=disable
       - JWT_SECRET=your_jwt_secret_key
       - JWT_EXPIRATION=24h
       - KAFKA_BROKERS=kafka:9092
     networks:
-      - instagram_network
+      - generia_network
 
   post-service:
     build:
       context: .
       dockerfile: services/post-service/Dockerfile
-    container_name: instagram-post-service
+    container_name: generia-post-service
     restart: always
     ports:
       - "8082:8082"
@@ -242,17 +242,17 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=instagram_clone
+      - DB_NAME=generia
       - DB_SSL_MODE=disable
       - KAFKA_BROKERS=kafka:9092
     networks:
-      - instagram_network
+      - generia_network
 
   media-service:
     build:
       context: .
       dockerfile: services/media-service/Dockerfile
-    container_name: instagram-media-service
+    container_name: generia-media-service
     restart: always
     ports:
       - "8083:8083"
@@ -277,22 +277,22 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=instagram_clone
+      - DB_NAME=generia
       - DB_SSL_MODE=disable
       - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
-      - MINIO_BUCKET=instagram-images
+      - MINIO_BUCKET=generia-images
       - MINIO_USE_SSL=false
       - KAFKA_BROKERS=kafka:9092
     networks:
-      - instagram_network
+      - generia_network
 
   interaction-service:
     build:
       context: .
       dockerfile: services/interaction-service/Dockerfile
-    container_name: instagram-interaction-service
+    container_name: generia-interaction-service
     restart: always
     ports:
       - "8084:8084"
@@ -312,16 +312,16 @@ services:
       - CONSUL_ADDRESS=consul:8500
       - JAEGER_HOST=jaeger:6831
       - MONGODB_URI=mongodb://admin:password@mongodb:27017
-      - MONGODB_DATABASE=instagram_interactions
+      - MONGODB_DATABASE=generia_interactions
       - KAFKA_BROKERS=kafka:9092
     networks:
-      - instagram_network
+      - generia_network
 
   feed-service:
     build:
       context: .
       dockerfile: services/feed-service/Dockerfile
-    container_name: instagram-feed-service
+    container_name: generia-feed-service
     restart: always
     ports:
       - "8085:8085"
@@ -345,13 +345,13 @@ services:
       - REDIS_DB=0
       - KAFKA_BROKERS=kafka:9092
     networks:
-      - instagram_network
+      - generia_network
 
   cache-service:
     build:
       context: .
       dockerfile: services/cache-service/Dockerfile
-    container_name: instagram-cache-service
+    container_name: generia-cache-service
     restart: always
     ports:
       - "8086:8086"
@@ -372,13 +372,13 @@ services:
       - REDIS_PASSWORD=
       - REDIS_DB=1
     networks:
-      - instagram_network
+      - generia_network
 
   cdn-service:
     build:
       context: .
       dockerfile: services/cdn-service/Dockerfile
-    container_name: instagram-cdn-service
+    container_name: generia-cdn-service
     restart: always
     ports:
       - "8087:8087"
@@ -397,21 +397,21 @@ services:
       - CDN_DEFAULT_TTL=86400
       - CDN_SIGNING_KEY=your_cdn_signing_key
     networks:
-      - instagram_network
+      - generia_network
 
   # Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: instagram-frontend
+    container_name: generia-frontend
     restart: always
     ports:
       - "80:80"
     depends_on:
       - api-gateway
     networks:
-      - instagram_network
+      - generia_network
 
 volumes:
   postgres_data:
@@ -422,5 +422,5 @@ volumes:
   grafana_data:
 
 networks:
-  instagram_network:
+  generia_network:
     driver: bridge

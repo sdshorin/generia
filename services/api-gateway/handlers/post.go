@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/api-gateway/middleware"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
-	interactionpb "instagram-clone/api/grpc/interaction"
-	mediapb "instagram-clone/api/grpc/media"
-	postpb "instagram-clone/api/grpc/post"
+	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
+	postpb "github.com/sdshorin/generia/api/grpc/post"
 )
 
 // PostHandler handles post-related HTTP requests

@@ -492,7 +492,7 @@ const file_cdn_cdn_proto_rawDesc = "" +
 	"\fGetSignedURL\x12\x18.cdn.GetSignedURLRequest\x1a\x19.cdn.GetSignedURLResponse\x12L\n" +
 	"\x0fInvalidateCache\x12\x1b.cdn.InvalidateCacheRequest\x1a\x1c.cdn.InvalidateCacheResponse\x12C\n" +
 	"\fGetCDNConfig\x12\x18.cdn.GetCDNConfigRequest\x1a\x19.cdn.GetCDNConfigResponse\x12@\n" +
-	"\vHealthCheck\x12\x17.cdn.HealthCheckRequest\x1a\x18.cdn.HealthCheckResponseB\x1fZ\x1dinstagram-clone/api/proto/cdnb\x06proto3"
+	"\vHealthCheck\x12\x17.cdn.HealthCheckRequest\x1a\x18.cdn.HealthCheckResponseB+Z)github.com/sdshorin/generia/api/proto/cdnb\x06proto3"
 
 var (
 	file_cdn_cdn_proto_rawDescOnce sync.Once

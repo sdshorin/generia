@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"instagram-clone/pkg/auth"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/auth"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.uber.org/zap"
 )
 

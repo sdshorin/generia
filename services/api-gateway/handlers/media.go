@@ -10,14 +10,14 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/api-gateway/middleware"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
-	cdnpb "instagram-clone/api/grpc/cdn"
-	mediapb "instagram-clone/api/grpc/media"
+	cdnpb "github.com/sdshorin/generia/api/grpc/cdn"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 )
 
 // MediaHandler handles media-related HTTP requests

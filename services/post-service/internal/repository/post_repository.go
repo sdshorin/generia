@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/post-service/internal/models"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/post-service/internal/models"
 	"go.uber.org/zap"
 )
 

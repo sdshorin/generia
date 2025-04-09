@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package interaction;
 
-option go_package = "instagram-clone/api/proto/interaction";
+option go_package = "github.com/sdshorin/generia/api/proto/interaction";
 
 // InteractionService предоставляет API для взаимодействий с постами (лайки, комментарии)
 service InteractionService {

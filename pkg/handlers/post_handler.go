@@ -7,10 +7,10 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"instagram-clone/pkg/logger"
-	"instagram-clone/pkg/middleware"
-	"instagram-clone/pkg/models"
-	"instagram-clone/pkg/services"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/middleware"
+	"github.com/sdshorin/generia/pkg/models"
+	"github.com/sdshorin/generia/pkg/services"
 	"go.uber.org/zap"
 )
 

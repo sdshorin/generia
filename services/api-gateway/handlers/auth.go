@@ -5,15 +5,15 @@ import (
 	"net/http"
 	"time"
 
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/api-gateway/middleware"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	authpb "instagram-clone/api/grpc/auth"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
 )
 
 // AuthHandler handles authentication-related HTTP requests

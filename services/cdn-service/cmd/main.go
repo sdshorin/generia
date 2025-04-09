@@ -18,9 +18,9 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/discovery"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -33,7 +33,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	cdnpb "instagram-clone/api/grpc/cdn"
+	cdnpb "github.com/sdshorin/generia/api/grpc/cdn"
 )
 
 // CDNService implements the CDN service

@@ -1152,7 +1152,7 @@ const file_cache_cache_proto_rawDesc = "" +
 	"\aGetList\x12\x15.cache.GetListRequest\x1a\x16.cache.GetListResponse\x12/\n" +
 	"\x04HSet\x12\x12.cache.HSetRequest\x1a\x13.cache.HSetResponse\x12/\n" +
 	"\x04HGet\x12\x12.cache.HGetRequest\x1a\x13.cache.HGetResponse\x12D\n" +
-	"\vHealthCheck\x12\x19.cache.HealthCheckRequest\x1a\x1a.cache.HealthCheckResponseB!Z\x1finstagram-clone/api/proto/cacheb\x06proto3"
+	"\vHealthCheck\x12\x19.cache.HealthCheckRequest\x1a\x1a.cache.HealthCheckResponseB-Z+github.com/sdshorin/generia/api/proto/cacheb\x06proto3"
 
 var (
 	file_cache_cache_proto_rawDescOnce sync.Once

@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/interaction-service/internal/models"
-	"instagram-clone/services/interaction-service/internal/repository"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/interaction-service/internal/models"
+	"github.com/sdshorin/generia/services/interaction-service/internal/repository"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	authpb "instagram-clone/api/grpc/auth"
-	interactionpb "instagram-clone/api/grpc/interaction"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
 )
 
 // InteractionService implements the interaction gRPC service

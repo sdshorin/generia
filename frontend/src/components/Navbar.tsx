@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">Instagram Clone</Link>
+        <Link to="/">Generia</Link>
       </div>
       <div className="navbar-menu">
         {isAuthenticated ? (

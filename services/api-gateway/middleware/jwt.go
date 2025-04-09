@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.uber.org/zap"
 )
 

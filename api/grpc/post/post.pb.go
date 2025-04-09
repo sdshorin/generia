@@ -696,7 +696,7 @@ const file_post_post_proto_rawDesc = "" +
 	"\fGetUserPosts\x12\x19.post.GetUserPostsRequest\x1a\x0e.post.PostList\x12;\n" +
 	"\rGetPostsByIds\x12\x1a.post.GetPostsByIdsRequest\x1a\x0e.post.PostList\x12;\n" +
 	"\rGetGlobalFeed\x12\x1a.post.GetGlobalFeedRequest\x1a\x0e.post.PostList\x12B\n" +
-	"\vHealthCheck\x12\x18.post.HealthCheckRequest\x1a\x19.post.HealthCheckResponseB Z\x1einstagram-clone/api/proto/postb\x06proto3"
+	"\vHealthCheck\x12\x18.post.HealthCheckRequest\x1a\x19.post.HealthCheckResponseB,Z*github.com/sdshorin/generia/api/proto/postb\x06proto3"
 
 var (
 	file_post_post_proto_rawDescOnce sync.Once

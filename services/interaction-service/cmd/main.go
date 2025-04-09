@@ -14,9 +14,9 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/discovery"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,10 +34,10 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 
-	authpb "instagram-clone/api/grpc/auth"
-	interactionpb "instagram-clone/api/grpc/interaction"
-	"instagram-clone/services/interaction-service/internal/repository"
-	"instagram-clone/services/interaction-service/internal/service"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
+	"github.com/sdshorin/generia/services/interaction-service/internal/repository"
+	"github.com/sdshorin/generia/services/interaction-service/internal/service"
 )
 
 func main() {

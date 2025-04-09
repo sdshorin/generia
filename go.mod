@@ -1,4 +1,4 @@
-module instagram-clone
+module github.com/sdshorin/generia
 
 go 1.21.0
 

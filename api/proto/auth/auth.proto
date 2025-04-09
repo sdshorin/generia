@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package auth;
 
-option go_package = "instagram-clone/api/proto/auth";
+option go_package = "github.com/sdshorin/generia/api/proto/auth";
 
 // AuthService предоставляет API для аутентификации и управления пользователями
 service AuthService {

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"instagram-clone/pkg/config"
+	"github.com/sdshorin/generia/pkg/config"
 )
 
 // JWTClaims структура для хранения JWT-клеймов
@@ -43,7 +43,7 @@ func (s *JWTService) GenerateToken(userID string) (string, error) {
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
-			Issuer:    "instagram-clone",
+			Issuer:    "github.com/sdshorin/generia",
 		},
 	}
 

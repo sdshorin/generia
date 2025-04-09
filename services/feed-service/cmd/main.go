@@ -14,9 +14,9 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/discovery"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -31,9 +31,9 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 
-	authpb "instagram-clone/api/grpc/auth"
-	feedpb "instagram-clone/api/grpc/feed"
-	postpb "instagram-clone/api/grpc/post"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	feedpb "github.com/sdshorin/generia/api/grpc/feed"
+	postpb "github.com/sdshorin/generia/api/grpc/post"
 )
 
 // FeedService implements the feed service

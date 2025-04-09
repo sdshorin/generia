@@ -14,10 +14,10 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/database"
-	"instagram-clone/pkg/discovery"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/database"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -32,12 +32,12 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 
-	authpb "instagram-clone/api/grpc/auth"
-	interactionpb "instagram-clone/api/grpc/interaction"
-	mediapb "instagram-clone/api/grpc/media"
-	postpb "instagram-clone/api/grpc/post"
-	"instagram-clone/services/post-service/internal/repository"
-	"instagram-clone/services/post-service/internal/service"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
+	postpb "github.com/sdshorin/generia/api/grpc/post"
+	"github.com/sdshorin/generia/services/post-service/internal/repository"
+	"github.com/sdshorin/generia/services/post-service/internal/service"
 )
 
 func main() {

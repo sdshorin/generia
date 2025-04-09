@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package cdn;
 
-option go_package = "instagram-clone/api/proto/cdn";
+option go_package = "github.com/sdshorin/generia/api/proto/cdn";
 
 // CDNService предоставляет API для управления доставкой контента через CDN
 service CDNService {

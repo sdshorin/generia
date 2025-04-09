@@ -823,7 +823,7 @@ const file_media_pedia_proto_rawDesc = "" +
 	"\bGetMedia\x12\x16.media.GetMediaRequest\x1a\f.media.Media\x12D\n" +
 	"\vGetMediaURL\x12\x19.media.GetMediaURLRequest\x1a\x1a.media.GetMediaURLResponse\x12J\n" +
 	"\rOptimizeImage\x12\x1b.media.OptimizeImageRequest\x1a\x1c.media.OptimizeImageResponse\x12D\n" +
-	"\vHealthCheck\x12\x19.media.HealthCheckRequest\x1a\x1a.media.HealthCheckResponseB!Z\x1finstagram-clone/api/proto/mediab\x06proto3"
+	"\vHealthCheck\x12\x19.media.HealthCheckRequest\x1a\x1a.media.HealthCheckResponseB-Z+github.com/sdshorin/generia/api/proto/mediab\x06proto3"
 
 var (
 	file_media_pedia_proto_rawDescOnce sync.Once

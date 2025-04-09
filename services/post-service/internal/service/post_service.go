@@ -4,17 +4,17 @@ import (
 	"context"
 	"time"
 
-	"instagram-clone/pkg/logger"
-	"instagram-clone/services/post-service/internal/models"
-	"instagram-clone/services/post-service/internal/repository"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/post-service/internal/models"
+	"github.com/sdshorin/generia/services/post-service/internal/repository"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	authpb "instagram-clone/api/grpc/auth"
-	interactionpb "instagram-clone/api/grpc/interaction"
-	mediapb "instagram-clone/api/grpc/media"
-	postpb "instagram-clone/api/grpc/post"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
+	postpb "github.com/sdshorin/generia/api/grpc/post"
 )
 
 // PostService implements the post gRPC service

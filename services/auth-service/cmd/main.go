@@ -13,10 +13,10 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"instagram-clone/pkg/config"
-	"instagram-clone/pkg/database"
-	"instagram-clone/pkg/discovery"
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/database"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -29,9 +29,9 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	authpb "instagram-clone/api/grpc/auth"
-	"instagram-clone/services/auth-service/internal/repository"
-	"instagram-clone/services/auth-service/internal/service"
+	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	"github.com/sdshorin/generia/services/auth-service/internal/repository"
+	"github.com/sdshorin/generia/services/auth-service/internal/service"
 )
 
 func main() {

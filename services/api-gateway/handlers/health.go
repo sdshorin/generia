@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"instagram-clone/pkg/logger"
+	"github.com/sdshorin/generia/pkg/logger"
 	"go.uber.org/zap"
 )
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package post;
 
-option go_package = "instagram-clone/api/proto/post";
+option go_package = "github.com/sdshorin/generia/api/proto/post";
 
 // PostService предоставляет API для создания и получения постов
 service PostService {
