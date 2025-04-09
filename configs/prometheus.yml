@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:8081']
+
+  - job_name: 'post-service'
+    static_configs:
+      - targets: ['post-service:8082']
+
+  - job_name: 'media-service'
+    static_configs:
+      - targets: ['media-service:8083']
+
+  - job_name: 'interaction-service'
+    static_configs:
+      - targets: ['interaction-service:8084']
+
+  - job_name: 'feed-service'
+    static_configs:
+      - targets: ['feed-service:8085']
+
+  - job_name: 'cache-service'
+    static_configs:
+      - targets: ['cache-service:8086']
+
+  - job_name: 'cdn-service'
+    static_configs:
+      - targets: ['cdn-service:8087']

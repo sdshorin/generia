@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "instagram-clone/api/proto/auth";
+
+// AuthService предоставляет API для аутентификации и управления пользователями
+service AuthService {
+  // Регистрация нового пользователя
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  
+  // Аутентификация пользователя
+  rpc Login(LoginRequest) returns (LoginResponse);
+  
+  // Валидация токена
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  
+  // Получение информации о пользователе
+  rpc GetUserInfo(GetUserInfoRequest) returns (UserInfo);
+
+  // Обновление токена
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+
+  // Проверка здоровья сервиса
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message RegisterRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+}
+
+message RegisterResponse {
+  string user_id = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int64 expires_at = 4; // Unix timestamp
+}
+
+message LoginRequest {
+  string email_or_username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string user_id = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int64 expires_at = 4; // Unix timestamp
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+  repeated string permissions = 3; // Опционально, для будущего расширения
+}
+
+message GetUserInfoRequest {
+  string user_id = 1;
+}
+
+message UserInfo {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+  string created_at = 4; // ISO 8601 format
+  string profile_picture_url = 5; // Опционально
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3; // Unix timestamp
+}
+
+message HealthCheckRequest {
+  // Пустой запрос
+}
+
+message HealthCheckResponse {
+  enum Status {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  Status status = 1;
+}

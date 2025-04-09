@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package feed;
+
+option go_package = "instagram-clone/api/proto/feed";
+
+// FeedService предоставляет API для получения лент
+service FeedService {
+  // Получение глобальной ленты
+  rpc GetGlobalFeed(GetGlobalFeedRequest) returns (GetGlobalFeedResponse);
+  
+  // Получение ленты пользователя
+  rpc GetUserFeed(GetUserFeedRequest) returns (GetUserFeedResponse);
+
+  // Инвалидация кеша ленты
+  rpc InvalidateFeedCache(InvalidateFeedCacheRequest) returns (InvalidateFeedCacheResponse);
+
+  // Проверка здоровья сервиса
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message GetGlobalFeedRequest {
+  string user_id = 1; // ID пользователя, запрашивающего ленту (может быть пустым)
+  int32 limit = 2;
+  string cursor = 3; // курсор для пагинации
+}
+
+message GetGlobalFeedResponse {
+  repeated PostInfo posts = 1;
+  string next_cursor = 2;
+  bool has_more = 3;
+}
+
+message GetUserFeedRequest {
+  string user_id = 1; // ID пользователя, ленту которого запрашиваем
+  string requesting_user_id = 2; // ID пользователя, который делает запрос (может быть пустым)
+  int32 limit = 3;
+  string cursor = 4; // курсор для пагинации
+}
+
+message GetUserFeedResponse {
+  repeated PostInfo posts = 1;
+  string next_cursor = 2;
+  bool has_more = 3;
+}
+
+message PostInfo {
+  string id = 1;
+  string user_id = 2;
+  string caption = 3;
+  string media_id = 4;
+  int64 created_at = 5; // Unix timestamp
+  UserInfo user = 6;
+  PostStats stats = 7;
+}
+
+message UserInfo {
+  string id = 1;
+  string username = 2;
+  string profile_picture_url = 3; // Опционально
+}
+
+message PostStats {
+  int32 likes_count = 1;
+  int32 comments_count = 2;
+  bool user_liked = 3; // Лайкнул ли текущий пользователь этот пост
+}
+
+message InvalidateFeedCacheRequest {
+  enum InvalidationType {
+    ALL = 0;
+    POST = 1;
+    USER = 2;
+  }
+  
+  InvalidationType type = 1;
+  string id = 2; // post_id или user_id в зависимости от типа
+}
+
+message InvalidateFeedCacheResponse {
+  bool success = 1;
+}
+
+message HealthCheckRequest {
+  // Пустой запрос
+}
+
+message HealthCheckResponse {
+  enum Status {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  Status status = 1;
+}

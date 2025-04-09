@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package post;
+
+option go_package = "instagram-clone/api/proto/post";
+
+// PostService предоставляет API для создания и получения постов
+service PostService {
+  // Создание поста
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  
+  // Получение поста по ID
+  rpc GetPost(GetPostRequest) returns (Post);
+  
+  // Получение постов пользователя
+  rpc GetUserPosts(GetUserPostsRequest) returns (PostList);
+  
+  // Получение нескольких постов по ID
+  rpc GetPostsByIds(GetPostsByIdsRequest) returns (PostList);
+
+  // Получение постов для глобальной ленты
+  rpc GetGlobalFeed(GetGlobalFeedRequest) returns (PostList);
+
+  // Проверка здоровья сервиса
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message CreatePostRequest {
+  string user_id = 1;
+  string caption = 2;
+  string media_id = 3; // ID медиафайла, полученный от Media Service
+  repeated string tags = 4; // Опционально, для будущего расширения
+}
+
+message CreatePostResponse {
+  string post_id = 1;
+  string created_at = 2; // ISO 8601 format
+}
+
+message GetPostRequest {
+  string post_id = 1;
+}
+
+message GetUserPostsRequest {
+  string user_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message GetPostsByIdsRequest {
+  repeated string post_ids = 1;
+}
+
+message GetGlobalFeedRequest {
+  int32 limit = 1;
+  string cursor = 2; // Курсор для пагинации
+}
+
+message Post {
+  string post_id = 1;
+  string user_id = 2;
+  string username = 3; // Для отображения в UI
+  string caption = 4;
+  string media_url = 5;
+  string created_at = 6; // ISO 8601 format
+  int32 likes_count = 7; // Количество лайков
+  int32 comments_count = 8; // Количество комментариев
+  repeated string tags = 9; // Опционально, для будущего расширения
+}
+
+message PostList {
+  repeated Post posts = 1;
+  int32 total = 2;
+  string next_cursor = 3; // Курсор для следующей страницы
+}
+
+message HealthCheckRequest {
+  // Пустой запрос
+}
+
+message HealthCheckResponse {
+  enum Status {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  Status status = 1;
+}

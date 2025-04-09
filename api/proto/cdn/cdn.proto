@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package cdn;
+
+option go_package = "instagram-clone/api/proto/cdn";
+
+// CDNService предоставляет API для управления доставкой контента через CDN
+service CDNService {
+  // Получение подписанного URL для доступа к файлу
+  rpc GetSignedURL(GetSignedURLRequest) returns (GetSignedURLResponse);
+  
+  // Инвалидация кеша для файла
+  rpc InvalidateCache(InvalidateCacheRequest) returns (InvalidateCacheResponse);
+
+  // Получение конфигурации CDN
+  rpc GetCDNConfig(GetCDNConfigRequest) returns (GetCDNConfigResponse);
+
+  // Проверка здоровья сервиса
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message GetSignedURLRequest {
+  string path = 1; // Путь к файлу
+  int32 expires_in = 2; // Время жизни URL в секундах
+}
+
+message GetSignedURLResponse {
+  string url = 1;
+  int64 expires_at = 2; // Unix timestamp
+}
+
+message InvalidateCacheRequest {
+  repeated string paths = 1; // Пути к файлам для инвалидации
+}
+
+message InvalidateCacheResponse {
+  bool success = 1;
+  string operation_id = 2; // ID операции инвалидации
+}
+
+message GetCDNConfigRequest {
+  // Пустой запрос
+}
+
+message GetCDNConfigResponse {
+  string cdn_domain = 1;
+  int32 default_ttl = 2;
+  repeated string allowed_origins = 3;
+  repeated string allowed_http_methods = 4;
+}
+
+message HealthCheckRequest {
+  // Пустой запрос
+}
+
+message HealthCheckResponse {
+  enum Status {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  Status status = 1;
+}
