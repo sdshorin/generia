@@ -2,6 +2,17 @@
 
 This project is a microservices-based Instagram clone, designed as an MVP with basic functionality for users, posts, likes, and comments.
 
+# как запустить
+
+- прописать в `/etc/hosts` строчку `127.0.0.1 minio`
+- cp .env_example .env
+- docker-compose up -d
+- http://localhost
+
+
+
+
+
 ## Architecture Overview
 
 The application is built using a microservices architecture with the following services:

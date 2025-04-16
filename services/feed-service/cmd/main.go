@@ -18,11 +18,12 @@ import (
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+
+	// "go.opentelemetry.io/otel"
+	"github.com/sdshorin/generia/pkg/telemetry"
+	// "go.opentelemetry.io/otel/sdk/resource"
+	// tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	// semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -48,7 +49,7 @@ type FeedService struct {
 
 // GetGlobalFeed implements the GetGlobalFeed method
 func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFeedRequest) (*feedpb.GetGlobalFeedResponse, error) {
-	s.logger.Info("GetGlobalFeed called", 
+	s.logger.Info("GetGlobalFeed called",
 		zap.String("user_id", req.UserId),
 		zap.Int32("limit", req.Limit),
 		zap.String("cursor", req.Cursor))
@@ -75,8 +76,8 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 		// Parse time string to Unix timestamp
 		createdTime, err := time.Parse(time.RFC3339, post.CreatedAt)
 		if err != nil {
-			s.logger.Warn("Failed to parse created time", 
-				zap.Error(err), 
+			s.logger.Warn("Failed to parse created time",
+				zap.Error(err),
 				zap.String("time_str", post.CreatedAt))
 			createdTime = time.Now() // Fallback to current time
 		}
@@ -107,7 +108,7 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 				CommentsCount: post.CommentsCount,
 			},
 		}
-		
+
 		// No need to separately fetch media URLs since the post service already provides them
 		feedPosts = append(feedPosts, feedPost)
 	}
@@ -121,7 +122,7 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 
 // GetUserFeed implements the GetUserFeed method
 func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRequest) (*feedpb.GetUserFeedResponse, error) {
-	s.logger.Info("GetUserFeed called", 
+	s.logger.Info("GetUserFeed called",
 		zap.String("user_id", req.UserId),
 		zap.String("requesting_user_id", req.RequestingUserId),
 		zap.Int32("limit", req.Limit),
@@ -150,8 +151,8 @@ func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRe
 		// Parse time string to Unix timestamp
 		createdTime, err := time.Parse(time.RFC3339, post.CreatedAt)
 		if err != nil {
-			s.logger.Warn("Failed to parse created time", 
-				zap.Error(err), 
+			s.logger.Warn("Failed to parse created time",
+				zap.Error(err),
 				zap.String("time_str", post.CreatedAt))
 			createdTime = time.Now() // Fallback to current time
 		}
@@ -181,16 +182,16 @@ func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRe
 				LikesCount:    post.LikesCount,
 				CommentsCount: post.CommentsCount,
 				// Check if the requesting user liked this post (not implemented yet)
-				UserLiked:     false,
+				UserLiked: false,
 			},
 		}
-		
+
 		feedPosts = append(feedPosts, feedPost)
 	}
 
 	// Determine if there are more posts
-	hasMore := len(feedPosts) > 0 && int32(len(feedPosts)) >= limit 
-	
+	hasMore := len(feedPosts) > 0 && int32(len(feedPosts)) >= limit
+
 	// In a real implementation, we'd use the cursor for pagination
 	// For now, just return an empty cursor
 	nextCursor := ""
@@ -209,7 +210,7 @@ func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRe
 // InvalidateFeedCache implements the InvalidateFeedCache method
 func (s *FeedService) InvalidateFeedCache(ctx context.Context, req *feedpb.InvalidateFeedCacheRequest) (*feedpb.InvalidateFeedCacheResponse, error) {
 	// Placeholder implementation
-	s.logger.Info("InvalidateFeedCache called", 
+	s.logger.Info("InvalidateFeedCache called",
 		zap.String("type", req.Type.String()),
 		zap.String("id", req.Id))
 	return &feedpb.InvalidateFeedCacheResponse{
@@ -239,12 +240,14 @@ func main() {
 	}
 
 	// Initialize OpenTelemetry
-	tp, err := initTracer(cfg.Jaeger.Host)
+	tp, err := telemetry.InitTracer(&cfg.Telemetry)
 	if err != nil {
 		logger.Logger.Fatal("Failed to initialize tracer", zap.Error(err))
 	}
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := telemetry.Shutdown(ctx, tp); err != nil {
 			logger.Logger.Error("Error shutting down tracer provider", zap.Error(err))
 		}
 	}()
@@ -301,7 +304,7 @@ func main() {
 
 	// Register services
 	feedpb.RegisterFeedServiceServer(grpcServer, feedService)
-	
+
 	// Register health check service
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
@@ -326,10 +329,10 @@ func main() {
 		logger.Logger.Fatal("Failed to listen", zap.Error(err))
 	}
 
-	logger.Logger.Info("Starting feed service", 
-		zap.String("host", cfg.Service.Host), 
+	logger.Logger.Info("Starting feed service",
+		zap.String("host", cfg.Service.Host),
 		zap.Int("port", cfg.Service.Port))
-	
+
 	// Handle graceful shutdown
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
@@ -344,27 +347,6 @@ func main() {
 	logger.Logger.Info("Shutting down feed service...")
 	grpcServer.GracefulStop()
 	logger.Logger.Info("Feed service stopped")
-}
-
-func initTracer(jaegerHost string) (*tracesdk.TracerProvider, error) {
-	// Create Jaeger exporter
-	exp, err := jaeger.New(jaeger.WithAgentEndpoint(jaeger.WithAgentHost(jaegerHost)))
-	if err != nil {
-		return nil, err
-	}
-
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exp),
-		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("feed-service"),
-		)),
-	)
-
-	// Set global tracer provider
-	otel.SetTracerProvider(tp)
-
-	return tp, nil
 }
 
 func createAuthClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, authpb.AuthServiceClient, error) {

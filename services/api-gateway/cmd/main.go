@@ -18,14 +18,11 @@ import (
 	"github.com/sdshorin/generia/pkg/config"
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/telemetry"
 	"github.com/sdshorin/generia/services/api-gateway/handlers"
 	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -64,19 +61,20 @@ func main() {
 		logger.Logger.Fatal("Failed to load configuration", zap.Error(err))
 	}
 
-	// Initialize tracer
-	tp, err := initTracer(cfg.Jaeger.Host)
+	// Initialize OpenTelemetry tracer
+	tp, err := telemetry.InitTracer(&cfg.Telemetry)
 	if err != nil {
 		logger.Logger.Warn("Failed to initialize tracer, continuing without tracing", zap.Error(err))
 		// Create a no-op tracer provider instead of failing
-		tp = tracesdk.NewTracerProvider()
 	}
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := telemetry.Shutdown(ctx, tp); err != nil {
 			logger.Logger.Error("Error shutting down tracer provider", zap.Error(err))
 		}
 	}()
-	tracer := tp.Tracer("api-gateway")
+	tracer := otel.Tracer("api-gateway")
 
 	// Initialize service discovery client
 	discoveryClient, err := discovery.NewConsulClient(cfg.Consul.Address)
@@ -187,32 +185,6 @@ func main() {
 	}
 
 	logger.Logger.Info("Server gracefully stopped")
-}
-
-func initTracer(jaegerHost string) (*tracesdk.TracerProvider, error) {
-	// Create Jaeger exporter with explicit port configuration
-	exp, err := jaeger.New(jaeger.WithAgentEndpoint(
-		jaeger.WithAgentHost(jaegerHost),
-		jaeger.WithAgentPort("6831"), // Explicit port specification to avoid UDP connection issues
-	))
-	if err != nil {
-		return nil, err
-	}
-
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exp),
-		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("api-gateway"),
-		)),
-		// Add sampling configuration to reduce trace volume in production
-		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(0.5))),
-	)
-
-	// Set global tracer provider
-	otel.SetTracerProvider(tp)
-
-	return tp, nil
 }
 
 func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, error) {

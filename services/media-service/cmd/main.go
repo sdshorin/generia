@@ -23,15 +23,11 @@ import (
 	"github.com/sdshorin/generia/pkg/database"
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/telemetry"
 	"github.com/sdshorin/generia/services/media-service/internal/models"
 	"github.com/sdshorin/generia/services/media-service/internal/repository"
 	"github.com/sdshorin/generia/services/media-service/internal/service"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -431,12 +427,14 @@ func main() {
 	}
 
 	// Initialize OpenTelemetry
-	tp, err := initTracer(cfg.Jaeger.Host)
+	tp, err := telemetry.InitTracer(&cfg.Telemetry)
 	if err != nil {
 		logger.Logger.Fatal("Failed to initialize tracer", zap.Error(err))
 	}
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := telemetry.Shutdown(ctx, tp); err != nil {
 			logger.Logger.Error("Error shutting down tracer provider", zap.Error(err))
 		}
 	}()
@@ -565,26 +563,6 @@ func main() {
 	logger.Logger.Info("Media service stopped")
 }
 
-func initTracer(jaegerHost string) (*tracesdk.TracerProvider, error) {
-	// Create Jaeger exporter
-	exp, err := jaeger.New(jaeger.WithAgentEndpoint(jaeger.WithAgentHost(jaegerHost)))
-	if err != nil {
-		return nil, err
-	}
-
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exp),
-		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("media-service"),
-		)),
-	)
-
-	// Set global tracer provider
-	otel.SetTracerProvider(tp)
-
-	return tp, nil
-}
 
 func createAuthClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, authpb.AuthServiceClient, error) {
 	// Get service address from Consul

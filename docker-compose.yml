@@ -122,7 +122,10 @@ services:
     ports:
       - "16686:16686"  # Web UI
       - "14268:14268"  # Collector HTTP
-      - "6831:6831/udp"  # Collector for Jaeger client using compact Thrift protocol
+      - "4317:4317"    # OTLP gRPC endpoint
+      - "4318:4318"    # OTLP HTTP endpoint
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
     networks:
       - generia_network
 
@@ -175,7 +178,10 @@ services:
       - SERVER_PORT=8080
       - SERVER_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=api-gateway
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - JWT_SECRET=your_jwt_secret_key
       - JWT_EXPIRATION=24h
     networks:
@@ -203,7 +209,10 @@ services:
       - SERVICE_PORT=8081
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=auth-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
@@ -238,7 +247,10 @@ services:
       - SERVICE_PORT=8082
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=post-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
@@ -273,7 +285,10 @@ services:
       - SERVICE_PORT=8083
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=media-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
@@ -311,7 +326,10 @@ services:
       - SERVICE_PORT=8084
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=interaction-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - MONGODB_URI=mongodb://admin:password@mongodb:27017
       - MONGODB_DATABASE=generia_interactions
       - KAFKA_BROKERS=kafka:9092
@@ -340,7 +358,10 @@ services:
       - SERVICE_PORT=8085
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=feed-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - REDIS_ADDRESS=redis:6379
       - REDIS_PASSWORD=
       - REDIS_DB=0
@@ -368,7 +389,10 @@ services:
       - SERVICE_PORT=8086
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=cache-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - REDIS_ADDRESS=redis:6379
       - REDIS_PASSWORD=
       - REDIS_DB=1
@@ -393,7 +417,10 @@ services:
       - SERVICE_PORT=8087
       - SERVICE_HOST=0.0.0.0
       - CONSUL_ADDRESS=consul:8500
-      - JAEGER_HOST=jaeger:6831
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=cdn-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
       - CDN_DOMAIN=localhost
       - CDN_DEFAULT_TTL=86400
       - CDN_SIGNING_KEY=your_cdn_signing_key

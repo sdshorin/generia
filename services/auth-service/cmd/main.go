@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
@@ -17,12 +18,8 @@ import (
 	"github.com/sdshorin/generia/pkg/database"
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/telemetry"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -48,12 +45,14 @@ func main() {
 	}
 
 	// Initialize OpenTelemetry
-	tp, err := initTracer(cfg.Jaeger.Host)
+	tp, err := telemetry.InitTracer(&cfg.Telemetry)
 	if err != nil {
 		logger.Logger.Fatal("Failed to initialize tracer", zap.Error(err))
 	}
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := telemetry.Shutdown(ctx, tp); err != nil {
 			logger.Logger.Error("Error shutting down tracer provider", zap.Error(err))
 		}
 	}()
@@ -148,29 +147,3 @@ func main() {
 	logger.Logger.Info("Auth service stopped")
 }
 
-func initTracer(jaegerHost string) (*tracesdk.TracerProvider, error) {
-	// Create Jaeger exporter
-	exp, err := jaeger.New(jaeger.WithAgentEndpoint(
-		jaeger.WithAgentHost(jaegerHost),
-		// Add explicit port which resolves the "UDP connection not yet initialized" issue
-		jaeger.WithAgentPort("6831"),
-	))
-	if err != nil {
-		return nil, err
-	}
-
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exp),
-		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("auth-service"),
-		)),
-		// Add sampling configuration to reduce trace volume in production
-		tracesdk.WithSampler(tracesdk.ParentBased(tracesdk.TraceIDRatioBased(0.5))),
-	)
-
-	// Set global tracer provider
-	otel.SetTracerProvider(tp)
-
-	return tp, nil
-}

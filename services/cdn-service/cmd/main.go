@@ -22,11 +22,11 @@ import (
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/resource"
-	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	// "go.opentelemetry.io/otel"
+	"github.com/sdshorin/generia/pkg/telemetry"
+	// "go.opentelemetry.io/otel/sdk/resource"
+	// tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	// semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -72,10 +72,10 @@ func (s *CDNService) GetSignedURL(ctx context.Context, req *cdnpb.GetSignedURLRe
 func (s *CDNService) InvalidateCache(ctx context.Context, req *cdnpb.InvalidateCacheRequest) (*cdnpb.InvalidateCacheResponse, error) {
 	// Placeholder implementation
 	s.logger.Info("InvalidateCache called", zap.Strings("paths", req.Paths))
-	
+
 	// Generate unique operation ID
 	operationID := fmt.Sprintf("op-%d", time.Now().UnixNano())
-	
+
 	return &cdnpb.InvalidateCacheResponse{
 		Success:     true,
 		OperationId: operationID,
@@ -105,13 +105,13 @@ func (s *CDNService) HealthCheck(ctx context.Context, req *cdnpb.HealthCheckRequ
 func (s *CDNService) generateSignature(path string, expiry int64) string {
 	// Create HMAC
 	h := hmac.New(sha256.New, []byte(s.signingKey))
-	
+
 	// Create string to sign
 	stringToSign := fmt.Sprintf("%s/%d", path, expiry)
-	
+
 	// Write to HMAC
 	h.Write([]byte(stringToSign))
-	
+
 	// Get signature
 	return hex.EncodeToString(h.Sum(nil))
 }
@@ -130,12 +130,14 @@ func main() {
 	}
 
 	// Initialize OpenTelemetry
-	tp, err := initTracer(cfg.Jaeger.Host)
+	tp, err := telemetry.InitTracer(&cfg.Telemetry)
 	if err != nil {
 		logger.Logger.Fatal("Failed to initialize tracer", zap.Error(err))
 	}
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := telemetry.Shutdown(ctx, tp); err != nil {
 			logger.Logger.Error("Error shutting down tracer provider", zap.Error(err))
 		}
 	}()
@@ -173,7 +175,7 @@ func main() {
 
 	// Register services
 	cdnpb.RegisterCDNServiceServer(grpcServer, cdnService)
-	
+
 	// Register health check service
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
@@ -198,10 +200,10 @@ func main() {
 		logger.Logger.Fatal("Failed to listen", zap.Error(err))
 	}
 
-	logger.Logger.Info("Starting CDN service", 
-		zap.String("host", cfg.Service.Host), 
+	logger.Logger.Info("Starting CDN service",
+		zap.String("host", cfg.Service.Host),
 		zap.Int("port", cfg.Service.Port))
-	
+
 	// Handle graceful shutdown
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
@@ -216,25 +218,4 @@ func main() {
 	logger.Logger.Info("Shutting down CDN service...")
 	grpcServer.GracefulStop()
 	logger.Logger.Info("CDN service stopped")
-}
-
-func initTracer(jaegerHost string) (*tracesdk.TracerProvider, error) {
-	// Create Jaeger exporter
-	exp, err := jaeger.New(jaeger.WithAgentEndpoint(jaeger.WithAgentHost(jaegerHost)))
-	if err != nil {
-		return nil, err
-	}
-
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exp),
-		tracesdk.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName("cdn-service"),
-		)),
-	)
-
-	// Set global tracer provider
-	otel.SetTracerProvider(tp)
-
-	return tp, nil
 }

@@ -11,16 +11,17 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	Service  ServiceConfig
-	Database DatabaseConfig
-	JWT      JWTConfig
-	Consul   ConsulConfig
-	Jaeger   JaegerConfig
-	Redis    RedisConfig
-	MongoDB  MongoDBConfig
-	Minio    MinioConfig
-	Kafka    KafkaConfig
-	CDN      CDNConfig
+	Service      ServiceConfig
+	Database     DatabaseConfig
+	JWT          JWTConfig
+	Consul       ConsulConfig
+	Telemetry    TelemetryConfig
+	Redis        RedisConfig
+	MongoDB      MongoDBConfig
+	Minio        MinioConfig
+	Kafka        KafkaConfig
+	CDN          CDNConfig
+	Jaeger       JaegerConfig
 }
 
 // ServiceConfig holds service-related configuration
@@ -51,9 +52,15 @@ type ConsulConfig struct {
 	Address string
 }
 
-// JaegerConfig holds Jaeger-related configuration
-type JaegerConfig struct {
-	Host string
+// TelemetryConfig holds OpenTelemetry configuration
+type TelemetryConfig struct {
+	Endpoint        string // OTLP endpoint
+	ServiceName     string
+	Environment     string
+	SamplingRatio   float64
+	PropagatorType  string // "b3", "w3c", "all"
+	DisableMetrics  bool
+	DisableTracing  bool
 }
 
 // RedisConfig holds Redis-related configuration
@@ -90,6 +97,12 @@ type CDNConfig struct {
 	SigningKey string
 }
 
+// JaegerConfig holds Jaeger-related configuration
+type JaegerConfig struct {
+	Host string
+	Port string
+}
+
 // LoadConfig loads configuration from environment variables
 func LoadConfig() (*Config, error) {
 	// Load .env file if it exists
@@ -123,8 +136,26 @@ func LoadConfig() (*Config, error) {
 	// Consul configuration
 	consulAddress := getEnv("CONSUL_ADDRESS", "localhost:8500")
 
-	// Jaeger configuration
-	jaegerHost := getEnv("JAEGER_HOST", "localhost:6831")
+	// OpenTelemetry configuration
+	otlpEndpoint := getEnv("OTLP_ENDPOINT", "jaeger:4318") // Default to Jaeger OTLP endpoint
+	telemetryServiceName := getEnv("TELEMETRY_SERVICE_NAME", serviceName)
+	telemetryEnvironment := getEnv("TELEMETRY_ENVIRONMENT", "production")
+	samplingRatioStr := getEnv("TELEMETRY_SAMPLING_RATIO", "1.0")
+	samplingRatio, err := strconv.ParseFloat(samplingRatioStr, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid sampling ratio: %s", samplingRatioStr)
+	}
+	propagatorType := getEnv("TELEMETRY_PROPAGATOR", "w3c")
+	disableMetricsStr := getEnv("TELEMETRY_DISABLE_METRICS", "false")
+	disableMetrics, err := strconv.ParseBool(disableMetricsStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid disable metrics flag: %s", disableMetricsStr)
+	}
+	disableTracingStr := getEnv("TELEMETRY_DISABLE_TRACING", "false")
+	disableTracing, err := strconv.ParseBool(disableTracingStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid disable tracing flag: %s", disableTracingStr)
+	}
 
 	// Redis configuration
 	redisAddress := getEnv("REDIS_ADDRESS", "localhost:6379")
@@ -162,6 +193,10 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("invalid CDN default TTL: %s", cdnDefaultTTLStr)
 	}
 	cdnSigningKey := getEnv("CDN_SIGNING_KEY", "your_cdn_signing_key")
+	
+	// Jaeger configuration
+	jaegerHost := getEnv("JAEGER_HOST", "jaeger")
+	jaegerPort := getEnv("JAEGER_PORT", "6831")
 
 	return &Config{
 		Service: ServiceConfig{
@@ -184,8 +219,14 @@ func LoadConfig() (*Config, error) {
 		Consul: ConsulConfig{
 			Address: consulAddress,
 		},
-		Jaeger: JaegerConfig{
-			Host: jaegerHost,
+		Telemetry: TelemetryConfig{
+			Endpoint:       otlpEndpoint,
+			ServiceName:    telemetryServiceName,
+			Environment:    telemetryEnvironment,
+			SamplingRatio:  samplingRatio,
+			PropagatorType: propagatorType,
+			DisableMetrics: disableMetrics,
+			DisableTracing: disableTracing,
 		},
 		Redis: RedisConfig{
 			Address:  redisAddress,
@@ -210,6 +251,10 @@ func LoadConfig() (*Config, error) {
 			Domain:     cdnDomain,
 			DefaultTTL: cdnDefaultTTL,
 			SigningKey: cdnSigningKey,
+		},
+		Jaeger: JaegerConfig{
+			Host: jaegerHost,
+			Port: jaegerPort,
 		},
 	}, nil
 }

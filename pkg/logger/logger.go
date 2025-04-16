@@ -14,7 +14,7 @@ var Logger *zap.Logger
 func InitDevelopment() error {
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	
+
 	var err error
 	Logger, err = config.Build()
 	if err != nil {
@@ -29,7 +29,7 @@ func InitProduction() error {
 	config := zap.NewProductionConfig()
 	config.EncoderConfig.TimeKey = "timestamp"
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	
+
 	var err error
 	Logger, err = config.Build()
 	if err != nil {
@@ -61,7 +61,7 @@ func InitCustom(level string, format string) error {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.TimeKey = "timestamp"
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	
+
 	if format == "console" {
 		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
