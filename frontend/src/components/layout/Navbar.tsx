@@ -36,6 +36,7 @@ const Logo = styled(Link)`
   transition: color 0.2s;
   display: flex;
   align-items: center;
+  gap: 8px;
   
   &:hover {
     color: var(--color-primary);
@@ -47,6 +48,12 @@ const Logo = styled(Link)`
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+`;
+
+const LogoIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 `;
 
 const NavLinks = styled.div`
@@ -275,6 +282,7 @@ export const Navbar: React.FC = () => {
     <NavbarContainer>
       <NavbarInner>
         <Logo to="/">
+          <LogoIcon src="/favicon.ico" alt="Generia" />
           <span>Generia</span>
         </Logo>
         
@@ -368,6 +376,7 @@ export const Navbar: React.FC = () => {
             >
               <MobileMenuHeader>
                 <Logo to="/" onClick={toggleMobileMenu}>
+                  <LogoIcon src="/favicon.ico" alt="Generia" />
                   <span>Generia</span>
                 </Logo>
                 <MobileMenuClose onClick={toggleMobileMenu}>

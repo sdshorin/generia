@@ -82,12 +82,15 @@ const ForgotPassword = styled(Link)`
 `;
 
 const FormError = styled.div`
-  color: var(--color-accent);
+  color: #D32F2F;
   font-size: var(--font-sm);
+  font-weight: 600;
   padding: var(--space-3);
-  background-color: rgba(239, 118, 122, 0.1);
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px solid rgba(211, 47, 47, 0.3);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-4);
+  text-align: center;
 `;
 
 const RegisterLink = styled.div`

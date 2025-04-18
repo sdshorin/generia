@@ -104,7 +104,7 @@ const WorldName = styled.h3`
 
 const WorldDescription = styled.p`
   font-size: var(--font-sm);
-  color: var(--color-text-light);
+  color: var(--color-text);
   margin-bottom: var(--space-3);
   line-height: 1.5;
   flex: 1;
@@ -124,7 +124,7 @@ const WorldStats = styled.div`
 `;
 
 const StatItem = styled.div`
-  color: var(--color-text-lighter);
+  color: var(--color-text);
   
   span {
     font-weight: 600;
@@ -143,7 +143,7 @@ const EmptyState = styled.div`
   }
   
   p {
-    color: var(--color-text-light);
+    color: var(--color-text);
     margin-bottom: var(--space-6);
     max-width: 500px;
     margin-left: auto;

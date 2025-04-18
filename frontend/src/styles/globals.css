@@ -2,21 +2,26 @@
 
 :root {
   /* Color palette */
-  --color-primary: #ffc75f;
-  --color-primary-hover: #ffbd45;
-  --color-secondary: #a5b4fc;
-  --color-accent: #ef767a;
-  --color-background: #fafaf9;
-  --color-card: #ffffff;
-  --color-text: #313131;
-  --color-text-light: #5a5a5a;
-  --color-text-lighter: #717171;
-  --color-border: #e4e4e4;
-  --color-input-bg: #f5f5f4;
-  --color-success: #6ee7b7;
-  --color-error: #fca5a5;
-  --color-warning: #fdba74;
-  --color-info: #a5b4fc;
+  --color-primary: #EBCFB2;
+  --color-primary-hover: #D5B898;
+  --color-secondary: #D3C4E3;
+  --color-accent: #C9E7DA;
+  --color-background: #FDFCFB;
+  --color-card: #F5EBDD;
+  --color-card-alt: #F1E6D7;
+  --color-text: #2F2F2F;
+  --color-text-light: #7D7D7D;
+  --color-text-lighter: #B0AFAF;
+  --color-border: #E0E0E0;
+  --color-input-bg: #F8F4EE;
+  --color-success: #CBE4B4;
+  --color-error: #FFB4B4;
+  --color-warning: #F5EBDD;
+  --color-info: #D3C4E3;
+  --color-link: #6C7A89;
+  --color-text-inverse: #FFFFFF;
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
+  --color-shadow: rgba(0, 0, 0, 0.05);
 
   /* Spacing system */
   --space-1: 4px;
@@ -58,9 +63,10 @@
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0px 2px 10px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0px 4px 16px rgba(0, 0, 0, 0.08);
   --shadow-xl: 0px 8px 30px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 2px 10px rgba(0, 0, 0, 0.05);
   
   /* Animation durations */
   --duration-fast: 150ms;
@@ -136,13 +142,13 @@ p {
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--color-link);
   text-decoration: none;
   transition: color var(--duration-fast) ease;
 }
 
 a:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-primary);
 }
 
 button {
@@ -188,7 +194,7 @@ img {
 
 .textarea:focus {
   border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 2px rgba(255, 199, 95, 0.2);
+  box-shadow: 0 0 0 2px rgba(235, 207, 178, 0.2);
 }
 
 .textarea.has-error {
@@ -196,7 +202,7 @@ img {
 }
 
 .textarea.has-error:focus {
-  box-shadow: 0 0 0 2px rgba(252, 165, 165, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 180, 180, 0.2);
 }
 
 .textarea::placeholder {

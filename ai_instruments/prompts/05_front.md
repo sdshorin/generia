@@ -62,3 +62,21 @@ Total cost:            $1.57
 Total duration (API):  5m 35.1s
 Total duration (wall): 30m 51.6s
 Total code changes:    42 lines added, 10 lines removed
+
+
+Total cost:            $1.37
+Total duration (API):  6m 1.7s
+Total duration (wall): 25m 16.4s
+Total code changes:    77 lines added, 37 lines removed
+
+
+Total cost:            $0.89
+Total duration (API):  3m 36.1s
+Total duration (wall): 24m 29.3s
+Total code changes:    40 lines added, 35 lines removed
+
+
+Total cost:            $2.76
+Total duration (API):  9m 15.3s
+Total duration (wall): 40m 34.4s
+Total code changes:    190 lines added, 82 lines removed

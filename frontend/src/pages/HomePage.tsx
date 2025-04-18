@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { BiPlus } from 'react-icons/bi';
 import styled from 'styled-components';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Layout } from '../components/layout/Layout';
@@ -31,7 +32,7 @@ const HeroSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at center, rgba(255, 199, 95, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    background: radial-gradient(circle at center, rgba(213, 184, 152, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
     z-index: -1;
   }
 `;
@@ -39,7 +40,7 @@ const HeroSection = styled.section`
 const HeroTitle = styled(motion.h1)<HTMLMotionProps<'h1'>>`
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   margin-bottom: var(--space-4);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: linear-gradient(135deg, #D5B898, #A78BFA);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -49,7 +50,7 @@ const HeroTitle = styled(motion.h1)<HTMLMotionProps<'h1'>>`
 
 const HeroSubtitle = styled(motion.h2)<HTMLMotionProps<'h2'>>`
   font-size: clamp(1.125rem, 2vw, 1.5rem);
-  color: var(--color-text-light);
+  color: var(--color-text);
   font-weight: 400;
   margin-bottom: var(--space-8);
   max-width: 600px;
@@ -57,7 +58,7 @@ const HeroSubtitle = styled(motion.h2)<HTMLMotionProps<'h2'>>`
 
 const MainContent = styled.div`
   display: grid;
-  grid-template-columns: 1fr 350px;
+  grid-template-columns: minmax(0, 1fr) 350px;
   gap: var(--space-6);
   margin-top: var(--space-10);
   
@@ -67,7 +68,7 @@ const MainContent = styled.div`
 `;
 
 const WorldsPanel = styled.div`
-  order: 1;
+  order: 2;
   
   @media (max-width: 968px) {
     order: 2;
@@ -75,7 +76,7 @@ const WorldsPanel = styled.div`
 `;
 
 const FeedPanel = styled.div`
-  order: 2;
+  order: 1;
   
   @media (max-width: 968px) {
     order: 1;
@@ -86,6 +87,28 @@ const PanelTitle = styled.h3`
   font-size: var(--font-xl);
   margin-bottom: var(--space-4);
   color: var(--color-text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const CreatePostButton = styled(Link)`
+  font-size: var(--font-sm);
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    color: var(--color-text);
+  }
 `;
 
 const WorldsList = styled.div`
@@ -102,9 +125,20 @@ const WorldItem = styled(Card)<{ $isActive?: boolean }>`
   cursor: pointer;
   border-left: ${props => props.$isActive ? '4px solid var(--color-primary)' : '4px solid transparent'};
   background-color: ${props => props.$isActive ? 'rgba(213, 184, 152, 0.2)' : 'var(--color-card)'};
+  position: relative;
   
   &:hover {
     transform: translateY(-2px);
+  }
+  
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background-color: ${props => props.$isActive ? 'var(--color-primary)' : 'transparent'};
   }
 `;
 
@@ -120,7 +154,7 @@ const WorldName = styled.h4`
 
 const WorldDescription = styled.p`
   font-size: var(--font-sm);
-  color: var(--color-text-light);
+  color: var(--color-text);
   margin-bottom: var(--space-2);
   white-space: nowrap;
   overflow: hidden;
@@ -152,10 +186,21 @@ const PortalCircle = styled.div<{ $index: number }>`
   font-size: 20px;
 `;
 
+const PostsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const NoPostsMessage = styled.div`
   text-align: center;
   padding: var(--space-8) var(--space-4);
-  color: var(--color-text-light);
+  color: var(--color-text);
   
   h4 {
     margin-bottom: var(--space-2);
@@ -223,7 +268,7 @@ export const HomePage: React.FC = () => {
       try {
         setIsLoadingPosts(true);
         setRecentPosts([]); // Очистить прежние посты во время загрузки
-        const data = await postsAPI.getFeed(currentWorld.id, 3, 0);
+        const data = await postsAPI.getFeed(currentWorld.id, 6, 0);
         setRecentPosts(data.posts || []);
       } catch (error) {
         console.error('Failed to fetch recent posts:', error);
@@ -320,7 +365,14 @@ export const HomePage: React.FC = () => {
           </WorldsPanel>
           
           <FeedPanel>
-            <PanelTitle>From This World</PanelTitle>
+            <PanelTitle>
+              {currentWorld ? `Posts from ${currentWorld.name}` : 'Select a World'}
+              {currentWorld && (
+                <CreatePostButton to={`/worlds/${currentWorld.id}/create`}>
+                  <BiPlus style={{ marginRight: '4px' }} /> Create Post
+                </CreatePostButton>
+              )}
+            </PanelTitle>
             {currentWorld ? (
               <>
                 {isLoadingPosts ? (
@@ -328,13 +380,22 @@ export const HomePage: React.FC = () => {
                     <Loader size="md" text="Loading posts..." />
                   </div>
                 ) : recentPosts.length > 0 ? (
-                  recentPosts.map(post => (
-                    <PostCard 
-                      key={post.id} 
-                      post={post} 
-                      currentWorldId={currentWorld.id} 
-                    />
-                  ))
+                  <>
+                    <PostsGrid>
+                      {recentPosts.map(post => (
+                        <PostCard 
+                          key={post.id} 
+                          post={post} 
+                          currentWorldId={currentWorld.id} 
+                        />
+                      ))}
+                    </PostsGrid>
+                    <Link to={`/worlds/${currentWorld.id}/feed`}>
+                      <Button variant="ghost" fullWidth>
+                        View All Posts
+                      </Button>
+                    </Link>
+                  </>
                 ) : (
                   <NoPostsMessage>
                     <h4>No posts yet</h4>
@@ -344,17 +405,12 @@ export const HomePage: React.FC = () => {
                     </Link>
                   </NoPostsMessage>
                 )}
-                <Link to={`/worlds/${currentWorld.id}/feed`}>
-                  <Button variant="ghost" fullWidth>
-                    View Full Feed
-                  </Button>
-                </Link>
               </>
             ) : (
               <Card variant="elevated" padding="var(--space-6)">
                 <NoPostsMessage>
                   <h4>No world selected</h4>
-                  <p>Select a world to see posts from it</p>
+                  <p>Select a world from the right panel to see posts</p>
                   <Link to="/worlds">
                     <Button>Browse Worlds</Button>
                   </Link>

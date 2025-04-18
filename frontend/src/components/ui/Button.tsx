@@ -69,7 +69,8 @@ const ButtonContainer = styled(motion.button)<ButtonContainerProps>`
       case 'secondary':
         return css`
           background-color: var(--color-secondary);
-          color: white;
+          color: var(--color-text);
+          font-weight: 600;
           &:hover:not(:disabled) {
             background-color: #8da3fb;
             transform: translateY(-1px);
@@ -82,7 +83,8 @@ const ButtonContainer = styled(motion.button)<ButtonContainerProps>`
       case 'accent':
         return css`
           background-color: var(--color-accent);
-          color: white;
+          color: var(--color-text);
+          font-weight: 600;
           &:hover:not(:disabled) {
             background-color: #e5636b;
             transform: translateY(-1px);
@@ -118,7 +120,8 @@ const ButtonContainer = styled(motion.button)<ButtonContainerProps>`
       default: // primary
         return css`
           background-color: var(--color-primary);
-          color: white;
+          color: var(--color-text);
+          font-weight: 600;
           &:hover:not(:disabled) {
             background-color: var(--color-primary-hover);
             transform: translateY(-1px);
@@ -138,9 +141,9 @@ const Spinner = styled.div`
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(47, 47, 47, 0.3);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: var(--color-text);
   animation: spin 0.8s linear infinite;
   
   @keyframes spin {

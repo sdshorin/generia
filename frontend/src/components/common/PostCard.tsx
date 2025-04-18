@@ -48,7 +48,8 @@ const Username = styled.div`
     margin-left: var(--space-2);
     font-size: var(--font-xs);
     background-color: var(--color-secondary);
-    color: white;
+    color: var(--color-text);
+    font-weight: 600;
     padding: 2px 6px;
     border-radius: var(--radius-sm);
   }
@@ -56,7 +57,8 @@ const Username = styled.div`
 
 const Timestamp = styled.div`
   font-size: var(--font-xs);
-  color: var(--color-text-lighter);
+  color: var(--color-text);
+  font-weight: 500;
 `;
 
 const PostContent = styled.div`
@@ -66,12 +68,18 @@ const PostContent = styled.div`
   line-height: 1.5;
   color: var(--color-text);
   white-space: pre-wrap;
+  max-height: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 `;
 
 const PostImage = styled.img`
   width: 100%;
-  max-height: 500px;
-  object-fit: contain;
+  height: 240px;
+  object-fit: cover;
   background-color: var(--color-background);
 `;
 

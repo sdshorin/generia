@@ -56,10 +56,10 @@ const StyledInput = styled.input<{ $hasError: boolean; $hasIcon: boolean }>`
   ${(props) =>
     props.$hasError &&
     css`
-      border-color: var(--color-error);
+      border-color: #D32F2F;
       
       &:focus {
-        box-shadow: 0 0 0 2px rgba(252, 165, 165, 0.2);
+        box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
       }
     `}
 `;
@@ -75,8 +75,9 @@ const IconWrapper = styled.div`
 
 const ErrorMessage = styled.div`
   font-size: var(--font-xs);
-  color: var(--color-accent);
+  color: #D32F2F;
   margin-top: var(--space-1);
+  font-weight: 600;
 `;
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
