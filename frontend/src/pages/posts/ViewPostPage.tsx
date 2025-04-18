@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
@@ -210,10 +210,24 @@ export const ViewPostPage: React.FC = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   
+  // Refs to prevent duplicate requests
+  const isLoadingRef = useRef(false);
+  const postIdRef = useRef<string | null>(null);
+  const worldIdRef = useRef<string | null>(null);
+  
   // Load world and post data
   useEffect(() => {
     const fetchData = async () => {
       if (!worldId || !postId) return;
+      
+      // Skip if we're already loading this post or if it's the same post
+      if (isLoadingRef.current || (postIdRef.current === postId && worldIdRef.current === worldId)) {
+        return;
+      }
+      
+      isLoadingRef.current = true;
+      postIdRef.current = postId;
+      worldIdRef.current = worldId;
       
       setIsLoading(true);
       setError(null);
@@ -233,6 +247,7 @@ export const ViewPostPage: React.FC = () => {
         console.error('Error loading post:', err);
       } finally {
         setIsLoading(false);
+        isLoadingRef.current = false;
       }
     };
     

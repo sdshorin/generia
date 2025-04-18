@@ -6,6 +6,7 @@ import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Avatar } from '../components/ui/Avatar';
+import { Loader } from '../components/ui/Loader';
 import { PostCard } from '../components/common/PostCard';
 import { useAuth } from '../hooks/useAuth';
 import { useWorld } from '../hooks/useWorld';
@@ -43,6 +44,7 @@ const HeroTitle = styled(motion.h1)<HTMLMotionProps<'h1'>>`
   background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.2;
+  font-weight: 700;
 `;
 
 const HeroSubtitle = styled(motion.h2)<HTMLMotionProps<'h2'>>`
@@ -92,11 +94,14 @@ const WorldsList = styled.div`
   gap: var(--space-3);
 `;
 
-const WorldItem = styled(Card)`
+const WorldItem = styled(Card)<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   padding: var(--space-4);
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-left: ${props => props.$isActive ? '4px solid var(--color-primary)' : '4px solid transparent'};
+  background-color: ${props => props.$isActive ? 'rgba(213, 184, 152, 0.2)' : 'var(--color-card)'};
   
   &:hover {
     transform: translateY(-2px);
@@ -179,6 +184,7 @@ export const HomePage: React.FC = () => {
   const [popularWorlds, setPopularWorlds] = useState<World[]>([]);
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -215,17 +221,21 @@ export const HomePage: React.FC = () => {
       currentWorldRef.current = currentWorld.id;
       
       try {
+        setIsLoadingPosts(true);
+        setRecentPosts([]); // Очистить прежние посты во время загрузки
         const data = await postsAPI.getFeed(currentWorld.id, 3, 0);
         setRecentPosts(data.posts || []);
       } catch (error) {
         console.error('Failed to fetch recent posts:', error);
+      } finally {
+        setIsLoadingPosts(false);
       }
     };
     
     if (currentWorld) {
       fetchRecentPosts();
     }
-  }, [isAuthenticated, currentWorld?.id]); // Only depend on the ID to prevent unnecessary re-renders
+  }, [isAuthenticated, currentWorld]); // Зависит от всего объекта currentWorld, чтобы реагировать на его изменения
   
   // Navigate directly to world feed instead of switching
   
@@ -272,7 +282,16 @@ export const HomePage: React.FC = () => {
             <PanelTitle>Popular Worlds</PanelTitle>
             <WorldsList>
               {popularWorlds.map((world, index) => (
-                <WorldItem key={world.id} variant="elevated" animateHover>
+                <WorldItem 
+                  key={world.id} 
+                  variant="elevated" 
+                  animateHover
+                  $isActive={currentWorld?.id === world.id}
+                  onClick={() => {
+                    loadCurrentWorld(world.id);
+                    currentWorldRef.current = null; // Сбросить для загрузки постов нового мира
+                  }}
+                >
                   <PortalCircle $index={index}>
                     {world.name.charAt(0)}
                   </PortalCircle>
@@ -283,7 +302,10 @@ export const HomePage: React.FC = () => {
                   <Button 
                     size="small" 
                     variant="primary"
-                    onClick={() => navigate(`/worlds/${world.id}/feed`)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Предотвратить запуск клика родителя
+                      navigate(`/worlds/${world.id}/feed`);
+                    }}
                   >
                     Open World
                   </Button>
@@ -301,7 +323,11 @@ export const HomePage: React.FC = () => {
             <PanelTitle>From This World</PanelTitle>
             {currentWorld ? (
               <>
-                {recentPosts.length > 0 ? (
+                {isLoadingPosts ? (
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-8)' }}>
+                    <Loader size="md" text="Loading posts..." />
+                  </div>
+                ) : recentPosts.length > 0 ? (
                   recentPosts.map(post => (
                     <PostCard 
                       key={post.id} 
