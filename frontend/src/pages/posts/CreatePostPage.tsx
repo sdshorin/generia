@@ -140,8 +140,14 @@ export const CreatePostPage: React.FC = () => {
   };
   
   const handleUploadComplete = (id: string, url: string) => {
-    setMediaId(id);
-    setMediaUrl(url);
+    if (id === null || id === undefined) {
+      console.warn('Received null/undefined media ID, setting to empty string');
+      setMediaId('');
+    } else {
+      setMediaId(id);
+    }
+    
+    setMediaUrl(url || null);
   };
   
   if (isLoading) {
@@ -228,7 +234,7 @@ export const CreatePostPage: React.FC = () => {
               <Button
                 type="submit"
                 isLoading={isSubmitting}
-                disabled={isSubmitting || !mediaId}
+                disabled={isSubmitting || !mediaId || mediaId === ''}
                 fullWidth
               >
                 Post

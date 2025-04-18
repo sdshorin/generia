@@ -57,7 +57,7 @@ export interface Comment {
 }
 
 export interface Media {
-  id: string;
+  media_id: string;
   variants: Record<string, string>;
 }
 

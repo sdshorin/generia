@@ -175,8 +175,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     if (result && result.variants) {
       // Find the first available variant or original
       const mediaUrl = result.variants.original || Object.values(result.variants)[0];
-      onUploadComplete(result.id, mediaUrl);
+      // Используем media_id вместо id (согласно возвращаемому объекту от сервера)
+      const mediaId = result.media_id || "";
+      onUploadComplete(mediaId, mediaUrl);
       setIsUploaded(true);
+    } else {
+      console.error('Upload failed or returned invalid result:', result);
     }
   };
   
@@ -184,7 +188,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     setSelectedFile(null);
     setPreviewUrl(null);
     setIsUploaded(false);
-    onUploadComplete('', ''); // Clear any previously uploaded media
+    onUploadComplete('', '');
     
     // Refocus the file input to encourage selecting a new image
     setTimeout(() => {
