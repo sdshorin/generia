@@ -10,13 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// Key for user ID in context
-type contextKey string
-
-const (
-	// UserIDKey is the key to store the user ID in the request context
-	UserIDKey = contextKey("user_id")
-)
+// UserIDKey is the key to store the user ID in the request context
+const UserIDKey = "user_id"
 
 // JWTMiddleware handles JWT authentication
 type JWTMiddleware struct {

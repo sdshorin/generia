@@ -45,6 +45,7 @@ func NewPostHandler(
 type CreatePostRequest struct {
 	Caption string `json:"caption"`
 	MediaID string `json:"media_id"`
+	WorldID string `json:"world_id"`
 }
 
 // CreatePostResponse represents a response after creating a post
@@ -81,12 +82,19 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
+	
+	if req.WorldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
 
 	// Create post
 	resp, err := h.postClient.CreatePost(ctx, &postpb.CreatePostRequest{
 		UserId:  userID,
 		Caption: req.Caption,
 		MediaId: req.MediaID,
+		WorldId: req.WorldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)

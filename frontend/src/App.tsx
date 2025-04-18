@@ -5,6 +5,8 @@ import Feed from './components/Feed';
 import Login from './components/Login';
 import Register from './components/Register';
 import CreatePost from './components/CreatePost';
+import WorldsList from './components/WorldsList';
+import CreateWorld from './components/CreateWorld';
 import { AuthContext } from './context/AuthContext';
 
 const App: React.FC = () => {
@@ -19,18 +21,30 @@ const App: React.FC = () => {
       <div className="app">
         <Navbar />
         <Routes>
-          <Route path="/" element={<Feed />} />
+          <Route path="/" element={isAuthenticated ? <Feed /> : <Navigate to="/login" />} />
           <Route
             path="/login"
-            element={isAuthenticated ? <Navigate to="/" /> : <Login />}
+            element={isAuthenticated ? <Navigate to="/worlds" /> : <Login />}
           />
           <Route
             path="/register"
-            element={isAuthenticated ? <Navigate to="/" /> : <Register />}
+            element={isAuthenticated ? <Navigate to="/worlds" /> : <Register />}
           />
           <Route
             path="/create"
             element={isAuthenticated ? <CreatePost /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/worlds"
+            element={isAuthenticated ? <WorldsList /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/create-world"
+            element={isAuthenticated ? <CreateWorld /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/feed"
+            element={isAuthenticated ? <Feed /> : <Navigate to="/login" />}
           />
         </Routes>
       </div>

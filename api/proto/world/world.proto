@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package world;
+
+option go_package = "github.com/sdshorin/generia/api/grpc/world";
+
+service WorldService {
+  // Create a new world
+  rpc CreateWorld(CreateWorldRequest) returns (WorldResponse) {}
+  
+  // Get world by ID
+  rpc GetWorld(GetWorldRequest) returns (WorldResponse) {}
+  
+  // Get all worlds available to the user
+  rpc GetWorlds(GetWorldsRequest) returns (WorldsResponse) {}
+  
+  // Join a world (add to user's available worlds)
+  rpc JoinWorld(JoinWorldRequest) returns (JoinWorldResponse) {}
+  
+  // Set active world for a user
+  rpc SetActiveWorld(SetActiveWorldRequest) returns (SetActiveWorldResponse) {}
+  
+  // Get active world for a user
+  rpc GetActiveWorld(GetActiveWorldRequest) returns (WorldResponse) {}
+  
+  // Generate AI content for a world
+  rpc GenerateContent(GenerateContentRequest) returns (GenerateContentResponse) {}
+  
+  // Get generation status for a world
+  rpc GetGenerationStatus(GetGenerationStatusRequest) returns (GetGenerationStatusResponse) {}
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+// CreateWorldRequest is the request for creating a new world
+message CreateWorldRequest {
+  string user_id = 1;
+  string name = 2;
+  string description = 3;
+  string prompt = 4;
+}
+
+// WorldResponse contains information about a world
+message WorldResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string prompt = 4;
+  string creator_id = 5;
+  string generation_status = 6;
+  string status = 7;
+  int32 users_count = 8;
+  int32 posts_count = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  bool is_joined = 12;
+  bool is_active = 13;
+}
+
+// GetWorldRequest is the request for getting a world by ID
+message GetWorldRequest {
+  string world_id = 1;
+  string user_id = 2;
+}
+
+// GetWorldsRequest is the request for getting all worlds available to a user
+message GetWorldsRequest {
+  string user_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  string status = 4; // active, archived, all
+}
+
+// WorldsResponse contains a list of worlds
+message WorldsResponse {
+  repeated WorldResponse worlds = 1;
+  int32 total = 2;
+}
+
+// JoinWorldRequest is the request for joining a world
+message JoinWorldRequest {
+  string user_id = 1;
+  string world_id = 2;
+}
+
+// JoinWorldResponse is the response for joining a world
+message JoinWorldResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// SetActiveWorldRequest is the request for setting a user's active world
+message SetActiveWorldRequest {
+  string user_id = 1;
+  string world_id = 2;
+}
+
+// SetActiveWorldResponse is the response for setting a user's active world
+message SetActiveWorldResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// GetActiveWorldRequest is the request for getting a user's active world
+message GetActiveWorldRequest {
+  string user_id = 1;
+}
+
+// GenerateContentRequest is the request for generating AI content for a world
+message GenerateContentRequest {
+  string world_id = 1;
+  int32 users_count = 2;
+  int32 posts_count = 3;
+  bool force = 4;
+}
+
+// GenerateContentResponse is the response for generating AI content
+message GenerateContentResponse {
+  bool success = 1;
+  string message = 2;
+  string task_id = 3;
+}
+
+// GetGenerationStatusRequest is the request for getting the generation status of a world
+message GetGenerationStatusRequest {
+  string world_id = 1;
+}
+
+// GetGenerationStatusResponse is the response containing generation status info
+message GetGenerationStatusResponse {
+  string status = 1; // pending, in_progress, completed, failed
+  string message = 2;
+  int32 users_generated = 3;
+  int32 posts_generated = 4;
+  float progress_percentage = 5;
+}
+
+// HealthCheckRequest is the request for performing a health check
+message HealthCheckRequest {}
+
+// HealthCheckResponse is the response for the health check
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}

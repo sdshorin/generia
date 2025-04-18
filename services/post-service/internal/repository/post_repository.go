@@ -18,7 +18,7 @@ type PostRepository interface {
 	Create(ctx context.Context, post *models.Post) error
 	GetByID(ctx context.Context, id string) (*models.Post, error)
 	GetByUserID(ctx context.Context, userID string, limit, offset int) ([]*models.Post, int, error)
-	GetGlobalFeed(ctx context.Context, limit int, cursor string) ([]*models.Post, string, error)
+	GetGlobalFeed(ctx context.Context, limit int, cursor string, worldID string) ([]*models.Post, string, error)
 	GetByIDs(ctx context.Context, ids []string) ([]*models.Post, error)
 }
 
@@ -36,8 +36,8 @@ func NewPostRepository(db *sqlx.DB) PostRepository {
 // Create inserts a new post into the database
 func (r *postRepository) Create(ctx context.Context, post *models.Post) error {
 	query := `
-		INSERT INTO posts (id, user_id, caption, media_id, created_at, updated_at)
-		VALUES (:id, :user_id, :caption, :media_id, :created_at, :updated_at)
+		INSERT INTO posts (id, user_id, world_id, caption, media_id, created_at, updated_at)
+		VALUES (:id, :user_id, :world_id, :caption, :media_id, :created_at, :updated_at)
 		RETURNING id
 	`
 
@@ -75,7 +75,7 @@ func (r *postRepository) Create(ctx context.Context, post *models.Post) error {
 // GetByID retrieves a post by ID
 func (r *postRepository) GetByID(ctx context.Context, id string) (*models.Post, error) {
 	query := `
-		SELECT id, user_id, caption, media_id, created_at, updated_at
+		SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
 		FROM posts
 		WHERE id = $1
 	`
@@ -96,7 +96,7 @@ func (r *postRepository) GetByID(ctx context.Context, id string) (*models.Post, 
 // GetByUserID retrieves posts by user ID with pagination
 func (r *postRepository) GetByUserID(ctx context.Context, userID string, limit, offset int) ([]*models.Post, int, error) {
 	query := `
-		SELECT id, user_id, caption, media_id, created_at, updated_at
+		SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
 		FROM posts
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -131,33 +131,40 @@ func (r *postRepository) GetByUserID(ctx context.Context, userID string, limit, 
 }
 
 // GetGlobalFeed retrieves posts for the global feed with cursor-based pagination
-func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor string) ([]*models.Post, string, error) {
+func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor string, worldID string) ([]*models.Post, string, error) {
 	var query string
 	var args []interface{}
+
+	if worldID == "" {
+		// Если мир не указан, возвращаем пустой результат
+		return []*models.Post{}, "", nil
+	}
 
 	if cursor == "" {
 		// First page
 		query = `
-			SELECT id, user_id, caption, media_id, created_at, updated_at
+			SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
 			FROM posts
-			ORDER BY created_at DESC
-			LIMIT $1
-		`
-		args = []interface{}{limit}
-	} else {
-		// Subsequent pages
-		query = `
-			SELECT id, user_id, caption, media_id, created_at, updated_at
-			FROM posts
-			WHERE created_at < (
-				SELECT created_at
-				FROM posts
-				WHERE id = $1
-			)
+			WHERE world_id = $1
 			ORDER BY created_at DESC
 			LIMIT $2
 		`
-		args = []interface{}{cursor, limit}
+		args = []interface{}{worldID, limit}
+	} else {
+		// Subsequent pages
+		query = `
+			SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
+			FROM posts
+			WHERE world_id = $1
+			AND created_at < (
+				SELECT created_at
+				FROM posts
+				WHERE id = $2
+			)
+			ORDER BY created_at DESC
+			LIMIT $3
+		`
+		args = []interface{}{worldID, cursor, limit}
 	}
 
 	posts := []*models.Post{}
@@ -166,7 +173,8 @@ func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor st
 		logger.Logger.Error("Failed to get global feed",
 			zap.Error(err),
 			zap.String("cursor", cursor),
-			zap.Int("limit", limit))
+			zap.Int("limit", limit),
+			zap.String("world_id", worldID))
 		return nil, "", err
 	}
 
@@ -185,7 +193,7 @@ func (r *postRepository) GetByIDs(ctx context.Context, ids []string) ([]*models.
 	}
 
 	query, args, err := sqlx.In(`
-		SELECT id, user_id, caption, media_id, created_at, updated_at
+		SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
 		FROM posts
 		WHERE id IN (?)
 		ORDER BY created_at DESC

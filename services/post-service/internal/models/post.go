@@ -8,6 +8,7 @@ import (
 type Post struct {
 	ID          string    `db:"id"`
 	UserID      string    `db:"user_id"`
+	WorldID     string    `db:"world_id"`
 	Caption     string    `db:"caption"`
 	MediaID     string    `db:"media_id"`
 	CreatedAt   time.Time `db:"created_at"`

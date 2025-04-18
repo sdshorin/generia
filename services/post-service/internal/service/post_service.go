@@ -44,8 +44,8 @@ func NewPostService(
 // CreatePost handles post creation
 func (s *PostService) CreatePost(ctx context.Context, req *postpb.CreatePostRequest) (*postpb.CreatePostResponse, error) {
 	// Validate input
-	if req.UserId == "" || req.MediaId == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "user_id and media_id are required")
+	if req.UserId == "" || req.MediaId == "" || req.WorldId == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "user_id, media_id, and world_id are required")
 	}
 
 	// Validate user
@@ -74,6 +74,7 @@ func (s *PostService) CreatePost(ctx context.Context, req *postpb.CreatePostRequ
 	// Create post
 	post := &models.Post{
 		UserID:   req.UserId,
+		WorldID:  req.WorldId,
 		Caption:  req.Caption,
 		MediaID:  req.MediaId,
 	}
@@ -151,6 +152,7 @@ func (s *PostService) GetPost(ctx context.Context, req *postpb.GetPostRequest) (
 		CreatedAt:     post.CreatedAt.Format(time.RFC3339),
 		LikesCount:    statsResp.LikesCount,
 		CommentsCount: statsResp.CommentsCount,
+		WorldId:       post.WorldID,
 	}, nil
 }
 
@@ -249,6 +251,7 @@ func (s *PostService) GetUserPosts(ctx context.Context, req *postpb.GetUserPosts
 			CreatedAt:     post.CreatedAt.Format(time.RFC3339),
 			LikesCount:    likesCount,
 			CommentsCount: commentsCount,
+			WorldId:       post.WorldID,
 		}
 	}
 
@@ -358,6 +361,7 @@ func (s *PostService) GetPostsByIds(ctx context.Context, req *postpb.GetPostsByI
 			CreatedAt:     post.CreatedAt.Format(time.RFC3339),
 			LikesCount:    likesCount,
 			CommentsCount: commentsCount,
+			WorldId:       post.WorldID,
 		}
 	}
 
@@ -374,13 +378,19 @@ func (s *PostService) GetGlobalFeed(ctx context.Context, req *postpb.GetGlobalFe
 		limit = 10 // Default limit
 	}
 
+	// Validate world_id
+	if req.WorldId == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "world_id is required")
+	}
+
 	// Get posts
-	posts, nextCursor, err := s.postRepo.GetGlobalFeed(ctx, limit, req.Cursor)
+	posts, nextCursor, err := s.postRepo.GetGlobalFeed(ctx, limit, req.Cursor, req.WorldId)
 	if err != nil {
 		logger.Logger.Error("Failed to get global feed", 
 			zap.Error(err), 
 			zap.Int("limit", limit), 
-			zap.String("cursor", req.Cursor))
+			zap.String("cursor", req.Cursor),
+			zap.String("world_id", req.WorldId))
 		return nil, status.Errorf(codes.Internal, "failed to get global feed")
 	}
 
@@ -468,6 +478,7 @@ func (s *PostService) GetGlobalFeed(ctx context.Context, req *postpb.GetGlobalFe
 			CreatedAt:     post.CreatedAt.Format(time.RFC3339),
 			LikesCount:    likesCount,
 			CommentsCount: commentsCount,
+			WorldId:       post.WorldID,
 		}
 	}
 

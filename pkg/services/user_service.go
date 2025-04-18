@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/sdshorin/generia/internal/repositories"
 	"github.com/sdshorin/generia/pkg/auth"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/pkg/models"
@@ -20,12 +19,21 @@ type UserService interface {
 
 // UserServiceImpl реализует UserService
 type UserServiceImpl struct {
-	userRepo    repositories.UserRepository
+	userRepo    UserRepository
 	tokenService auth.TokenService
 }
 
+// UserRepository интерфейс для работы с хранилищем пользователей
+type UserRepository interface {
+	Create(ctx context.Context, user *models.User) error
+	GetByID(ctx context.Context, id string) (*models.User, error)
+	GetByEmail(ctx context.Context, email string) (*models.User, error)
+	GetByUsername(ctx context.Context, username string) (*models.User, error)
+	GetByEmailOrUsername(ctx context.Context, emailOrUsername string) (*models.User, error)
+}
+
 // NewUserService создает новый сервис пользователей
-func NewUserService(userRepo repositories.UserRepository, tokenService auth.TokenService) UserService {
+func NewUserService(userRepo UserRepository, tokenService auth.TokenService) UserService {
 	return &UserServiceImpl{
 		userRepo:    userRepo,
 		tokenService: tokenService,

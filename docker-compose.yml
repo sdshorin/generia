@@ -368,6 +368,39 @@ services:
       - KAFKA_BROKERS=kafka:9092
     networks:
       - generia_network
+      
+  world-service:
+    build:
+      context: .
+      dockerfile: services/world-service/Dockerfile
+    container_name: generia-world-service
+    restart: always
+    ports:
+      - "8088:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_started
+      jaeger:
+        condition: service_started
+    environment:
+      - SERVICE_NAME=world-service
+      - SERVICE_PORT=8088
+      - SERVICE_HOST=0.0.0.0
+      - CONSUL_ADDRESS=consul:8500
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=world-service
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=generia
+      - DB_SSL_MODE=disable
+    networks:
+      - generia_network
 
   cache-service:
     build:
@@ -424,6 +457,33 @@ services:
       - CDN_DOMAIN=localhost
       - CDN_DEFAULT_TTL=86400
       - CDN_SIGNING_KEY=your_cdn_signing_key
+    networks:
+      - generia_network
+
+  # AI Worker for content generation
+  ai-worker:
+    build:
+      context: .
+      dockerfile: services/ai-worker/Dockerfile
+    container_name: generia-ai-worker
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jaeger:
+        condition: service_started
+    environment:
+      - SERVICE_NAME=ai-worker
+      - OTLP_ENDPOINT=jaeger:4318
+      - TELEMETRY_SERVICE_NAME=ai-worker
+      - TELEMETRY_ENVIRONMENT=production
+      - TELEMETRY_SAMPLING_RATIO=1.0
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=generia
+      - DB_SSL_MODE=disable
     networks:
       - generia_network
 

@@ -35,6 +35,31 @@ const CreatePost: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  // Get the active world - должно быть наверху, до условных рендеров
+  const [activeWorld, setActiveWorld] = useState<string | null>(null);
+
+  // Fetch active world on component mount
+  useEffect(() => {
+    const fetchActiveWorld = async () => {
+      try {
+        const response = await axiosInstance.get('/worlds/active');
+        if (response.data && response.data.id) {
+          setActiveWorld(response.data.id);
+        } else {
+          // If no active world, redirect to worlds page
+          navigate('/worlds');
+        }
+      } catch (err) {
+        // If error, redirect to worlds page
+        navigate('/worlds');
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchActiveWorld();
+    }
+  }, [isAuthenticated, navigate]);
+
   // Если пользователь не аутентифицирован, не рендерим компонент
   if (!isAuthenticated) {
     return null;
@@ -61,12 +86,18 @@ const CreatePost: React.FC = () => {
       return false;
     }
 
+    if (!activeWorld) {
+      setError('No active world selected');
+      return false;
+    }
+
     try {
       // 1. Получаем предподписанный URL для загрузки
       const getUrlResponse = await axiosInstance.post<UploadUrlResponse>('/media/upload-url', {
         filename: image.name,
         content_type: image.type,
-        size: image.size
+        size: image.size,
+        world_id: activeWorld
       });
 
       const { media_id, upload_url } = getUrlResponse.data;
@@ -87,10 +118,11 @@ const CreatePost: React.FC = () => {
         media_id
       });
 
-      // 4. Создаем пост с ID загруженного медиа
+      // 4. Создаем пост с ID загруженного медиа и указанием мира
       await axiosInstance.post('/posts', {
         caption,
-        media_id
+        media_id,
+        world_id: activeWorld
       });
 
       return true;
@@ -108,6 +140,11 @@ const CreatePost: React.FC = () => {
       return false;
     }
 
+    if (!activeWorld) {
+      setError('No active world selected');
+      return false;
+    }
+
     try {
       // Подготавливаем изображение в Base64
       const reader = new FileReader();
@@ -117,11 +154,12 @@ const CreatePost: React.FC = () => {
           try {
             const base64Image = reader.result as string;
 
-            // Отправляем запрос
+            // Отправляем запрос с указанием мира
             await axiosInstance.post('/media', {
               media_data: base64Image,
               content_type: image.type,
-              filename: image.name
+              filename: image.name,
+              world_id: activeWorld
             });
 
             resolve(true);

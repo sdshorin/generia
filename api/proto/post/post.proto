@@ -29,7 +29,8 @@ message CreatePostRequest {
   string user_id = 1;
   string caption = 2;
   string media_id = 3; // ID медиафайла, полученный от Media Service
-  repeated string tags = 4; // Опционально, для будущего расширения
+  string world_id = 4; // ID мира, к которому относится пост
+  repeated string tags = 5; // Опционально, для будущего расширения
 }
 
 message CreatePostResponse {
@@ -54,6 +55,7 @@ message GetPostsByIdsRequest {
 message GetGlobalFeedRequest {
   int32 limit = 1;
   string cursor = 2; // Курсор для пагинации
+  string world_id = 3; // ID мира, для которого запрашивается лента
 }
 
 message Post {
@@ -65,7 +67,8 @@ message Post {
   string created_at = 6; // ISO 8601 format
   int32 likes_count = 7; // Количество лайков
   int32 comments_count = 8; // Количество комментариев
-  repeated string tags = 9; // Опционально, для будущего расширения
+  string world_id = 9; // ID мира, к которому относится пост
+  repeated string tags = 10; // Опционально, для будущего расширения
 }
 
 message PostList {

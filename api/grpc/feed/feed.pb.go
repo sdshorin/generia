@@ -123,7 +123,8 @@ type GetGlobalFeedRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя, запрашивающего ленту (может быть пустым)
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Cursor        string                 `protobuf:"bytes,3,opt,name=cursor,proto3" json:"cursor,omitempty"` // курсор для пагинации
+	Cursor        string                 `protobuf:"bytes,3,opt,name=cursor,proto3" json:"cursor,omitempty"`                  // курсор для пагинации
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"` // ID мира, для которого запрашивается лента
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,6 +176,13 @@ func (x *GetGlobalFeedRequest) GetLimit() int32 {
 func (x *GetGlobalFeedRequest) GetCursor() string {
 	if x != nil {
 		return x.Cursor
+	}
+	return ""
+}
+
+func (x *GetGlobalFeedRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
 	}
 	return ""
 }
@@ -767,11 +775,12 @@ var File_feed_feed_proto protoreflect.FileDescriptor
 
 const file_feed_feed_proto_rawDesc = "" +
 	"\n" +
-	"\x0ffeed/feed.proto\x12\x04feed\"]\n" +
+	"\x0ffeed/feed.proto\x12\x04feed\"x\n" +
 	"\x14GetGlobalFeedRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06cursor\x18\x03 \x01(\tR\x06cursor\"y\n" +
+	"\x06cursor\x18\x03 \x01(\tR\x06cursor\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\"y\n" +
 	"\x15GetGlobalFeedResponse\x12$\n" +
 	"\x05posts\x18\x01 \x03(\v2\x0e.feed.PostInfoR\x05posts\x12\x1f\n" +
 	"\vnext_cursor\x18\x02 \x01(\tR\n" +

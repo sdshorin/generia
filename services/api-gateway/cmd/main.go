@@ -35,6 +35,7 @@ import (
 	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
+	worldpb "github.com/sdshorin/generia/api/grpc/world"
 )
 
 // grpcClients contains all gRPC clients for interacting with microservices
@@ -46,6 +47,7 @@ type grpcClients struct {
 	feedClient        feedpb.FeedServiceClient
 	cacheClient       cachepb.CacheServiceClient
 	cdnClient         cdnpb.CDNServiceClient
+	worldClient       worldpb.WorldServiceClient
 }
 
 func main() {
@@ -113,6 +115,7 @@ func main() {
 	mediaHandler := handlers.NewMediaHandler(clients.mediaClient, clients.cdnClient, tracer)
 	interactionHandler := handlers.NewInteractionHandler(clients.interactionClient, tracer)
 	feedHandler := handlers.NewFeedHandler(clients.feedClient, tracer)
+	worldHandler := handlers.NewWorldHandler(clients.worldClient, 30*time.Second)
 
 	// Initialize router
 	router := mux.NewRouter()
@@ -152,6 +155,16 @@ func main() {
 	router.Handle("/api/v1/posts/{id}/comments", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.AddComment))).Methods("POST")
 	router.Handle("/api/v1/posts/{id}/comments", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetComments))).Methods("GET")
 	router.Handle("/api/v1/posts/{id}/likes", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetLikes))).Methods("GET")
+	
+	// World routes - сначала конкретные маршруты, затем маршруты с параметрами
+	router.Handle("/api/v1/worlds/active", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetActiveWorld))).Methods("GET")
+	router.Handle("/api/v1/worlds/set-active", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.SetActiveWorld))).Methods("POST")
+	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorlds))).Methods("GET")
+	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.CreateWorld))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/join", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.JoinWorld))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/status", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorldStatus))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/generate", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GenerateContent))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorld))).Methods("GET")
 
 	// Configure server
 	server := &http.Server{
@@ -245,6 +258,11 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		return nil, fmt.Errorf("failed to resolve cdn service: %w", err)
 	}
 
+	worldAddr, err := discoveryClient.ResolveService("world-service")
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve world service: %w", err)
+	}
+
 	// Create connections
 	authConn, err := grpc.Dial(authAddr, opts...)
 	if err != nil {
@@ -281,6 +299,11 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		return nil, fmt.Errorf("failed to connect to cdn service: %w", err)
 	}
 
+	worldConn, err := grpc.Dial(worldAddr, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to world service: %w", err)
+	}
+
 	// Create clients
 	return &grpcClients{
 		authClient:        authpb.NewAuthServiceClient(authConn),
@@ -290,5 +313,6 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		feedClient:        feedpb.NewFeedServiceClient(feedConn),
 		cacheClient:       cachepb.NewCacheServiceClient(cacheConn),
 		cdnClient:         cdnpb.NewCDNServiceClient(cdnConn),
+		worldClient:       worldpb.NewWorldServiceClient(worldConn),
 	}, nil
 }

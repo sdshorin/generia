@@ -23,6 +23,7 @@ message GetGlobalFeedRequest {
   string user_id = 1; // ID пользователя, запрашивающего ленту (может быть пустым)
   int32 limit = 2;
   string cursor = 3; // курсор для пагинации
+  string world_id = 4; // ID мира, для которого запрашивается лента
 }
 
 message GetGlobalFeedResponse {

@@ -60,10 +60,16 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 		limit = 10
 	}
 
+	// Validate world_id
+	if req.WorldId == "" {
+		return nil, fmt.Errorf("world_id is required")
+	}
+
 	// Get posts from post service
 	postsResp, err := s.postClient.GetGlobalFeed(ctx, &postpb.GetGlobalFeedRequest{
-		Limit:  limit,
-		Cursor: req.Cursor,
+		Limit:   limit,
+		Cursor:  req.Cursor,
+		WorldId: req.WorldId,
 	})
 	if err != nil {
 		s.logger.Error("Failed to get posts from post service", zap.Error(err))

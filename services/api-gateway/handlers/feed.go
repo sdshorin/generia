@@ -69,12 +69,22 @@ func (h *FeedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cursor := r.URL.Query().Get("cursor")
+	worldID := r.URL.Query().Get("world_id")
+
+	// Проверка наличия world_id
+	if worldID == "" {
+		http.Error(w, "world_id is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Missing world_id parameter")
+		return
+	}
 
 	// Get feed
 	resp, err := h.feedClient.GetGlobalFeed(ctx, &feedpb.GetGlobalFeedRequest{
-		UserId: userID,
-		Limit:  int32(limit),
-		Cursor: cursor,
+		UserId:  userID,
+		Limit:   int32(limit),
+		Cursor:  cursor,
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to get feed", http.StatusInternalServerError)

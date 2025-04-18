@@ -39,6 +39,7 @@ type DatabaseConfig struct {
 	Password string
 	Name     string
 	SSLMode  string
+	URL      string
 }
 
 // JWTConfig holds JWT-related configuration
@@ -198,6 +199,10 @@ func LoadConfig() (*Config, error) {
 	jaegerHost := getEnv("JAEGER_HOST", "jaeger")
 	jaegerPort := getEnv("JAEGER_PORT", "6831")
 
+	// Create database URL
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", 
+		dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode)
+
 	return &Config{
 		Service: ServiceConfig{
 			Name: serviceName,
@@ -211,6 +216,7 @@ func LoadConfig() (*Config, error) {
 			Password: dbPassword,
 			Name:     dbName,
 			SSLMode:  dbSSLMode,
+			URL:      dbURL,
 		},
 		JWT: JWTConfig{
 			Secret:     jwtSecret,

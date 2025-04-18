@@ -75,7 +75,8 @@ type CreatePostRequest struct {
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
 	MediaId       string                 `protobuf:"bytes,3,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"` // ID медиафайла, полученный от Media Service
-	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`                      // Опционально, для будущего расширения
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"` // ID мира, к которому относится пост
+	Tags          []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`                      // Опционально, для будущего расширения
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -127,6 +128,13 @@ func (x *CreatePostRequest) GetCaption() string {
 func (x *CreatePostRequest) GetMediaId() string {
 	if x != nil {
 		return x.MediaId
+	}
+	return ""
+}
+
+func (x *CreatePostRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
 	}
 	return ""
 }
@@ -341,7 +349,8 @@ func (x *GetPostsByIdsRequest) GetPostIds() []string {
 type GetGlobalFeedRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"` // Курсор для пагинации
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`                  // Курсор для пагинации
+	WorldId       string                 `protobuf:"bytes,3,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"` // ID мира, для которого запрашивается лента
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -390,6 +399,13 @@ func (x *GetGlobalFeedRequest) GetCursor() string {
 	return ""
 }
 
+func (x *GetGlobalFeedRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
 type Post struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
@@ -400,7 +416,8 @@ type Post struct {
 	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`              // ISO 8601 format
 	LikesCount    int32                  `protobuf:"varint,7,opt,name=likes_count,json=likesCount,proto3" json:"likes_count,omitempty"`          // Количество лайков
 	CommentsCount int32                  `protobuf:"varint,8,opt,name=comments_count,json=commentsCount,proto3" json:"comments_count,omitempty"` // Количество комментариев
-	Tags          []string               `protobuf:"bytes,9,rep,name=tags,proto3" json:"tags,omitempty"`                                         // Опционально, для будущего расширения
+	WorldId       string                 `protobuf:"bytes,9,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`                    // ID мира, к которому относится пост
+	Tags          []string               `protobuf:"bytes,10,rep,name=tags,proto3" json:"tags,omitempty"`                                        // Опционально, для будущего расширения
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -489,6 +506,13 @@ func (x *Post) GetCommentsCount() int32 {
 		return x.CommentsCount
 	}
 	return 0
+}
+
+func (x *Post) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
 }
 
 func (x *Post) GetTags() []string {
@@ -642,12 +666,13 @@ var File_post_post_proto protoreflect.FileDescriptor
 
 const file_post_post_proto_rawDesc = "" +
 	"\n" +
-	"\x0fpost/post.proto\x12\x04post\"u\n" +
+	"\x0fpost/post.proto\x12\x04post\"\x90\x01\n" +
 	"\x11CreatePostRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
 	"\acaption\x18\x02 \x01(\tR\acaption\x12\x19\n" +
-	"\bmedia_id\x18\x03 \x01(\tR\amediaId\x12\x12\n" +
-	"\x04tags\x18\x04 \x03(\tR\x04tags\"L\n" +
+	"\bmedia_id\x18\x03 \x01(\tR\amediaId\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\x12\x12\n" +
+	"\x04tags\x18\x05 \x03(\tR\x04tags\"L\n" +
 	"\x12CreatePostResponse\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x1d\n" +
 	"\n" +
@@ -659,10 +684,11 @@ const file_post_post_proto_rawDesc = "" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x03 \x01(\x05R\x06offset\"1\n" +
 	"\x14GetPostsByIdsRequest\x12\x19\n" +
-	"\bpost_ids\x18\x01 \x03(\tR\apostIds\"D\n" +
+	"\bpost_ids\x18\x01 \x03(\tR\apostIds\"_\n" +
 	"\x14GetGlobalFeedRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06cursor\x18\x02 \x01(\tR\x06cursor\"\x86\x02\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x19\n" +
+	"\bworld_id\x18\x03 \x01(\tR\aworldId\"\xa1\x02\n" +
 	"\x04Post\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
@@ -673,8 +699,10 @@ const file_post_post_proto_rawDesc = "" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1f\n" +
 	"\vlikes_count\x18\a \x01(\x05R\n" +
 	"likesCount\x12%\n" +
-	"\x0ecomments_count\x18\b \x01(\x05R\rcommentsCount\x12\x12\n" +
-	"\x04tags\x18\t \x03(\tR\x04tags\"c\n" +
+	"\x0ecomments_count\x18\b \x01(\x05R\rcommentsCount\x12\x19\n" +
+	"\bworld_id\x18\t \x01(\tR\aworldId\x12\x12\n" +
+	"\x04tags\x18\n" +
+	" \x03(\tR\x04tags\"c\n" +
 	"\bPostList\x12 \n" +
 	"\x05posts\x18\x01 \x03(\v2\n" +
 	".post.PostR\x05posts\x12\x14\n" +

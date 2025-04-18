@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/sdshorin/generia/internal/repositories"
 	"github.com/sdshorin/generia/pkg/config"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/pkg/models"
@@ -35,16 +34,38 @@ type PostService interface {
 	CheckUserLiked(ctx context.Context, postID, userID string) (bool, error)
 }
 
+// PostRepository интерфейс для работы с хранилищем постов
+type PostRepository interface {
+	Create(ctx context.Context, post *models.Post) error
+	GetByID(ctx context.Context, id string) (*models.Post, error)
+	GetGlobalFeed(ctx context.Context, limit, offset int) ([]*models.Post, error)
+	GetUserPosts(ctx context.Context, userID string, limit, offset int) ([]*models.Post, error)
+	
+	// Комментарии
+	CreateComment(ctx context.Context, comment *models.Comment) error
+	GetPostComments(ctx context.Context, postID string, limit, offset int) ([]*models.Comment, error)
+	
+	// Лайки
+	CreateLike(ctx context.Context, like *models.Like) error
+	DeleteLike(ctx context.Context, postID, userID string) error
+	CheckUserLiked(ctx context.Context, postID, userID string) (bool, error)
+}
+
+// UserRepository интерфейс для работы с хранилищем пользователей
+type UserRepository interface {
+	GetByID(ctx context.Context, id string) (*models.User, error)
+}
+
 // PostServiceImpl реализует PostService
 type PostServiceImpl struct {
-	postRepo      repositories.PostRepository
-	userRepo      repositories.UserRepository
+	postRepo      PostRepository
+	userRepo      UserRepository
 	config        *config.Config
 	minioClient   *minio.Client
 }
 
 // NewPostService создает новый сервис постов
-func NewPostService(postRepo repositories.PostRepository, userRepo repositories.UserRepository, config *config.Config) (PostService, error) {
+func NewPostService(postRepo PostRepository, userRepo UserRepository, config *config.Config) (PostService, error) {
 	// Инициализируем клиент MinIO
 	minioClient, err := minio.New(config.Storage.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(config.Storage.AccessKey, config.Storage.SecretKey, ""),
