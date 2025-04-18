@@ -45,7 +45,6 @@ func NewPostHandler(
 type CreatePostRequest struct {
 	Caption string `json:"caption"`
 	MediaID string `json:"media_id"`
-	WorldID string `json:"world_id"`
 }
 
 // CreatePostResponse represents a response after creating a post
@@ -83,7 +82,10 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if req.WorldID == "" {
+	// Получаем world_id из URL параметров
+	vars := mux.Vars(r)
+	worldID := vars["world_id"]
+	if worldID == "" {
 		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
@@ -94,7 +96,7 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		UserId:  userID,
 		Caption: req.Caption,
 		MediaId: req.MediaID,
-		WorldId: req.WorldID,
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
@@ -141,11 +143,19 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "PostHandler.GetPost")
 	defer span.End()
 
-	// Get post ID from URL path
+	// Get post ID and world ID from URL path
 	vars := mux.Vars(r)
 	postID := vars["id"]
+	worldID := vars["world_id"]
+	
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -153,6 +163,7 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	// Get post
 	resp, err := h.postClient.GetPost(ctx, &postpb.GetPostRequest{
 		PostId: postID,
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to get post", http.StatusInternalServerError)
@@ -213,11 +224,19 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "PostHandler.GetUserPosts")
 	defer span.End()
 
-	// Get user ID from URL path
+	// Get user ID and world ID from URL path
 	vars := mux.Vars(r)
 	userID := vars["user_id"]
+	worldID := vars["world_id"]
+	
 	if userID == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -240,9 +259,10 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 
 	// Get posts
 	resp, err := h.postClient.GetUserPosts(ctx, &postpb.GetUserPostsRequest{
-		UserId: userID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		UserId:  userID,
+		WorldId: worldID,
+		Limit:   int32(limit),
+		Offset:  int32(offset),
 	})
 	if err != nil {
 		http.Error(w, "Failed to get user posts", http.StatusInternalServerError)

@@ -23,8 +23,6 @@ const (
 	WorldService_GetWorld_FullMethodName            = "/world.WorldService/GetWorld"
 	WorldService_GetWorlds_FullMethodName           = "/world.WorldService/GetWorlds"
 	WorldService_JoinWorld_FullMethodName           = "/world.WorldService/JoinWorld"
-	WorldService_SetActiveWorld_FullMethodName      = "/world.WorldService/SetActiveWorld"
-	WorldService_GetActiveWorld_FullMethodName      = "/world.WorldService/GetActiveWorld"
 	WorldService_GenerateContent_FullMethodName     = "/world.WorldService/GenerateContent"
 	WorldService_GetGenerationStatus_FullMethodName = "/world.WorldService/GetGenerationStatus"
 	WorldService_HealthCheck_FullMethodName         = "/world.WorldService/HealthCheck"
@@ -42,10 +40,6 @@ type WorldServiceClient interface {
 	GetWorlds(ctx context.Context, in *GetWorldsRequest, opts ...grpc.CallOption) (*WorldsResponse, error)
 	// Join a world (add to user's available worlds)
 	JoinWorld(ctx context.Context, in *JoinWorldRequest, opts ...grpc.CallOption) (*JoinWorldResponse, error)
-	// Set active world for a user
-	SetActiveWorld(ctx context.Context, in *SetActiveWorldRequest, opts ...grpc.CallOption) (*SetActiveWorldResponse, error)
-	// Get active world for a user
-	GetActiveWorld(ctx context.Context, in *GetActiveWorldRequest, opts ...grpc.CallOption) (*WorldResponse, error)
 	// Generate AI content for a world
 	GenerateContent(ctx context.Context, in *GenerateContentRequest, opts ...grpc.CallOption) (*GenerateContentResponse, error)
 	// Get generation status for a world
@@ -102,26 +96,6 @@ func (c *worldServiceClient) JoinWorld(ctx context.Context, in *JoinWorldRequest
 	return out, nil
 }
 
-func (c *worldServiceClient) SetActiveWorld(ctx context.Context, in *SetActiveWorldRequest, opts ...grpc.CallOption) (*SetActiveWorldResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SetActiveWorldResponse)
-	err := c.cc.Invoke(ctx, WorldService_SetActiveWorld_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *worldServiceClient) GetActiveWorld(ctx context.Context, in *GetActiveWorldRequest, opts ...grpc.CallOption) (*WorldResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(WorldResponse)
-	err := c.cc.Invoke(ctx, WorldService_GetActiveWorld_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *worldServiceClient) GenerateContent(ctx context.Context, in *GenerateContentRequest, opts ...grpc.CallOption) (*GenerateContentResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GenerateContentResponse)
@@ -164,10 +138,6 @@ type WorldServiceServer interface {
 	GetWorlds(context.Context, *GetWorldsRequest) (*WorldsResponse, error)
 	// Join a world (add to user's available worlds)
 	JoinWorld(context.Context, *JoinWorldRequest) (*JoinWorldResponse, error)
-	// Set active world for a user
-	SetActiveWorld(context.Context, *SetActiveWorldRequest) (*SetActiveWorldResponse, error)
-	// Get active world for a user
-	GetActiveWorld(context.Context, *GetActiveWorldRequest) (*WorldResponse, error)
 	// Generate AI content for a world
 	GenerateContent(context.Context, *GenerateContentRequest) (*GenerateContentResponse, error)
 	// Get generation status for a world
@@ -195,12 +165,6 @@ func (UnimplementedWorldServiceServer) GetWorlds(context.Context, *GetWorldsRequ
 }
 func (UnimplementedWorldServiceServer) JoinWorld(context.Context, *JoinWorldRequest) (*JoinWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinWorld not implemented")
-}
-func (UnimplementedWorldServiceServer) SetActiveWorld(context.Context, *SetActiveWorldRequest) (*SetActiveWorldResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetActiveWorld not implemented")
-}
-func (UnimplementedWorldServiceServer) GetActiveWorld(context.Context, *GetActiveWorldRequest) (*WorldResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetActiveWorld not implemented")
 }
 func (UnimplementedWorldServiceServer) GenerateContent(context.Context, *GenerateContentRequest) (*GenerateContentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateContent not implemented")
@@ -304,42 +268,6 @@ func _WorldService_JoinWorld_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WorldService_SetActiveWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetActiveWorldRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WorldServiceServer).SetActiveWorld(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WorldService_SetActiveWorld_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorldServiceServer).SetActiveWorld(ctx, req.(*SetActiveWorldRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _WorldService_GetActiveWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActiveWorldRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WorldServiceServer).GetActiveWorld(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WorldService_GetActiveWorld_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorldServiceServer).GetActiveWorld(ctx, req.(*GetActiveWorldRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _WorldService_GenerateContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GenerateContentRequest)
 	if err := dec(in); err != nil {
@@ -416,14 +344,6 @@ var WorldService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "JoinWorld",
 			Handler:    _WorldService_JoinWorld_Handler,
-		},
-		{
-			MethodName: "SetActiveWorld",
-			Handler:    _WorldService_SetActiveWorld_Handler,
-		},
-		{
-			MethodName: "GetActiveWorld",
-			Handler:    _WorldService_GetActiveWorld_Handler,
 		},
 		{
 			MethodName: "GenerateContent",

@@ -28,6 +28,7 @@ service InteractionService {
 message LikePostRequest {
   string post_id = 1;
   string user_id = 2;
+  string world_id = 3;
 }
 
 message LikePostResponse {
@@ -38,6 +39,7 @@ message LikePostResponse {
 message UnlikePostRequest {
   string post_id = 1;
   string user_id = 2;
+  string world_id = 3;
 }
 
 message UnlikePostResponse {
@@ -49,6 +51,7 @@ message GetPostLikesRequest {
   string post_id = 1;
   int32 limit = 2;
   int32 offset = 3;
+  string world_id = 4;
 }
 
 message PostLikesResponse {
@@ -76,6 +79,7 @@ message AddCommentRequest {
   string post_id = 1;
   string user_id = 2;
   string text = 3;
+  string world_id = 4;
 }
 
 message AddCommentResponse {
@@ -87,6 +91,7 @@ message GetPostCommentsRequest {
   string post_id = 1;
   int32 limit = 2;
   int32 offset = 3;
+  string world_id = 4;
 }
 
 message PostCommentsResponse {

@@ -23,8 +23,6 @@ type WorldRepository interface {
 	AddUserToWorld(ctx context.Context, userID, worldID string) error
 	RemoveUserFromWorld(ctx context.Context, userID, worldID string) error
 	GetUserWorlds(ctx context.Context, userID string) ([]*models.UserWorld, error)
-	SetActiveWorld(ctx context.Context, userID, worldID string) error
-	GetActiveWorld(ctx context.Context, userID string) (*models.World, error)
 	CheckUserWorld(ctx context.Context, userID, worldID string) (bool, error)
 
 	// Generation tasks
@@ -328,108 +326,6 @@ func (r *PostgresWorldRepository) GetUserWorlds(ctx context.Context, userID stri
 	return userWorlds, nil
 }
 
-// SetActiveWorld sets a world as active for a user
-func (r *PostgresWorldRepository) SetActiveWorld(ctx context.Context, userID, worldID string) error {
-	// First, check if the user has access to the world
-	var exists bool
-	checkQuery := `
-		SELECT EXISTS(
-			SELECT 1 FROM user_worlds
-			WHERE user_id = $1 AND world_id = $2
-		)
-	`
-	err := r.db.GetContext(ctx, &exists, checkQuery, userID, worldID)
-	if err != nil {
-		logger.Logger.Error("Failed to check if user has access to world", 
-			zap.Error(err), 
-			zap.String("user_id", userID), 
-			zap.String("world_id", worldID))
-		return err
-	}
-
-	if !exists {
-		// Add user to world if they don't have access
-		err = r.AddUserToWorld(ctx, userID, worldID)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Begin transaction
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		logger.Logger.Error("Failed to begin transaction", zap.Error(err))
-		return err
-	}
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-	}()
-
-	// Reset all active worlds for user
-	resetQuery := `
-		UPDATE user_worlds
-		SET is_active = false
-		WHERE user_id = $1
-	`
-	_, err = tx.ExecContext(ctx, resetQuery, userID)
-	if err != nil {
-		logger.Logger.Error("Failed to reset active worlds", 
-			zap.Error(err), 
-			zap.String("user_id", userID))
-		return err
-	}
-
-	// Set the world as active
-	setQuery := `
-		UPDATE user_worlds
-		SET is_active = true
-		WHERE user_id = $1 AND world_id = $2
-	`
-	_, err = tx.ExecContext(ctx, setQuery, userID, worldID)
-	if err != nil {
-		logger.Logger.Error("Failed to set active world", 
-			zap.Error(err), 
-			zap.String("user_id", userID), 
-			zap.String("world_id", worldID))
-		return err
-	}
-
-	// Commit transaction
-	err = tx.Commit()
-	if err != nil {
-		logger.Logger.Error("Failed to commit transaction", zap.Error(err))
-		return err
-	}
-
-	return nil
-}
-
-// GetActiveWorld gets the active world for a user
-func (r *PostgresWorldRepository) GetActiveWorld(ctx context.Context, userID string) (*models.World, error) {
-	query := `
-		SELECT w.id, w.name, w.description, w.prompt, w.creator_id, w.generation_status, w.status, w.created_at, w.updated_at
-		FROM worlds w
-		JOIN user_worlds uw ON w.id = uw.world_id
-		WHERE uw.user_id = $1 AND uw.is_active = true
-		LIMIT 1
-	`
-
-	var world models.World
-	err := r.db.GetContext(ctx, &world, query, userID)
-	if err != nil {
-		// If no active world is found, this is not an error
-		if err.Error() == "sql: no rows in result set" {
-			return nil, nil
-		}
-		logger.Logger.Error("Failed to get active world", zap.Error(err), zap.String("user_id", userID))
-		return nil, err
-	}
-
-	return &world, nil
-}
 
 // CheckUserWorld checks if a user has access to a world
 func (r *PostgresWorldRepository) CheckUserWorld(ctx context.Context, userID, worldID string) (bool, error) {

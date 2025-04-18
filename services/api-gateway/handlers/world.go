@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -216,89 +215,6 @@ func (h *WorldHandler) JoinWorld(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// SetActiveWorld handles POST /worlds/set-active
-func (h *WorldHandler) SetActiveWorld(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	userIDValue := ctx.Value(middleware.UserIDKey)
-	if userIDValue == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-	userID, ok := userIDValue.(string)
-	if !ok || userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-
-	var req models.SetActiveWorldRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		http.Error(w, "Invalid request format", http.StatusBadRequest)
-		return
-	}
-
-	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
-	defer cancel()
-
-	resp, err := h.worldClient.SetActiveWorld(timeoutCtx, &worldpb.SetActiveWorldRequest{
-		UserId:  userID,
-		WorldId: req.WorldID,
-	})
-
-	if err != nil {
-		logger.Logger.Error("Failed to set active world",
-			zap.Error(err),
-			zap.String("user_id", userID),
-			zap.String("world_id", req.WorldID))
-		http.Error(w, "Failed to set active world", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
-}
-
-// GetActiveWorld handles GET /worlds/active
-func (h *WorldHandler) GetActiveWorld(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Println("GetActiveWorld")
-	fmt.Println(r.Context())
-
-	ctx := r.Context()
-	userIDValue := ctx.Value(middleware.UserIDKey)
-	if userIDValue == nil {
-		fmt.Println("userIDValue is nil")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-	userID, ok := userIDValue.(string)
-	if !ok || userID == "" {
-		fmt.Println("userID is empty")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
-	defer cancel()
-
-	resp, err := h.worldClient.GetActiveWorld(timeoutCtx, &worldpb.GetActiveWorldRequest{
-		UserId: userID,
-	})
-
-	if err != nil {
-		// If there's no active world, this is not a server error - it's just a 404
-		http.Error(w, "No active world found", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
-}
 
 // GetWorldStatus handles GET /worlds/{world_id}/status
 func (h *WorldHandler) GetWorldStatus(w http.ResponseWriter, r *http.Request) {

@@ -95,10 +95,10 @@ docker-compose up -d
 - `POST /api/v1/worlds/{world_id}/generate` - Generate content for a world
 
 ### Posts
-- `POST /api/v1/posts` - Create a new post
-- `GET /api/v1/posts/{id}` - Get post by ID
-- `GET /api/v1/feed` - Get feed for active world
-- `GET /api/v1/users/{user_id}/posts` - Get user's posts
+- `POST /api/v1/worlds/{world_id}/posts` - Create a new post
+- `GET /api/v1/worlds/{world_id}/posts/{id}` - Get post by ID
+- `GET /api/v1/worlds/{world_id}/feed` - Get feed for specific world
+- `GET /api/v1/worlds/{world_id}/users/{user_id}/posts` - Get user's posts in a specific world
 
 ### Media
 - `POST /api/v1/media/upload` - Upload media
@@ -108,11 +108,11 @@ docker-compose up -d
 - `GET /api/v1/media/{id}` - Get media URLs
 
 ### Interactions
-- `POST /api/v1/posts/{id}/like` - Like a post
-- `DELETE /api/v1/posts/{id}/like` - Unlike a post
-- `POST /api/v1/posts/{id}/comments` - Add comment to a post
-- `GET /api/v1/posts/{id}/comments` - Get post comments
-- `GET /api/v1/posts/{id}/likes` - Get post likes
+- `POST /api/v1/worlds/{world_id}/posts/{id}/like` - Like a post
+- `DELETE /api/v1/worlds/{world_id}/posts/{id}/like` - Unlike a post
+- `POST /api/v1/worlds/{world_id}/posts/{id}/comments` - Add comment to a post
+- `GET /api/v1/worlds/{world_id}/posts/{id}/comments` - Get post comments
+- `GET /api/v1/worlds/{world_id}/posts/{id}/likes` - Get post likes
 
 ## Development
 

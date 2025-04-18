@@ -75,6 +75,7 @@ type LikePostRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	WorldId       string                 `protobuf:"bytes,3,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -119,6 +120,13 @@ func (x *LikePostRequest) GetPostId() string {
 func (x *LikePostRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *LikePostRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
 	}
 	return ""
 }
@@ -179,6 +187,7 @@ type UnlikePostRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	WorldId       string                 `protobuf:"bytes,3,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -223,6 +232,13 @@ func (x *UnlikePostRequest) GetPostId() string {
 func (x *UnlikePostRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *UnlikePostRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
 	}
 	return ""
 }
@@ -284,6 +300,7 @@ type GetPostLikesRequest struct {
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -337,6 +354,13 @@ func (x *GetPostLikesRequest) GetOffset() int32 {
 		return x.Offset
 	}
 	return 0
+}
+
+func (x *GetPostLikesRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
 }
 
 type PostLikesResponse struct {
@@ -553,6 +577,7 @@ type AddCommentRequest struct {
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Text          string                 `protobuf:"bytes,3,opt,name=text,proto3" json:"text,omitempty"`
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -604,6 +629,13 @@ func (x *AddCommentRequest) GetUserId() string {
 func (x *AddCommentRequest) GetText() string {
 	if x != nil {
 		return x.Text
+	}
+	return ""
+}
+
+func (x *AddCommentRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
 	}
 	return ""
 }
@@ -665,6 +697,7 @@ type GetPostCommentsRequest struct {
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -718,6 +751,13 @@ func (x *GetPostCommentsRequest) GetOffset() int32 {
 		return x.Offset
 	}
 	return 0
+}
+
+func (x *GetPostCommentsRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
 }
 
 type PostCommentsResponse struct {
@@ -1133,25 +1173,28 @@ var File_interaction_interaction_proto protoreflect.FileDescriptor
 
 const file_interaction_interaction_proto_rawDesc = "" +
 	"\n" +
-	"\x1dinteraction/interaction.proto\x12\vinteraction\"C\n" +
+	"\x1dinteraction/interaction.proto\x12\vinteraction\"^\n" +
 	"\x0fLikePostRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"M\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x19\n" +
+	"\bworld_id\x18\x03 \x01(\tR\aworldId\"M\n" +
 	"\x10LikePostResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1f\n" +
 	"\vlikes_count\x18\x02 \x01(\x05R\n" +
-	"likesCount\"E\n" +
+	"likesCount\"`\n" +
 	"\x11UnlikePostRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"O\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x19\n" +
+	"\bworld_id\x18\x03 \x01(\tR\aworldId\"O\n" +
 	"\x12UnlikePostResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1f\n" +
 	"\vlikes_count\x18\x02 \x01(\x05R\n" +
-	"likesCount\"\\\n" +
+	"likesCount\"w\n" +
 	"\x13GetPostLikesRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x03 \x01(\x05R\x06offset\"R\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\"R\n" +
 	"\x11PostLikesResponse\x12'\n" +
 	"\x05likes\x18\x01 \x03(\v2\x11.interaction.LikeR\x05likes\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\"Z\n" +
@@ -1164,20 +1207,22 @@ const file_interaction_interaction_proto_rawDesc = "" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\".\n" +
 	"\x16CheckUserLikedResponse\x12\x14\n" +
-	"\x05liked\x18\x01 \x01(\bR\x05liked\"Y\n" +
+	"\x05liked\x18\x01 \x01(\bR\x05liked\"t\n" +
 	"\x11AddCommentRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04text\x18\x03 \x01(\tR\x04text\"R\n" +
+	"\x04text\x18\x03 \x01(\tR\x04text\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\"R\n" +
 	"\x12AddCommentResponse\x12\x1d\n" +
 	"\n" +
 	"comment_id\x18\x01 \x01(\tR\tcommentId\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x02 \x01(\tR\tcreatedAt\"_\n" +
+	"created_at\x18\x02 \x01(\tR\tcreatedAt\"z\n" +
 	"\x16GetPostCommentsRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x03 \x01(\x05R\x06offset\"^\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\"^\n" +
 	"\x14PostCommentsResponse\x120\n" +
 	"\bcomments\x18\x01 \x03(\v2\x14.interaction.CommentR\bcomments\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\"\xa9\x01\n" +

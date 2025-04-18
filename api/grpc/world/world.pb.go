@@ -67,7 +67,7 @@ func (x HealthCheckResponse_ServingStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use HealthCheckResponse_ServingStatus.Descriptor instead.
 func (HealthCheckResponse_ServingStatus) EnumDescriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{15, 0}
+	return file_world_world_proto_rawDescGZIP(), []int{12, 0}
 }
 
 // CreateWorldRequest is the request for creating a new world
@@ -154,7 +154,6 @@ type WorldResponse struct {
 	CreatedAt        string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt        string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	IsJoined         bool                   `protobuf:"varint,12,opt,name=is_joined,json=isJoined,proto3" json:"is_joined,omitempty"`
-	IsActive         bool                   `protobuf:"varint,13,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -269,13 +268,6 @@ func (x *WorldResponse) GetUpdatedAt() string {
 func (x *WorldResponse) GetIsJoined() bool {
 	if x != nil {
 		return x.IsJoined
-	}
-	return false
-}
-
-func (x *WorldResponse) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
 	}
 	return false
 }
@@ -561,157 +553,6 @@ func (x *JoinWorldResponse) GetMessage() string {
 	return ""
 }
 
-// SetActiveWorldRequest is the request for setting a user's active world
-type SetActiveWorldRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	WorldId       string                 `protobuf:"bytes,2,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SetActiveWorldRequest) Reset() {
-	*x = SetActiveWorldRequest{}
-	mi := &file_world_world_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SetActiveWorldRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetActiveWorldRequest) ProtoMessage() {}
-
-func (x *SetActiveWorldRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetActiveWorldRequest.ProtoReflect.Descriptor instead.
-func (*SetActiveWorldRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *SetActiveWorldRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *SetActiveWorldRequest) GetWorldId() string {
-	if x != nil {
-		return x.WorldId
-	}
-	return ""
-}
-
-// SetActiveWorldResponse is the response for setting a user's active world
-type SetActiveWorldResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SetActiveWorldResponse) Reset() {
-	*x = SetActiveWorldResponse{}
-	mi := &file_world_world_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SetActiveWorldResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetActiveWorldResponse) ProtoMessage() {}
-
-func (x *SetActiveWorldResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetActiveWorldResponse.ProtoReflect.Descriptor instead.
-func (*SetActiveWorldResponse) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *SetActiveWorldResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *SetActiveWorldResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-// GetActiveWorldRequest is the request for getting a user's active world
-type GetActiveWorldRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetActiveWorldRequest) Reset() {
-	*x = GetActiveWorldRequest{}
-	mi := &file_world_world_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetActiveWorldRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetActiveWorldRequest) ProtoMessage() {}
-
-func (x *GetActiveWorldRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetActiveWorldRequest.ProtoReflect.Descriptor instead.
-func (*GetActiveWorldRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *GetActiveWorldRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
 // GenerateContentRequest is the request for generating AI content for a world
 type GenerateContentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -725,7 +566,7 @@ type GenerateContentRequest struct {
 
 func (x *GenerateContentRequest) Reset() {
 	*x = GenerateContentRequest{}
-	mi := &file_world_world_proto_msgTypes[10]
+	mi := &file_world_world_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -737,7 +578,7 @@ func (x *GenerateContentRequest) String() string {
 func (*GenerateContentRequest) ProtoMessage() {}
 
 func (x *GenerateContentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[10]
+	mi := &file_world_world_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -750,7 +591,7 @@ func (x *GenerateContentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateContentRequest.ProtoReflect.Descriptor instead.
 func (*GenerateContentRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{10}
+	return file_world_world_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GenerateContentRequest) GetWorldId() string {
@@ -793,7 +634,7 @@ type GenerateContentResponse struct {
 
 func (x *GenerateContentResponse) Reset() {
 	*x = GenerateContentResponse{}
-	mi := &file_world_world_proto_msgTypes[11]
+	mi := &file_world_world_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -805,7 +646,7 @@ func (x *GenerateContentResponse) String() string {
 func (*GenerateContentResponse) ProtoMessage() {}
 
 func (x *GenerateContentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[11]
+	mi := &file_world_world_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -818,7 +659,7 @@ func (x *GenerateContentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateContentResponse.ProtoReflect.Descriptor instead.
 func (*GenerateContentResponse) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{11}
+	return file_world_world_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GenerateContentResponse) GetSuccess() bool {
@@ -852,7 +693,7 @@ type GetGenerationStatusRequest struct {
 
 func (x *GetGenerationStatusRequest) Reset() {
 	*x = GetGenerationStatusRequest{}
-	mi := &file_world_world_proto_msgTypes[12]
+	mi := &file_world_world_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -864,7 +705,7 @@ func (x *GetGenerationStatusRequest) String() string {
 func (*GetGenerationStatusRequest) ProtoMessage() {}
 
 func (x *GetGenerationStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[12]
+	mi := &file_world_world_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -877,7 +718,7 @@ func (x *GetGenerationStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGenerationStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetGenerationStatusRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{12}
+	return file_world_world_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetGenerationStatusRequest) GetWorldId() string {
@@ -901,7 +742,7 @@ type GetGenerationStatusResponse struct {
 
 func (x *GetGenerationStatusResponse) Reset() {
 	*x = GetGenerationStatusResponse{}
-	mi := &file_world_world_proto_msgTypes[13]
+	mi := &file_world_world_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -913,7 +754,7 @@ func (x *GetGenerationStatusResponse) String() string {
 func (*GetGenerationStatusResponse) ProtoMessage() {}
 
 func (x *GetGenerationStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[13]
+	mi := &file_world_world_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -926,7 +767,7 @@ func (x *GetGenerationStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGenerationStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetGenerationStatusResponse) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{13}
+	return file_world_world_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetGenerationStatusResponse) GetStatus() string {
@@ -973,7 +814,7 @@ type HealthCheckRequest struct {
 
 func (x *HealthCheckRequest) Reset() {
 	*x = HealthCheckRequest{}
-	mi := &file_world_world_proto_msgTypes[14]
+	mi := &file_world_world_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -985,7 +826,7 @@ func (x *HealthCheckRequest) String() string {
 func (*HealthCheckRequest) ProtoMessage() {}
 
 func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[14]
+	mi := &file_world_world_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -998,7 +839,7 @@ func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
 func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{14}
+	return file_world_world_proto_rawDescGZIP(), []int{11}
 }
 
 // HealthCheckResponse is the response for the health check
@@ -1011,7 +852,7 @@ type HealthCheckResponse struct {
 
 func (x *HealthCheckResponse) Reset() {
 	*x = HealthCheckResponse{}
-	mi := &file_world_world_proto_msgTypes[15]
+	mi := &file_world_world_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1023,7 +864,7 @@ func (x *HealthCheckResponse) String() string {
 func (*HealthCheckResponse) ProtoMessage() {}
 
 func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[15]
+	mi := &file_world_world_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1036,7 +877,7 @@ func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
 func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{15}
+	return file_world_world_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *HealthCheckResponse) GetStatus() HealthCheckResponse_ServingStatus {
@@ -1055,7 +896,7 @@ const file_world_world_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06prompt\x18\x04 \x01(\tR\x06prompt\"\x8b\x03\n" +
+	"\x06prompt\x18\x04 \x01(\tR\x06prompt\"\xee\x02\n" +
 	"\rWorldResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -1074,8 +915,7 @@ const file_world_world_proto_rawDesc = "" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\v \x01(\tR\tupdatedAt\x12\x1b\n" +
-	"\tis_joined\x18\f \x01(\bR\bisJoined\x12\x1b\n" +
-	"\tis_active\x18\r \x01(\bR\bisActive\"E\n" +
+	"\tis_joined\x18\f \x01(\bR\bisJoined\"E\n" +
 	"\x0fGetWorldRequest\x12\x19\n" +
 	"\bworld_id\x18\x01 \x01(\tR\aworldId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"q\n" +
@@ -1092,15 +932,7 @@ const file_world_world_proto_rawDesc = "" +
 	"\bworld_id\x18\x02 \x01(\tR\aworldId\"G\n" +
 	"\x11JoinWorldResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"K\n" +
-	"\x15SetActiveWorldRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x19\n" +
-	"\bworld_id\x18\x02 \x01(\tR\aworldId\"L\n" +
-	"\x16SetActiveWorldResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"0\n" +
-	"\x15GetActiveWorldRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x8b\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x8b\x01\n" +
 	"\x16GenerateContentRequest\x12\x19\n" +
 	"\bworld_id\x18\x01 \x01(\tR\aworldId\x12\x1f\n" +
 	"\vusers_count\x18\x02 \x01(\x05R\n" +
@@ -1126,14 +958,12 @@ const file_world_world_proto_rawDesc = "" +
 	"\rServingStatus\x12\v\n" +
 	"\aUNKNOWN\x10\x00\x12\v\n" +
 	"\aSERVING\x10\x01\x12\x0f\n" +
-	"\vNOT_SERVING\x10\x022\xa2\x05\n" +
+	"\vNOT_SERVING\x10\x022\x89\x04\n" +
 	"\fWorldService\x12@\n" +
 	"\vCreateWorld\x12\x19.world.CreateWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12:\n" +
 	"\bGetWorld\x12\x16.world.GetWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12=\n" +
 	"\tGetWorlds\x12\x17.world.GetWorldsRequest\x1a\x15.world.WorldsResponse\"\x00\x12@\n" +
-	"\tJoinWorld\x12\x17.world.JoinWorldRequest\x1a\x18.world.JoinWorldResponse\"\x00\x12O\n" +
-	"\x0eSetActiveWorld\x12\x1c.world.SetActiveWorldRequest\x1a\x1d.world.SetActiveWorldResponse\"\x00\x12F\n" +
-	"\x0eGetActiveWorld\x12\x1c.world.GetActiveWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12R\n" +
+	"\tJoinWorld\x12\x17.world.JoinWorldRequest\x1a\x18.world.JoinWorldResponse\"\x00\x12R\n" +
 	"\x0fGenerateContent\x12\x1d.world.GenerateContentRequest\x1a\x1e.world.GenerateContentResponse\"\x00\x12^\n" +
 	"\x13GetGenerationStatus\x12!.world.GetGenerationStatusRequest\x1a\".world.GetGenerationStatusResponse\"\x00\x12F\n" +
 	"\vHealthCheck\x12\x19.world.HealthCheckRequest\x1a\x1a.world.HealthCheckResponse\"\x00B,Z*github.com/sdshorin/generia/api/grpc/worldb\x06proto3"
@@ -1151,7 +981,7 @@ func file_world_world_proto_rawDescGZIP() []byte {
 }
 
 var file_world_world_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_world_world_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_world_world_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_world_world_proto_goTypes = []any{
 	(HealthCheckResponse_ServingStatus)(0), // 0: world.HealthCheckResponse.ServingStatus
 	(*CreateWorldRequest)(nil),             // 1: world.CreateWorldRequest
@@ -1161,15 +991,12 @@ var file_world_world_proto_goTypes = []any{
 	(*WorldsResponse)(nil),                 // 5: world.WorldsResponse
 	(*JoinWorldRequest)(nil),               // 6: world.JoinWorldRequest
 	(*JoinWorldResponse)(nil),              // 7: world.JoinWorldResponse
-	(*SetActiveWorldRequest)(nil),          // 8: world.SetActiveWorldRequest
-	(*SetActiveWorldResponse)(nil),         // 9: world.SetActiveWorldResponse
-	(*GetActiveWorldRequest)(nil),          // 10: world.GetActiveWorldRequest
-	(*GenerateContentRequest)(nil),         // 11: world.GenerateContentRequest
-	(*GenerateContentResponse)(nil),        // 12: world.GenerateContentResponse
-	(*GetGenerationStatusRequest)(nil),     // 13: world.GetGenerationStatusRequest
-	(*GetGenerationStatusResponse)(nil),    // 14: world.GetGenerationStatusResponse
-	(*HealthCheckRequest)(nil),             // 15: world.HealthCheckRequest
-	(*HealthCheckResponse)(nil),            // 16: world.HealthCheckResponse
+	(*GenerateContentRequest)(nil),         // 8: world.GenerateContentRequest
+	(*GenerateContentResponse)(nil),        // 9: world.GenerateContentResponse
+	(*GetGenerationStatusRequest)(nil),     // 10: world.GetGenerationStatusRequest
+	(*GetGenerationStatusResponse)(nil),    // 11: world.GetGenerationStatusResponse
+	(*HealthCheckRequest)(nil),             // 12: world.HealthCheckRequest
+	(*HealthCheckResponse)(nil),            // 13: world.HealthCheckResponse
 }
 var file_world_world_proto_depIdxs = []int32{
 	2,  // 0: world.WorldsResponse.worlds:type_name -> world.WorldResponse
@@ -1178,22 +1005,18 @@ var file_world_world_proto_depIdxs = []int32{
 	3,  // 3: world.WorldService.GetWorld:input_type -> world.GetWorldRequest
 	4,  // 4: world.WorldService.GetWorlds:input_type -> world.GetWorldsRequest
 	6,  // 5: world.WorldService.JoinWorld:input_type -> world.JoinWorldRequest
-	8,  // 6: world.WorldService.SetActiveWorld:input_type -> world.SetActiveWorldRequest
-	10, // 7: world.WorldService.GetActiveWorld:input_type -> world.GetActiveWorldRequest
-	11, // 8: world.WorldService.GenerateContent:input_type -> world.GenerateContentRequest
-	13, // 9: world.WorldService.GetGenerationStatus:input_type -> world.GetGenerationStatusRequest
-	15, // 10: world.WorldService.HealthCheck:input_type -> world.HealthCheckRequest
-	2,  // 11: world.WorldService.CreateWorld:output_type -> world.WorldResponse
-	2,  // 12: world.WorldService.GetWorld:output_type -> world.WorldResponse
-	5,  // 13: world.WorldService.GetWorlds:output_type -> world.WorldsResponse
-	7,  // 14: world.WorldService.JoinWorld:output_type -> world.JoinWorldResponse
-	9,  // 15: world.WorldService.SetActiveWorld:output_type -> world.SetActiveWorldResponse
-	2,  // 16: world.WorldService.GetActiveWorld:output_type -> world.WorldResponse
-	12, // 17: world.WorldService.GenerateContent:output_type -> world.GenerateContentResponse
-	14, // 18: world.WorldService.GetGenerationStatus:output_type -> world.GetGenerationStatusResponse
-	16, // 19: world.WorldService.HealthCheck:output_type -> world.HealthCheckResponse
-	11, // [11:20] is the sub-list for method output_type
-	2,  // [2:11] is the sub-list for method input_type
+	8,  // 6: world.WorldService.GenerateContent:input_type -> world.GenerateContentRequest
+	10, // 7: world.WorldService.GetGenerationStatus:input_type -> world.GetGenerationStatusRequest
+	12, // 8: world.WorldService.HealthCheck:input_type -> world.HealthCheckRequest
+	2,  // 9: world.WorldService.CreateWorld:output_type -> world.WorldResponse
+	2,  // 10: world.WorldService.GetWorld:output_type -> world.WorldResponse
+	5,  // 11: world.WorldService.GetWorlds:output_type -> world.WorldsResponse
+	7,  // 12: world.WorldService.JoinWorld:output_type -> world.JoinWorldResponse
+	9,  // 13: world.WorldService.GenerateContent:output_type -> world.GenerateContentResponse
+	11, // 14: world.WorldService.GetGenerationStatus:output_type -> world.GetGenerationStatusResponse
+	13, // 15: world.WorldService.HealthCheck:output_type -> world.HealthCheckResponse
+	9,  // [9:16] is the sub-list for method output_type
+	2,  // [2:9] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -1210,7 +1033,7 @@ func file_world_world_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_world_world_proto_rawDesc), len(file_world_world_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   16,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

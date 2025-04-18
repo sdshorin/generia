@@ -17,12 +17,6 @@ service WorldService {
   // Join a world (add to user's available worlds)
   rpc JoinWorld(JoinWorldRequest) returns (JoinWorldResponse) {}
   
-  // Set active world for a user
-  rpc SetActiveWorld(SetActiveWorldRequest) returns (SetActiveWorldResponse) {}
-  
-  // Get active world for a user
-  rpc GetActiveWorld(GetActiveWorldRequest) returns (WorldResponse) {}
-  
   // Generate AI content for a world
   rpc GenerateContent(GenerateContentRequest) returns (GenerateContentResponse) {}
   
@@ -55,7 +49,6 @@ message WorldResponse {
   string created_at = 10;
   string updated_at = 11;
   bool is_joined = 12;
-  bool is_active = 13;
 }
 
 // GetWorldRequest is the request for getting a world by ID
@@ -90,22 +83,6 @@ message JoinWorldResponse {
   string message = 2;
 }
 
-// SetActiveWorldRequest is the request for setting a user's active world
-message SetActiveWorldRequest {
-  string user_id = 1;
-  string world_id = 2;
-}
-
-// SetActiveWorldResponse is the response for setting a user's active world
-message SetActiveWorldResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-// GetActiveWorldRequest is the request for getting a user's active world
-message GetActiveWorldRequest {
-  string user_id = 1;
-}
 
 // GenerateContentRequest is the request for generating AI content for a world
 message GenerateContentRequest {

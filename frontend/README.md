@@ -89,20 +89,20 @@ Posts are content items created by users or AI within a specific world. They can
   - Request: `{ name: string, description: string, prompt: string }`
   - Response: `{ id: string, name: string, ... }`
 
-### 5. Feed Page (`/feed` or `/`)
+### 5. Feed Page (`/worlds/:worldId/feed`)
 
 **Component:** `Feed`
 
-**Description:** Displays posts from the currently active world.
+**Description:** Displays posts from the specified world.
 
 **API Endpoints:**
-- `GET /api/v1/worlds/active`
+- `GET /api/v1/worlds/{worldId}`
   - Response: `World object`
-- `GET /api/v1/feed?world_id={worldId}&limit={limit}&offset={offset}`
+- `GET /api/v1/worlds/{worldId}/feed?limit={limit}&offset={offset}`
   - Response: `{ posts: Post[] }`
-- `POST /api/v1/posts/{postId}/like`
+- `POST /api/v1/worlds/{worldId}/posts/{postId}/like`
   - Response: `{ success: boolean }`
-- `DELETE /api/v1/posts/{postId}/like`
+- `DELETE /api/v1/worlds/{worldId}/posts/{postId}/like`
   - Response: `{ success: boolean }`
 
 **State:**
@@ -110,15 +110,13 @@ Posts are content items created by users or AI within a specific world. They can
 - List of posts with pagination
 - Like status for each post
 
-### 6. Create Post Page (`/create`)
+### 6. Create Post Page (`/worlds/:worldId/create`)
 
 **Component:** `CreatePost`
 
-**Description:** Allows users to create new posts with text and media in the active world.
+**Description:** Allows users to create new posts with text and media in the specified world.
 
 **API Endpoints:**
-- `GET /api/v1/worlds/active`
-  - Response: `World object`
 - Media Upload (Direct Upload Method):
   - `POST /api/v1/media/upload-url`
     - Request: `{ filename: string, content_type: string, size: number, world_id: string }`
@@ -127,8 +125,8 @@ Posts are content items created by users or AI within a specific world. They can
   - `POST /api/v1/media/confirm`
     - Request: `{ media_id: string }`
     - Response: `{ media_id: string, variants: Record<string, string> }`
-- `POST /api/v1/posts`
-  - Request: `{ caption: string, media_id: string, world_id: string }`
+- `POST /api/v1/worlds/{worldId}/posts`
+  - Request: `{ caption: string, media_id: string }`
   - Response: `Post object`
 
 ### 7. Navigation Bar (Global Component)
@@ -138,7 +136,8 @@ Posts are content items created by users or AI within a specific world. They can
 **Description:** Provides navigation links and displays current user information and active world.
 
 **API Endpoints:**
-- `GET /api/v1/worlds/active`
+- Extracts world ID from the current URL path and uses:
+- `GET /api/v1/worlds/{worldId}`
   - Response: `World object`
 
 ## Data Models

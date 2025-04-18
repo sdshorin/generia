@@ -57,11 +57,13 @@ const WorldsList: React.FC = () => {
 
   const handleSetActiveWorld = async (worldId: string) => {
     try {
-      await axiosInstance.post('/worlds/set-active', { world_id: worldId });
-      navigate('/feed');
+      // Сохраняем ID активного мира в localStorage для удобства
+      localStorage.setItem('activeWorldId', worldId);
+      // Переходим прямо на страницу этого мира
+      navigate(`/worlds/${worldId}/feed`);
     } catch (err) {
-      console.error('Failed to set active world', err);
-      setError('Failed to set active world');
+      console.error('Failed to navigate to world', err);
+      setError('Failed to navigate to world');
     }
   };
   

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../api/axios';
 import { Post, World } from '../types';
 import { AuthContext } from '../context/AuthContext';
 
 const Feed: React.FC = () => {
+  const { worldId } = useParams<{ worldId: string }>();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [activeWorld, setActiveWorld] = useState<World | null>(null);
+  const [worldInfo, setWorldInfo] = useState<World | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
@@ -21,49 +22,41 @@ const Feed: React.FC = () => {
       return;
     }
     
-    // Get active world first
-    fetchActiveWorld();
-  }, [isAuthenticated, navigate]);
-
-  // Fetch posts when active world changes
-  useEffect(() => {
-    if (activeWorld) {
-      setPosts([]);
-      setPage(1);
-      setHasMore(true);
-      fetchPosts();
+    if (!worldId) {
+      navigate('/worlds');
+      return;
     }
-  }, [activeWorld]);
+    
+    // Get world info and initial posts
+    fetchWorldInfo();
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+    fetchPosts();
+  }, [isAuthenticated, worldId, navigate]);
 
-  const fetchActiveWorld = async () => {
+  const fetchWorldInfo = async () => {
+    if (!worldId) return;
+    
     try {
-      const response = await axiosInstance.get('/worlds/active');
-      
+      const response = await axiosInstance.get(`/worlds/${worldId}`);
       if (response.data && response.data.id) {
-        setActiveWorld(response.data);
-      } else {
-        // No active world, redirect to worlds selection
-        navigate('/worlds');
+        setWorldInfo(response.data);
       }
-    } catch (err: any) {
-      // If no active world or error, redirect to worlds page
-      if (err.response && err.response.status === 404) {
-        navigate('/worlds');
-      } else {
-        setError('Failed to load active world');
-        console.error(err);
-      }
+    } catch (err) {
+      setError('Failed to load world information');
+      console.error(err);
     }
   };
 
   const fetchPosts = async () => {
-    if (!activeWorld) return;
+    if (!worldId) return;
     
     try {
       setLoading(true);
       const limit = 10;
       const offset = (page - 1) * limit;
-      const response = await axiosInstance.get(`/feed?world_id=${activeWorld.id}&limit=${limit}&offset=${offset}`);
+      const response = await axiosInstance.get(`/worlds/${worldId}/feed?limit=${limit}&offset=${offset}`);
       
       if (response.data.posts.length === 0) {
         setHasMore(false);
@@ -80,7 +73,7 @@ const Feed: React.FC = () => {
   };
 
   const handleLike = async (postId: string, isLiked: boolean) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !worldId) {
       navigate('/login');
       return;
     }
@@ -88,10 +81,10 @@ const Feed: React.FC = () => {
     try {
       if (isLiked) {
         // Unlike
-        await axiosInstance.delete(`/posts/${postId}/like`);
+        await axiosInstance.delete(`/worlds/${worldId}/posts/${postId}/like`);
       } else {
         // Like
-        await axiosInstance.post(`/posts/${postId}/like`);
+        await axiosInstance.post(`/worlds/${worldId}/posts/${postId}/like`);
       }
 
       // Update posts state
@@ -116,17 +109,17 @@ const Feed: React.FC = () => {
   };
 
   const handleCreatePost = () => {
-    navigate('/create');
+    navigate(`/worlds/${worldId}/create`);
   };
 
-  if (!activeWorld) {
+  if (!worldInfo) {
     return <div className="loading">Loading world...</div>;
   }
 
   return (
     <div className="feed-container">
       <div className="world-header">
-        <h2>{activeWorld.name}</h2>
+        <h2>{worldInfo.name}</h2>
         <div className="world-actions">
           <button onClick={handleChangeWorld} className="change-world-button">
             Change World
@@ -137,8 +130,8 @@ const Feed: React.FC = () => {
         </div>
       </div>
       
-      {activeWorld.description && (
-        <p className="world-description">{activeWorld.description}</p>
+      {worldInfo.description && (
+        <p className="world-description">{worldInfo.description}</p>
       )}
       
       {error && <div className="error">{error}</div>}
@@ -163,7 +156,7 @@ const Feed: React.FC = () => {
               <span className="post-username">{post.username}</span> {post.caption}
             </div>
             <div className="post-comments">
-              <a href={`/posts/${post.id}`}>View all {post.comments_count} comments</a>
+              <a href={`/worlds/${worldId}/posts/${post.id}`}>View all {post.comments_count} comments</a>
             </div>
           </div>
         ))}

@@ -138,10 +138,10 @@ func main() {
 	router.HandleFunc("/api/v1/auth/refresh", authHandler.RefreshToken).Methods("POST")
 
 	// Post routes
-	router.Handle("/api/v1/posts", jwtMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))).Methods("POST")
-	router.Handle("/api/v1/posts/{id}", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetPost))).Methods("GET")
-	router.Handle("/api/v1/feed", jwtMiddleware.Optional(http.HandlerFunc(feedHandler.GetGlobalFeed))).Methods("GET")
-	router.Handle("/api/v1/users/{user_id}/posts", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetUserPosts))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/posts", jwtMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/posts/{id}", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetPost))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/feed", jwtMiddleware.Optional(http.HandlerFunc(feedHandler.GetGlobalFeed))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/users/{user_id}/posts", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetUserPosts))).Methods("GET")
 
 	// Media routes - Legacy and Direct Upload
 	router.Handle("/api/v1/media/upload", jwtMiddleware.RequireAuth(http.HandlerFunc(mediaHandler.UploadMedia))).Methods("POST")
@@ -150,15 +150,13 @@ func main() {
 	router.HandleFunc("/api/v1/media/{id}", mediaHandler.GetMediaURLs).Methods("GET")
 
 	// Interaction routes
-	router.Handle("/api/v1/posts/{id}/like", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.LikePost))).Methods("POST")
-	router.Handle("/api/v1/posts/{id}/like", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.UnlikePost))).Methods("DELETE")
-	router.Handle("/api/v1/posts/{id}/comments", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.AddComment))).Methods("POST")
-	router.Handle("/api/v1/posts/{id}/comments", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetComments))).Methods("GET")
-	router.Handle("/api/v1/posts/{id}/likes", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetLikes))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/like", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.LikePost))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/like", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.UnlikePost))).Methods("DELETE")
+	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/comments", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.AddComment))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/comments", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetComments))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/likes", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetLikes))).Methods("GET")
 	
 	// World routes - сначала конкретные маршруты, затем маршруты с параметрами
-	router.Handle("/api/v1/worlds/active", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetActiveWorld))).Methods("GET")
-	router.Handle("/api/v1/worlds/set-active", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.SetActiveWorld))).Methods("POST")
 	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorlds))).Methods("GET")
 	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.CreateWorld))).Methods("POST")
 	router.Handle("/api/v1/worlds/{world_id}/join", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.JoinWorld))).Methods("POST")

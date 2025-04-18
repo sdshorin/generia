@@ -22,7 +22,6 @@ type UserWorld struct {
 	ID        string    `db:"id"`
 	UserID    string    `db:"user_id"`
 	WorldID   string    `db:"world_id"`
-	IsActive  bool      `db:"is_active"`
 	CreatedAt time.Time `db:"created_at"`
 }
 

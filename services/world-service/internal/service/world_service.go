@@ -82,16 +82,6 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		return nil, status.Errorf(codes.Internal, "failed to add creator to world")
 	}
 
-	// Set as active world for creator
-	err = s.worldRepo.SetActiveWorld(ctx, req.UserId, world.ID)
-	if err != nil {
-		logger.Logger.Error("Failed to set active world",
-			zap.Error(err),
-			zap.String("user_id", req.UserId),
-			zap.String("world_id", world.ID))
-		// Not a critical error, continue
-	}
-
 	// Get world stats
 	usersCount, postsCount, err := s.worldRepo.GetWorldStats(ctx, world.ID)
 	if err != nil {
@@ -118,7 +108,6 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 		IsJoined:         true,
-		IsActive:         true,
 	}, nil
 }
 
@@ -149,9 +138,8 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		postsCount = 0
 	}
 
-	// Check if user has joined this world and if it's active
+	// Check if user has joined this world
 	isJoined := false
-	isActive := false
 	if req.UserId != "" {
 		hasAccess, err := s.worldRepo.CheckUserWorld(ctx, req.UserId, world.ID)
 		if err != nil {
@@ -162,15 +150,6 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 			// Not a critical error, continue
 		} else {
 			isJoined = hasAccess
-		}
-
-		// Check if this is the active world for the user
-		activeWorld, err := s.worldRepo.GetActiveWorld(ctx, req.UserId)
-		if err != nil {
-			logger.Logger.Error("Failed to get active world", zap.Error(err), zap.String("user_id", req.UserId))
-			// Not a critical error, continue
-		} else if activeWorld != nil && activeWorld.ID == world.ID {
-			isActive = true
 		}
 	}
 
@@ -188,7 +167,6 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 		IsJoined:         isJoined,
-		IsActive:         isActive,
 	}, nil
 }
 
@@ -221,13 +199,6 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 		return nil, status.Errorf(codes.Internal, "failed to get worlds")
 	}
 
-	// Get active world for user
-	activeWorld, err := s.worldRepo.GetActiveWorld(ctx, req.UserId)
-	if err != nil {
-		logger.Logger.Error("Failed to get active world", zap.Error(err), zap.String("user_id", req.UserId))
-		// Not a critical error, continue
-	}
-
 	// Build response
 	worldResponses := make([]*worldpb.WorldResponse, len(worlds))
 	for i, world := range worlds {
@@ -239,9 +210,6 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			usersCount = 0
 			postsCount = 0
 		}
-
-		// Determine if this is the active world
-		isActive := activeWorld != nil && activeWorld.ID == world.ID
 
 		worldResponses[i] = &worldpb.WorldResponse{
 			Id:               world.ID,
@@ -256,7 +224,6 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 			IsJoined:         true, // User has access since this is from user-specific query
-			IsActive:         isActive,
 		}
 	}
 
@@ -326,102 +293,6 @@ func (s *WorldService) JoinWorld(ctx context.Context, req *worldpb.JoinWorldRequ
 	}, nil
 }
 
-// SetActiveWorld handles setting a world as active for a user
-func (s *WorldService) SetActiveWorld(ctx context.Context, req *worldpb.SetActiveWorldRequest) (*worldpb.SetActiveWorldResponse, error) {
-	// Validate input
-	if req.UserId == "" || req.WorldId == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "user_id and world_id are required")
-	}
-
-	// Validate user exists
-	_, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
-		UserId: req.UserId,
-	})
-	if err != nil {
-		logger.Logger.Error("Failed to validate user", zap.Error(err), zap.String("user_id", req.UserId))
-		return nil, status.Errorf(codes.Internal, "failed to validate user")
-	}
-
-	// Validate world exists
-	world, err := s.worldRepo.GetByID(ctx, req.WorldId)
-	if err != nil {
-		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", req.WorldId))
-		return nil, status.Errorf(codes.Internal, "failed to get world")
-	}
-
-	if world == nil {
-		return nil, status.Errorf(codes.NotFound, "world not found")
-	}
-
-	// Set active world (this will also add the user to the world if not already joined)
-	err = s.worldRepo.SetActiveWorld(ctx, req.UserId, req.WorldId)
-	if err != nil {
-		logger.Logger.Error("Failed to set active world",
-			zap.Error(err),
-			zap.String("user_id", req.UserId),
-			zap.String("world_id", req.WorldId))
-		return nil, status.Errorf(codes.Internal, "failed to set active world")
-	}
-
-	return &worldpb.SetActiveWorldResponse{
-		Success: true,
-		Message: "Active world set successfully",
-	}, nil
-}
-
-// GetActiveWorld handles getting the active world for a user
-func (s *WorldService) GetActiveWorld(ctx context.Context, req *worldpb.GetActiveWorldRequest) (*worldpb.WorldResponse, error) {
-	// Validate input
-	if req.UserId == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "user_id is required")
-	}
-
-	// Validate user exists
-	_, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
-		UserId: req.UserId,
-	})
-	if err != nil {
-		logger.Logger.Error("Failed to validate user", zap.Error(err), zap.String("user_id", req.UserId))
-		return nil, status.Errorf(codes.Internal, "failed to validate user")
-	}
-
-	// Get active world
-	world, err := s.worldRepo.GetActiveWorld(ctx, req.UserId)
-	if err != nil {
-		logger.Logger.Error("Failed to get active world", zap.Error(err), zap.String("user_id", req.UserId))
-		return nil, status.Errorf(codes.Internal, "failed to get active world")
-	}
-
-	if world == nil {
-		return nil, status.Errorf(codes.NotFound, "no active world found")
-	}
-
-	// Get world stats
-	usersCount, postsCount, err := s.worldRepo.GetWorldStats(ctx, world.ID)
-	if err != nil {
-		logger.Logger.Error("Failed to get world stats", zap.Error(err), zap.String("world_id", world.ID))
-		// Not a critical error, continue with zeros
-		usersCount = 0
-		postsCount = 0
-	}
-
-	// Build response
-	return &worldpb.WorldResponse{
-		Id:               world.ID,
-		Name:             world.Name,
-		Description:      world.Description,
-		Prompt:           world.Prompt,
-		CreatorId:        world.CreatorID,
-		GenerationStatus: world.GenerationStatus,
-		Status:           world.Status,
-		UsersCount:       int32(usersCount),
-		PostsCount:       int32(postsCount),
-		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
-		IsJoined:         true,
-		IsActive:         true,
-	}, nil
-}
 
 // GenerateContent handles generating AI content for a world
 func (s *WorldService) GenerateContent(ctx context.Context, req *worldpb.GenerateContentRequest) (*worldpb.GenerateContentResponse, error) {

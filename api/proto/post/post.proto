@@ -40,12 +40,14 @@ message CreatePostResponse {
 
 message GetPostRequest {
   string post_id = 1;
+  string world_id = 2;
 }
 
 message GetUserPostsRequest {
   string user_id = 1;
   int32 limit = 2;
   int32 offset = 3;
+  string world_id = 4;
 }
 
 message GetPostsByIdsRequest {

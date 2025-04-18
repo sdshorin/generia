@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS user_worlds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     world_id UUID NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
-    is_active BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id, world_id)
 );

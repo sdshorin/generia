@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/attribute"
@@ -69,9 +70,10 @@ func (h *FeedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cursor := r.URL.Query().Get("cursor")
-	worldID := r.URL.Query().Get("world_id")
-
-	// Проверка наличия world_id
+	
+	// Получаем world_id из URL параметров
+	vars := mux.Vars(r)
+	worldID := vars["world_id"]
 	if worldID == "" {
 		http.Error(w, "world_id is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))

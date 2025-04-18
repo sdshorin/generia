@@ -52,19 +52,28 @@ func (h *InteractionHandler) LikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get post ID from URL path
+	// Get post ID and world ID from URL path
 	vars := mux.Vars(r)
 	postID := vars["id"]
+	worldID := vars["world_id"]
+	
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
 
 	// Like the post
 	resp, err := h.interactionClient.LikePost(ctx, &interactionpb.LikePostRequest{
-		PostId: postID,
-		UserId: userID,
+		PostId:  postID,
+		UserId:  userID,
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to like post", http.StatusInternalServerError)
@@ -100,19 +109,28 @@ func (h *InteractionHandler) UnlikePost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Get post ID from URL path
+	// Get post ID and world ID from URL path
 	vars := mux.Vars(r)
 	postID := vars["id"]
+	worldID := vars["world_id"]
+	
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
 
 	// Unlike the post
 	resp, err := h.interactionClient.UnlikePost(ctx, &interactionpb.UnlikePostRequest{
-		PostId: postID,
-		UserId: userID,
+		PostId:  postID,
+		UserId:  userID,
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to unlike post", http.StatusInternalServerError)
@@ -159,11 +177,19 @@ func (h *InteractionHandler) AddComment(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Get post ID from URL path
+	// Get post ID and world ID from URL path
 	vars := mux.Vars(r)
 	postID := vars["id"]
+	worldID := vars["world_id"]
+	
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -186,9 +212,10 @@ func (h *InteractionHandler) AddComment(w http.ResponseWriter, r *http.Request) 
 
 	// Add comment
 	resp, err := h.interactionClient.AddComment(ctx, &interactionpb.AddCommentRequest{
-		PostId: postID,
-		UserId: userID,
-		Text:   req.Text,
+		PostId:  postID,
+		UserId:  userID,
+		Text:    req.Text,
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to add comment", http.StatusInternalServerError)
@@ -238,11 +265,19 @@ func (h *InteractionHandler) GetComments(w http.ResponseWriter, r *http.Request)
 	ctx, span := h.tracer.Start(r.Context(), "InteractionHandler.GetComments")
 	defer span.End()
 
-	// Get post ID from URL path
+	// Get post ID and world ID from URL path
 	vars := mux.Vars(r)
 	postID := vars["id"]
+	worldID := vars["world_id"]
+	
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -265,9 +300,10 @@ func (h *InteractionHandler) GetComments(w http.ResponseWriter, r *http.Request)
 
 	// Get comments
 	resp, err := h.interactionClient.GetPostComments(ctx, &interactionpb.GetPostCommentsRequest{
-		PostId: postID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		PostId:  postID,
+		Limit:   int32(limit),
+		Offset:  int32(offset),
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to get comments", http.StatusInternalServerError)
@@ -326,11 +362,19 @@ func (h *InteractionHandler) GetLikes(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "InteractionHandler.GetLikes")
 	defer span.End()
 
-	// Get post ID from URL path
+	// Get post ID and world ID from URL path
 	vars := mux.Vars(r)
 	postID := vars["id"]
+	worldID := vars["world_id"]
+	
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
+	if worldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -353,9 +397,10 @@ func (h *InteractionHandler) GetLikes(w http.ResponseWriter, r *http.Request) {
 
 	// Get likes
 	resp, err := h.interactionClient.GetPostLikes(ctx, &interactionpb.GetPostLikesRequest{
-		PostId: postID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		PostId:  postID,
+		Limit:   int32(limit),
+		Offset:  int32(offset),
+		WorldId: worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to get likes", http.StatusInternalServerError)

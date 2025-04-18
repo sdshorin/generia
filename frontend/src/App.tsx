@@ -21,7 +21,7 @@ const App: React.FC = () => {
       <div className="app">
         <Navbar />
         <Routes>
-          <Route path="/" element={isAuthenticated ? <Feed /> : <Navigate to="/login" />} />
+          <Route path="/" element={isAuthenticated ? <Navigate to="/worlds" /> : <Navigate to="/login" />} />
           <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/worlds" /> : <Login />}
@@ -31,7 +31,7 @@ const App: React.FC = () => {
             element={isAuthenticated ? <Navigate to="/worlds" /> : <Register />}
           />
           <Route
-            path="/create"
+            path="/worlds/:worldId/create"
             element={isAuthenticated ? <CreatePost /> : <Navigate to="/login" />}
           />
           <Route
@@ -43,7 +43,11 @@ const App: React.FC = () => {
             element={isAuthenticated ? <CreateWorld /> : <Navigate to="/login" />}
           />
           <Route
-            path="/feed"
+            path="/worlds/:worldId/feed"
+            element={isAuthenticated ? <Feed /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/worlds/:worldId/posts/:postId"
             element={isAuthenticated ? <Feed /> : <Navigate to="/login" />}
           />
         </Routes>

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -35,30 +35,15 @@ const CreatePost: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Get the active world - должно быть наверху, до условных рендеров
-  const [activeWorld, setActiveWorld] = useState<string | null>(null);
-
-  // Fetch active world on component mount
+  // Получаем worldId из URL параметров
+  const { worldId } = useParams<{ worldId: string }>();
+  
+  // Проверяем наличие worldId
   useEffect(() => {
-    const fetchActiveWorld = async () => {
-      try {
-        const response = await axiosInstance.get('/worlds/active');
-        if (response.data && response.data.id) {
-          setActiveWorld(response.data.id);
-        } else {
-          // If no active world, redirect to worlds page
-          navigate('/worlds');
-        }
-      } catch (err) {
-        // If error, redirect to worlds page
-        navigate('/worlds');
-      }
-    };
-
-    if (isAuthenticated) {
-      fetchActiveWorld();
+    if (isAuthenticated && !worldId) {
+      navigate('/worlds');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, worldId, navigate]);
 
   // Если пользователь не аутентифицирован, не рендерим компонент
   if (!isAuthenticated) {
@@ -86,8 +71,8 @@ const CreatePost: React.FC = () => {
       return false;
     }
 
-    if (!activeWorld) {
-      setError('No active world selected');
+    if (!worldId) {
+      setError('No world ID provided');
       return false;
     }
 
@@ -97,7 +82,7 @@ const CreatePost: React.FC = () => {
         filename: image.name,
         content_type: image.type,
         size: image.size,
-        world_id: activeWorld
+        world_id: worldId
       });
 
       const { media_id, upload_url } = getUrlResponse.data;
@@ -119,10 +104,9 @@ const CreatePost: React.FC = () => {
       });
 
       // 4. Создаем пост с ID загруженного медиа и указанием мира
-      await axiosInstance.post('/posts', {
+      await axiosInstance.post(`/worlds/${worldId}/posts`, {
         caption,
-        media_id,
-        world_id: activeWorld
+        media_id
       });
 
       return true;
@@ -140,8 +124,8 @@ const CreatePost: React.FC = () => {
       return false;
     }
 
-    if (!activeWorld) {
-      setError('No active world selected');
+    if (!worldId) {
+      setError('No world ID provided');
       return false;
     }
 
@@ -159,7 +143,7 @@ const CreatePost: React.FC = () => {
               media_data: base64Image,
               content_type: image.type,
               filename: image.name,
-              world_id: activeWorld
+              world_id: worldId
             });
 
             resolve(true);
@@ -201,7 +185,7 @@ const CreatePost: React.FC = () => {
       }
 
       if (success) {
-        navigate('/');
+        navigate(`/worlds/${worldId}/feed`);
       } else {
         setIsLoading(false);
       }

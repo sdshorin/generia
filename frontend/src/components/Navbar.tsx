@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axiosInstance from '../api/axios';
 import { World } from '../types';
@@ -8,23 +8,35 @@ const Navbar: React.FC = () => {
   const { isAuthenticated, user, logout } = useContext(AuthContext);
   const [activeWorld, setActiveWorld] = useState<World | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Извлекаем worldId из URL-пути, если он там есть
+  const getWorldIdFromPath = (): string | null => {
+    const match = location.pathname.match(/\/worlds\/([^/]+)/);
+    return match ? match[1] : null;
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchActiveWorld();
+      const worldId = getWorldIdFromPath();
+      if (worldId) {
+        fetchWorldInfo(worldId);
+      } else {
+        setActiveWorld(null);
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, location.pathname]);
 
-  const fetchActiveWorld = async () => {
+  const fetchWorldInfo = async (worldId: string) => {
     try {
-      const response = await axiosInstance.get('/worlds/active');
+      const response = await axiosInstance.get(`/worlds/${worldId}`);
       if (response.data && response.data.id) {
         setActiveWorld(response.data);
+        // Сохраняем ID активного мира в localStorage
+        localStorage.setItem('activeWorldId', worldId);
       }
     } catch (err) {
-      // If no active world, this is not an error
-      console.log('No active world found:', err);
-      // Сбрасываем активный мир если есть ошибка
+      console.log('Failed to fetch world info:', err);
       setActiveWorld(null);
     }
   };
@@ -53,7 +65,9 @@ const Navbar: React.FC = () => {
               </div>
             )}
             <Link to="/worlds" className="navbar-item">Worlds</Link>
-            <Link to="/create" className="navbar-item">Create Post</Link>
+            {activeWorld && (
+              <Link to={`/worlds/${activeWorld.id}/create`} className="navbar-item">Create Post</Link>
+            )}
             <span className="navbar-item">Welcome, {user?.username}</span>
             <button onClick={handleLogout} className="navbar-item logout-button">Logout</button>
           </>

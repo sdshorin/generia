@@ -201,6 +201,7 @@ func (x *CreatePostResponse) GetCreatedAt() string {
 type GetPostRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
+	WorldId       string                 `protobuf:"bytes,2,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -242,11 +243,19 @@ func (x *GetPostRequest) GetPostId() string {
 	return ""
 }
 
+func (x *GetPostRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
 type GetUserPostsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -300,6 +309,13 @@ func (x *GetUserPostsRequest) GetOffset() int32 {
 		return x.Offset
 	}
 	return 0
+}
+
+func (x *GetUserPostsRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
 }
 
 type GetPostsByIdsRequest struct {
@@ -676,13 +692,15 @@ const file_post_post_proto_rawDesc = "" +
 	"\x12CreatePostResponse\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x02 \x01(\tR\tcreatedAt\")\n" +
+	"created_at\x18\x02 \x01(\tR\tcreatedAt\"D\n" +
 	"\x0eGetPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\tR\x06postId\"\\\n" +
+	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x19\n" +
+	"\bworld_id\x18\x02 \x01(\tR\aworldId\"w\n" +
 	"\x13GetUserPostsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x03 \x01(\x05R\x06offset\"1\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\"1\n" +
 	"\x14GetPostsByIdsRequest\x12\x19\n" +
 	"\bpost_ids\x18\x01 \x03(\tR\apostIds\"_\n" +
 	"\x14GetGlobalFeedRequest\x12\x14\n" +
