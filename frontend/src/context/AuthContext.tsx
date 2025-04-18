@@ -1,34 +1,62 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User } from '../types';
-import axiosInstance from '../api/axios';
+import { authAPI } from '../api/services';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  error: string | null;
+  login: (emailOrUsername: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  clearError: () => void;
 }
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+const initialState: AuthContextType = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  error: null,
   login: async () => {},
   register: async () => {},
   logout: () => {},
-});
+  clearError: () => {},
+};
+
+export const AuthContext = createContext<AuthContextType>(initialState);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Clear error state
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // Fetch current user data
+  const fetchUser = useCallback(async () => {
+    try {
+      const userData = await authAPI.getCurrentUser();
+      setUser(userData);
+      setIsAuthenticated(true);
+    } catch (error) {
+      localStorage.removeItem('token');
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Check authentication status on component mount
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -36,41 +64,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } else {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchUser]);
 
-  const fetchUser = async () => {
+  // Login function
+  const login = async (emailOrUsername: string, password: string) => {
     try {
-      const response = await axiosInstance.get('/auth/me');
-      setUser(response.data);
+      setError(null);
+      setIsLoading(true);
+      const response = await authAPI.login(emailOrUsername, password);
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
       setIsAuthenticated(true);
-    } catch (error) {
-      localStorage.removeItem('token');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = async (emailOrUsername: string, password: string) => {
-    const response = await axiosInstance.post('/auth/login', {
-      email_or_username: emailOrUsername,
-      password,
-    });
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    setIsAuthenticated(true);
-  };
-
+  // Register function
   const register = async (username: string, email: string, password: string) => {
-    const response = await axiosInstance.post('/auth/register', {
-      username,
-      email,
-      password,
-    });
-    localStorage.setItem('token', response.data.token);
-    setUser(response.data.user);
-    setIsAuthenticated(true);
+    try {
+      setError(null);
+      setIsLoading(true);
+      const response = await authAPI.register(username, email, password);
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
+      setIsAuthenticated(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Logout function
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -83,9 +113,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated,
         isLoading,
+        error,
         login,
         register,
         logout,
+        clearError,
       }}
     >
       {children}

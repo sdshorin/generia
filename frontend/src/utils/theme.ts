@@ -1,0 +1,92 @@
+/**
+ * Theme configuration for the app
+ * These values should match the CSS variables in globals.css
+ */
+
+export const theme = {
+  colors: {
+    primary: '#ffc75f',
+    primaryHover: '#ffbd45',
+    secondary: '#a5b4fc',
+    accent: '#ef767a',
+    background: '#fafaf9',
+    card: '#ffffff',
+    text: '#313131',
+    textLight: '#5a5a5a',
+    textLighter: '#717171',
+    border: '#e4e4e4',
+    inputBg: '#f5f5f4',
+    success: '#6ee7b7',
+    error: '#fca5a5',
+    warning: '#fdba74',
+    info: '#a5b4fc',
+  },
+  spacing: {
+    1: '4px',
+    2: '8px',
+    3: '12px',
+    4: '16px',
+    5: '20px',
+    6: '24px',
+    8: '32px',
+    10: '40px',
+    12: '48px',
+    16: '64px',
+    20: '80px',
+    24: '96px',
+  },
+  borderRadius: {
+    sm: '6px',
+    md: '12px',
+    lg: '16px',
+    xl: '24px',
+    '2xl': '32px',
+    full: '9999px',
+  },
+  typography: {
+    fontFamily: {
+      sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+      sora: "'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+    },
+    fontSize: {
+      xs: '0.75rem',
+      sm: '0.875rem',
+      md: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
+      '2xl': '1.5rem',
+      '3xl': '1.875rem',
+      '4xl': '2.25rem',
+      '5xl': '3rem',
+      '6xl': '3.75rem',
+    },
+  },
+  shadows: {
+    sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+    md: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+    lg: '0px 4px 16px rgba(0, 0, 0, 0.08)',
+    xl: '0px 8px 30px rgba(0, 0, 0, 0.1)',
+  },
+  animation: {
+    fast: '150ms',
+    normal: '300ms',
+    slow: '500ms',
+  },
+  zIndex: {
+    0: 0,
+    10: 10,
+    20: 20,
+    30: 30,
+    40: 40,
+    50: 50,
+    auto: 'auto',
+  },
+  breakpoints: {
+    xs: '480px',
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+    xl: '1280px',
+    '2xl': '1536px',
+  },
+};

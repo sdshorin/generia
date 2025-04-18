@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   // Add timeout to prevent hanging requests
-  timeout: 15000,
+  timeout: 10000,
 });
 
 // Intercept requests to add authorization token
@@ -32,17 +32,6 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle authentication errors
-    if (error.response && error.response.status === 401) {
-      // Clear token if it's invalid or expired
-      localStorage.removeItem('token');
-      
-      // Redirect to login if user was logged in
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-        window.location.href = '/login';
-      }
-    }
-    
     // Log errors for debugging
     console.error('API Error:', error);
     return Promise.reject(error);

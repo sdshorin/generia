@@ -87,8 +87,6 @@ docker-compose up -d
 ### Worlds
 - `GET /api/v1/worlds` - Get list of available worlds
 - `POST /api/v1/worlds` - Create a new world
-- `GET /api/v1/worlds/active` - Get user's active world
-- `POST /api/v1/worlds/set-active` - Set active world for user
 - `GET /api/v1/worlds/{world_id}` - Get world by ID
 - `POST /api/v1/worlds/{world_id}/join` - Join a world
 - `GET /api/v1/worlds/{world_id}/status` - Get world generation status

@@ -1,57 +1,83 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Feed from './components/Feed';
-import Login from './components/Login';
-import Register from './components/Register';
-import CreatePost from './components/CreatePost';
-import WorldsList from './components/WorldsList';
-import CreateWorld from './components/CreateWorld';
-import { AuthContext } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { WorldProvider } from './context/WorldContext';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
+
+// Pages
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { WorldsListPage } from './pages/worlds/WorldsListPage';
+import { CreateWorldPage } from './pages/worlds/CreateWorldPage';
+import { FeedPage } from './pages/posts/FeedPage';
+import { CreatePostPage } from './pages/posts/CreatePostPage';
+import { ViewPostPage } from './pages/posts/ViewPostPage';
+import { ProfilePage } from './pages/user/ProfilePage';
 
 const App: React.FC = () => {
-  const { isAuthenticated, isLoading } = useContext(AuthContext);
-
-  if (isLoading) {
-    return <div className="loading">Loading...</div>;
-  }
-
   return (
     <Router>
-      <div className="app">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={isAuthenticated ? <Navigate to="/worlds" /> : <Navigate to="/login" />} />
-          <Route
-            path="/login"
-            element={isAuthenticated ? <Navigate to="/worlds" /> : <Login />}
-          />
-          <Route
-            path="/register"
-            element={isAuthenticated ? <Navigate to="/worlds" /> : <Register />}
-          />
-          <Route
-            path="/worlds/:worldId/create"
-            element={isAuthenticated ? <CreatePost /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/worlds"
-            element={isAuthenticated ? <WorldsList /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/create-world"
-            element={isAuthenticated ? <CreateWorld /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/worlds/:worldId/feed"
-            element={isAuthenticated ? <Feed /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/worlds/:worldId/posts/:postId"
-            element={isAuthenticated ? <Feed /> : <Navigate to="/login" />}
-          />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <WorldProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            {/* Protected routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Worlds routes */}
+            <Route path="/worlds" element={
+              <ProtectedRoute>
+                <WorldsListPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/create-world" element={
+              <ProtectedRoute>
+                <CreateWorldPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Posts routes */}
+            <Route path="/worlds/:worldId/feed" element={
+              <ProtectedRoute>
+                <FeedPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/worlds/:worldId/create" element={
+              <ProtectedRoute>
+                <CreatePostPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/worlds/:worldId/posts/:postId" element={
+              <ProtectedRoute>
+                <ViewPostPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* User profile */}
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/:userId" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </WorldProvider>
+      </AuthProvider>
     </Router>
   );
 };
