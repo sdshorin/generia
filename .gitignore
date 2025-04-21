@@ -2,3 +2,5 @@
 last_run_result.md
 Makefile
 .env
+services/ai-worker/src/__pycache__/**
+services/ai-worker/src/*/__pycache__/**

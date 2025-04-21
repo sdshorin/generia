@@ -145,6 +145,10 @@ generia/
 └── README.md          # Project documentation
 ```
 
+## Frontend
+
+For detailed information about the frontend application, including architecture, components, and design system, see the [Frontend README](frontend/README.md).
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

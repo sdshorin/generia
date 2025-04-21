@@ -382,6 +382,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_started
+      kafka:
+        condition: service_started
       jaeger:
         condition: service_started
     environment:
@@ -399,6 +401,7 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=generia
       - DB_SSL_MODE=disable
+      - KAFKA_BROKERS=kafka:9092
     networks:
       - generia_network
 
@@ -460,30 +463,39 @@ services:
     networks:
       - generia_network
 
-  # AI Worker for content generation
+  
+  # AI Worker Service
   ai-worker:
     build:
-      context: .
-      dockerfile: services/ai-worker/Dockerfile
+      context: ./services/ai-worker
+      dockerfile: Dockerfile
     container_name: generia-ai-worker
     restart: always
     depends_on:
-      postgres:
-        condition: service_healthy
-      jaeger:
+      mongodb:
+        condition: service_started
+      kafka:
+        condition: service_started
+      minio:
         condition: service_started
     environment:
       - SERVICE_NAME=ai-worker
-      - OTLP_ENDPOINT=jaeger:4318
-      - TELEMETRY_SERVICE_NAME=ai-worker
-      - TELEMETRY_ENVIRONMENT=production
-      - TELEMETRY_SAMPLING_RATIO=1.0
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=generia
-      - DB_SSL_MODE=disable
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8089
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017
+      - MONGODB_DATABASE=generia_ai_worker
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_TOPIC_TASKS=generia-tasks
+      - KAFKA_TOPIC_PROGRESS=generia-progress
+      - KAFKA_GROUP_ID=ai-worker
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=generia-images
+      - MINIO_USE_SSL=false
+      - LOG_LEVEL=DEBUG
+      - API_GATEWAY_URL=http://api-gateway:8080
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-your_gemini_api_key}
     networks:
       - generia_network
 

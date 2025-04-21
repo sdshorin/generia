@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sdshorin/generia/pkg/kafka"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/services/world-service/internal/models"
 	"github.com/sdshorin/generia/services/world-service/internal/repository"
@@ -22,9 +23,10 @@ import (
 // WorldService implements the world gRPC service
 type WorldService struct {
 	worldpb.UnimplementedWorldServiceServer
-	worldRepo  repository.WorldRepository
-	authClient authpb.AuthServiceClient
-	postClient postpb.PostServiceClient
+	worldRepo      repository.WorldRepository
+	authClient     authpb.AuthServiceClient
+	postClient     postpb.PostServiceClient
+	kafkaProducer  *kafka.Producer
 }
 
 // NewWorldService creates a new WorldService
@@ -32,11 +34,13 @@ func NewWorldService(
 	worldRepo repository.WorldRepository,
 	authClient authpb.AuthServiceClient,
 	postClient postpb.PostServiceClient,
+	kafkaBrokers []string,
 ) worldpb.WorldServiceServer {
 	return &WorldService{
-		worldRepo:  worldRepo,
-		authClient: authClient,
-		postClient: postClient,
+		worldRepo:     worldRepo,
+		authClient:    authClient,
+		postClient:    postClient,
+		kafkaProducer: kafka.NewProducer(kafkaBrokers),
 	}
 }
 
@@ -293,7 +297,6 @@ func (s *WorldService) JoinWorld(ctx context.Context, req *worldpb.JoinWorldRequ
 	}, nil
 }
 
-
 // GenerateContent handles generating AI content for a world
 func (s *WorldService) GenerateContent(ctx context.Context, req *worldpb.GenerateContentRequest) (*worldpb.GenerateContentResponse, error) {
 	// Validate input
@@ -489,45 +492,82 @@ func (s *WorldService) HealthCheck(ctx context.Context, req *worldpb.HealthCheck
 
 // Helper methods
 
-// createInitialGenerationTasks creates the initial tasks for a new world
+// createInitialGenerationTasks creates the initial task for world generation in Kafka and MongoDB
 func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID string) {
-	// In a real implementation, this would create and queue tasks for processing
-	// For now, we'll just create the tasks and simulate some basic generation
-
-	// Create users generation task
-	usersTask := &models.WorldGenerationTask{
-		WorldID:    worldID,
-		TaskType:   models.TaskTypeUsers,
-		Status:     models.TaskStatusPending,
-		Parameters: `{"count": 10}`, // Default to 10 AI users
-	}
-
-	err := s.worldRepo.CreateGenerationTask(ctx, usersTask)
+	// Get world details
+	world, err := s.worldRepo.GetByID(ctx, worldID)
 	if err != nil {
-		logger.Logger.Error("Failed to create users generation task",
+		logger.Logger.Error("Failed to get world details",
 			zap.Error(err),
 			zap.String("world_id", worldID))
 		return
 	}
 
-	// Create posts generation task
-	postsTask := &models.WorldGenerationTask{
-		WorldID:    worldID,
-		TaskType:   models.TaskTypePosts,
-		Status:     models.TaskStatusPending,
-		Parameters: `{"count": 50}`, // Default to 50 posts
+	if world == nil {
+		logger.Logger.Error("World not found when creating generation tasks",
+			zap.String("world_id", worldID))
+		return
 	}
 
-	err = s.worldRepo.CreateGenerationTask(ctx, postsTask)
+	// Create task ID
+	taskID := uuid.New().String()
+
+	// Параметры для задачи инициализации
+	parameters := map[string]interface{}{
+		"user_prompt": world.Prompt,
+		"users_count": 10,  // Значение по умолчанию
+		"posts_count": 50,  // Значение по умолчанию
+	}
+
+	// Преобразуем параметры в JSON
+	paramsJSON, err := json.Marshal(parameters)
 	if err != nil {
-		logger.Logger.Error("Failed to create posts generation task",
+		logger.Logger.Error("Failed to marshal task parameters",
 			zap.Error(err),
 			zap.String("world_id", worldID))
 		return
 	}
 
-	// Start simulation in background
-	go s.simulateContentGeneration(context.Background(), worldID, 10, 50)
+	// Создаем задачу инициализации в БД
+	task := &models.WorldGenerationTask{
+		ID:         taskID,
+		WorldID:    worldID,
+		TaskType:   "init_world_creation",
+		Status:     models.TaskStatusPending,
+		Parameters: string(paramsJSON),
+	}
+
+	err = s.worldRepo.CreateGenerationTask(ctx, task)
+	if err != nil {
+		logger.Logger.Error("Failed to create initialization task",
+			zap.Error(err),
+			zap.String("world_id", worldID))
+		return
+	}
+
+	logger.Logger.Info("Created initial generation task for world",
+		zap.String("world_id", worldID),
+		zap.String("task_id", taskID))
+
+	// Отправляем сообщение в Kafka
+	kafkaMessage := map[string]interface{}{
+		"event_type": "task_created",
+		"task_id":    taskID,
+		"task_type":  "init_world_creation",
+		"world_id":   worldID,
+		"parameters": parameters,
+	}
+
+	err = s.kafkaProducer.SendJSON("generia-tasks", kafkaMessage)
+	if err != nil {
+		logger.Logger.Error("Failed to send task to Kafka",
+			zap.Error(err),
+			zap.String("world_id", worldID))
+	} else {
+		logger.Logger.Info("Successfully sent AI generation task to Kafka",
+			zap.String("task_id", taskID),
+			zap.String("world_id", worldID))
+	}
 }
 
 // simulateContentGeneration simulates generating content for a world

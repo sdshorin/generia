@@ -100,7 +100,7 @@ func main() {
 	worldRepo := repository.NewWorldRepository(db)
 
 	// Initialize world service
-	worldService := service.NewWorldService(worldRepo, authClient, postClient)
+	worldService := service.NewWorldService(worldRepo, authClient, postClient, cfg.Kafka.Brokers)
 
 	// Create gRPC server with middleware
 	grpcServer := grpc.NewServer(
