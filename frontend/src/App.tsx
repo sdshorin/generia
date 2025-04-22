@@ -13,6 +13,7 @@ import { CreateWorldPage } from './pages/worlds/CreateWorldPage';
 import { FeedPage } from './pages/posts/FeedPage';
 import { CreatePostPage } from './pages/posts/CreatePostPage';
 import { ViewPostPage } from './pages/posts/ViewPostPage';
+import { CreateCharacterPage } from './pages/posts/CreateCharacterPage';
 import { ProfilePage } from './pages/user/ProfilePage';
 
 const App: React.FC = () => {
@@ -58,6 +59,13 @@ const App: React.FC = () => {
             <Route path="/worlds/:worldId/posts/:postId" element={
               <ProtectedRoute>
                 <ViewPostPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Character routes */}
+            <Route path="/worlds/:worldId/characters/create" element={
+              <ProtectedRoute>
+                <CreateCharacterPage />
               </ProtectedRoute>
             } />
             

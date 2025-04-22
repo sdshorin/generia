@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"time"
 
-	pb "github.com/generia/api/grpc/character"
-	"github.com/generia/pkg/logger"
-	"github.com/generia/services/character-service/internal/models"
-	"github.com/generia/services/character-service/internal/repository"
+	pb "github.com/sdshorin/generia/api/grpc/character"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/character-service/internal/models"
+	"github.com/sdshorin/generia/services/character-service/internal/repository"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
@@ -17,21 +18,21 @@ import (
 
 type CharacterService struct {
 	pb.UnimplementedCharacterServiceServer
-	repo   repository.CharacterRepository
-	logger logger.Logger
+	repo repository.CharacterRepository
 }
 
-func NewCharacterService(repo repository.CharacterRepository, logger logger.Logger) *CharacterService {
+func NewCharacterService(repo repository.CharacterRepository) *CharacterService {
 	return &CharacterService{
-		repo:   repo,
-		logger: logger,
+		repo: repo,
 	}
 }
 
 func (s *CharacterService) CreateCharacter(ctx context.Context, req *pb.CreateCharacterRequest) (*pb.Character, error) {
-	s.logger.Info("Creating character", "world_id", req.WorldId, "display_name", req.DisplayName)
+	logger.Logger.Info("Creating character",
+		zap.String("world_id", req.WorldId),
+		zap.String("display_name", req.DisplayName))
 
-	var meta json.RawMessage
+	var meta json.RawMessage = []byte("{}")
 	if req.Meta != nil && *req.Meta != "" {
 		meta = json.RawMessage(*req.Meta)
 	}
@@ -56,7 +57,7 @@ func (s *CharacterService) CreateCharacter(ctx context.Context, req *pb.CreateCh
 
 	character, err := s.repo.CreateCharacter(ctx, params)
 	if err != nil {
-		s.logger.Error("Failed to create character", err)
+		logger.Logger.Error("Failed to create character", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to create character")
 	}
 
@@ -64,11 +65,11 @@ func (s *CharacterService) CreateCharacter(ctx context.Context, req *pb.CreateCh
 }
 
 func (s *CharacterService) GetCharacter(ctx context.Context, req *pb.GetCharacterRequest) (*pb.Character, error) {
-	s.logger.Info("Getting character", "id", req.CharacterId)
+	logger.Logger.Info("Getting character", zap.String("id", req.CharacterId))
 
 	character, err := s.repo.GetCharacter(ctx, req.CharacterId)
 	if err != nil {
-		s.logger.Error("Failed to get character", err)
+		logger.Logger.Error("Failed to get character", zap.Error(err))
 		return nil, status.Error(codes.NotFound, "Character not found")
 	}
 
@@ -76,11 +77,13 @@ func (s *CharacterService) GetCharacter(ctx context.Context, req *pb.GetCharacte
 }
 
 func (s *CharacterService) GetUserCharactersInWorld(ctx context.Context, req *pb.GetUserCharactersInWorldRequest) (*pb.CharacterList, error) {
-	s.logger.Info("Getting user characters in world", "user_id", req.UserId, "world_id", req.WorldId)
+	logger.Logger.Info("Getting user characters in world",
+		zap.String("user_id", req.UserId),
+		zap.String("world_id", req.WorldId))
 
 	characters, err := s.repo.GetUserCharactersInWorld(ctx, req.UserId, req.WorldId)
 	if err != nil {
-		s.logger.Error("Failed to get user characters in world", err)
+		logger.Logger.Error("Failed to get user characters in world", zap.Error(err))
 		return nil, status.Error(codes.Internal, "Failed to get characters")
 	}
 

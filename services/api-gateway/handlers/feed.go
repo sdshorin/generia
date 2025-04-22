@@ -37,7 +37,7 @@ func NewFeedHandler(
 type FeedItemResponse struct {
 	ID            string    `json:"id"`
 	UserID        string    `json:"user_id"`
-	Username      string    `json:"username"`
+	DisplayName   string    `json:"display_name"`
 	Caption       string    `json:"caption"`
 	MediaURL      string    `json:"media_url"`
 	CreatedAt     time.Time `json:"created_at"`
@@ -70,7 +70,7 @@ func (h *FeedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cursor := r.URL.Query().Get("cursor")
-	
+
 	// Получаем world_id из URL параметров
 	vars := mux.Vars(r)
 	worldID := vars["world_id"]
@@ -104,7 +104,7 @@ func (h *FeedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, FeedItemResponse{
 			ID:            post.Id,
 			UserID:        post.UserId,
-			Username:      post.User.Username,
+			DisplayName:   post.User.DisplayName,
 			Caption:       post.Caption,
 			MediaURL:      post.MediaUrl,
 			CreatedAt:     createdAt,

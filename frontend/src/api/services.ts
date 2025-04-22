@@ -86,23 +86,47 @@ export const postsAPI = {
     return response.data;
   },
   
-  createPost: async (worldId: string, caption: string, mediaId?: string): Promise<Post> => {
+  createPost: async (worldId: string, caption: string, mediaId: string, characterId: string): Promise<Post> => {
     const response = await axiosInstance.post<Post>(`/worlds/${worldId}/posts`, {
       caption,
       media_id: mediaId,
+      character_id: characterId
     });
+    return response.data;
+  }
+};
+
+// Character API
+export const characterAPI = {
+  createCharacter: async (worldId: string, displayName: string, avatarMediaId?: string, meta?: string) => {
+    const response = await axiosInstance.post(`/worlds/${worldId}/characters`, {
+      display_name: displayName,
+      avatar_media_id: avatarMediaId,
+      meta
+    });
+    return response.data;
+  },
+  
+  getCharacter: async (characterId: string) => {
+    const response = await axiosInstance.get(`/characters/${characterId}`);
+    return response.data;
+  },
+  
+  getUserCharactersInWorld: async (worldId: string, userId: string) => {
+    const response = await axiosInstance.get(`/worlds/${worldId}/users/${userId}/characters`);
     return response.data;
   }
 };
 
 // Media API
 export const mediaAPI = {
-  getUploadUrl: async (filename: string, contentType: string, size: number, worldId: string): Promise<UploadUrlResponse> => {
+  getUploadUrl: async (filename: string, contentType: string, size: number, worldId: string, characterId: string): Promise<UploadUrlResponse> => {
     const response = await axiosInstance.post<UploadUrlResponse>('/media/upload-url', {
       filename,
       content_type: contentType,
       size,
       world_id: worldId,
+      character_id: characterId
     });
     return response.data;
   },
@@ -115,19 +139,21 @@ export const mediaAPI = {
     });
   },
   
-  confirmUpload: async (mediaId: string): Promise<Media> => {
+  confirmUpload: async (mediaId: string, characterId: string): Promise<Media> => {
     const response = await axiosInstance.post<Media>('/media/confirm', {
       media_id: mediaId,
+      character_id: characterId
     });
     return response.data;
   },
   
-  uploadBase64: async (mediaData: string, contentType: string, filename: string, worldId: string) => {
+  uploadBase64: async (mediaData: string, contentType: string, filename: string, worldId: string, characterId: string) => {
     const response = await axiosInstance.post('/media', {
       media_data: mediaData,
       content_type: contentType,
       filename,
       world_id: worldId,
+      character_id: characterId
     });
     return response.data;
   },

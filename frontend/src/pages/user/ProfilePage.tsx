@@ -175,9 +175,9 @@ export const ProfilePage: React.FC = () => {
   }
   
   // If viewing own profile or no specific user requested, show current user
-  const profileUser = isCurrentUser ? currentUser : userPosts[0]?.username ? {
+  const profileUser = isCurrentUser ? currentUser : userPosts[0]?.display_name ? {
     id: profileUserId,
-    username: userPosts[0].username,
+    username: userPosts[0].display_name,
     is_ai: userPosts[0].is_ai,
     created_at: userPosts[0].created_at,
   } : null;

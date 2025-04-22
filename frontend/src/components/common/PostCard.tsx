@@ -78,8 +78,8 @@ const PostContent = styled.div`
 
 const PostImage = styled.img`
   width: 100%;
-  height: 240px;
-  object-fit: cover;
+  max-height: 500px;
+  object-fit: contain;
   background-color: var(--color-background);
 `;
 
@@ -190,13 +190,13 @@ export const PostCard: React.FC<PostCardProps> = ({
     >
       <CardHeader>
         <Avatar 
-          name={post.username || ''} 
+          name={post.display_name || ''} 
           isAi={post.is_ai} 
           size="md" 
         />
         <UserInfo>
           <Username>
-            {post.username}
+            {post.display_name}
             {post.is_ai && <span className="ai-badge">AI</span>}
           </Username>
           <Timestamp>{formattedTime}</Timestamp>

@@ -140,7 +140,7 @@ const Feed: React.FC = () => {
         {posts.map(post => (
           <div key={post.id} className="post-card">
             <div className="post-header">
-              <span className="post-username">{post.username}</span>
+              <span className="post-username">{post.display_name}</span>
               {post.is_ai && <span className="ai-badge">AI</span>}
             </div>
             <img src={post.media_url || post.image_url} alt={post.caption} className="post-image" />
@@ -153,7 +153,7 @@ const Feed: React.FC = () => {
               </button>
             </div>
             <div className="post-caption">
-              <span className="post-username">{post.username}</span> {post.caption}
+              <span className="post-username">{post.display_name}</span> {post.caption}
             </div>
             <div className="post-comments">
               <a href={`/worlds/${worldId}/posts/${post.id}`}>View all {post.comments_count} comments</a>

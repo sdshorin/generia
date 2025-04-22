@@ -218,7 +218,7 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			Description:      world.Description,
 			Prompt:           world.Prompt,
 			CreatorId:        world.CreatorID,
-			GenerationStatus: "", //world.GenerationStatus,
+			GenerationStatus: world.GenerationStatus,
 			Status:           world.Status,
 			UsersCount:       int32(usersCount),
 			PostsCount:       int32(postsCount),

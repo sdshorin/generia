@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/generia/pkg/logger"
-	"github.com/generia/services/character-service/internal/models"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/character-service/internal/models"
+	"go.uber.org/zap"
 )
 
 type CharacterRepository interface {
@@ -16,14 +17,12 @@ type CharacterRepository interface {
 }
 
 type characterRepository struct {
-	db     *sql.DB
-	logger logger.Logger
+	db *sql.DB
 }
 
-func NewCharacterRepository(db *sql.DB, logger logger.Logger) CharacterRepository {
+func NewCharacterRepository(db *sql.DB) CharacterRepository {
 	return &characterRepository{
-		db:     db,
-		logger: logger,
+		db: db,
 	}
 }
 
@@ -55,7 +54,7 @@ func (r *characterRepository) CreateCharacter(ctx context.Context, params models
 	)
 
 	if err != nil {
-		r.logger.Error("Failed to create character", err)
+		logger.Logger.Error("Failed to create character", zap.Error(err))
 		return nil, err
 	}
 
@@ -85,7 +84,7 @@ func (r *characterRepository) GetCharacter(ctx context.Context, id string) (*mod
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New("character not found")
 		}
-		r.logger.Error("Failed to get character", err)
+		logger.Logger.Error("Failed to get character", zap.Error(err))
 		return nil, err
 	}
 
@@ -101,7 +100,7 @@ func (r *characterRepository) GetUserCharactersInWorld(ctx context.Context, user
 
 	rows, err := r.db.QueryContext(ctx, query, userID, worldID)
 	if err != nil {
-		r.logger.Error("Failed to get user characters in world", err)
+		logger.Logger.Error("Failed to get user characters in world", zap.Error(err))
 		return nil, err
 	}
 	defer rows.Close()
@@ -120,14 +119,14 @@ func (r *characterRepository) GetUserCharactersInWorld(ctx context.Context, user
 			&character.CreatedAt,
 		)
 		if err != nil {
-			r.logger.Error("Failed to scan character", err)
+			logger.Logger.Error("Failed to scan character", zap.Error(err))
 			return nil, err
 		}
 		characters = append(characters, &character)
 	}
 
 	if err = rows.Err(); err != nil {
-		r.logger.Error("Error iterating characters", err)
+		logger.Logger.Error("Error iterating characters", zap.Error(err))
 		return nil, err
 	}
 

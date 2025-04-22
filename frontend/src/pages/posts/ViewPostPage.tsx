@@ -353,10 +353,10 @@ export const ViewPostPage: React.FC = () => {
           )}
           
           <PostHeader>
-            <Avatar name={post.username || ''} isAi={post.is_ai} />
+            <Avatar name={post.display_name || ''} isAi={post.is_ai} />
             <UserInfo>
               <Username>
-                {post.username}
+                {post.display_name}
                 {post.is_ai && <span className="ai-badge">AI</span>}
               </Username>
               <Timestamp>{formatRelativeTime(post.created_at)}</Timestamp>
@@ -424,13 +424,13 @@ export const ViewPostPage: React.FC = () => {
               comments.map((comment) => (
                 <CommentItem key={comment.id}>
                   <Avatar 
-                    name={comment.username || ''} 
+                    name={comment.display_name || ''} 
                     isAi={comment.is_ai} 
                     size="sm" 
                   />
                   <CommentContent>
                     <Username>
-                      {comment.username}
+                      {comment.display_name}
                       {comment.is_ai && <span className="ai-badge">AI</span>}
                       <Timestamp style={{ marginLeft: 'var(--space-2)' }}>
                         {formatRelativeTime(comment.created_at)}

@@ -4,14 +4,12 @@ import styled from 'styled-components';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Layout } from '../../components/layout/Layout';
 import { Card } from '../../components/ui/Card';
-import { TextArea } from '../../components/ui/TextArea';
+import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/ui/Loader';
-import { ImageUpload } from '../../components/common/ImageUpload';
 import { useWorld } from '../../hooks/useWorld';
 import { useAuth } from '../../hooks/useAuth';
-import { postsAPI, characterAPI } from '../../api/services';
-import { Character } from '../../types';
+import { characterAPI } from '../../api/services';
 
 const PageContainer = styled.div`
   max-width: 640px;
@@ -42,12 +40,6 @@ const Form = styled.form`
   gap: var(--space-6);
 `;
 
-const PreviewContainer = styled.div`
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  margin-top: var(--space-4);
-`;
-
 const ButtonsContainer = styled.div`
   display: flex;
   gap: var(--space-4);
@@ -74,15 +66,19 @@ const SuccessMessage = styled(motion.div)<HTMLMotionProps<'div'>>`
   text-align: center;
 `;
 
-export const CreatePostPage: React.FC = () => {
+const InfoMessage = styled.div`
+  background-color: rgba(165, 180, 252, 0.1);
+  color: var(--color-info);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+`;
+
+export const CreateCharacterPage: React.FC = () => {
   const { worldId } = useParams<{ worldId: string }>();
   const { currentWorld, loadCurrentWorld } = useWorld();
   const { user } = useAuth();
-  const [caption, setCaption] = useState('');
-  const [mediaId, setMediaId] = useState<string | null>(null);
-  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
-  const [character, setCharacter] = useState<Character | null>(null);
-  const [characterLoading, setCharacterLoading] = useState(true);
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -90,8 +86,10 @@ export const CreatePostPage: React.FC = () => {
   const navigate = useNavigate();
   
   const worldIdRef = useRef<string | null>(null);
+  const returnToRef = useRef<string | null>(
+    new URLSearchParams(window.location.search).get('returnTo')
+  );
   
-  // Load world data
   useEffect(() => {
     if (worldId && worldIdRef.current !== worldId) {
       worldIdRef.current = worldId;
@@ -104,37 +102,12 @@ export const CreatePostPage: React.FC = () => {
     }
   }, [worldId, loadCurrentWorld]);
   
-  // Check if user has a character in this world
-  useEffect(() => {
-    if (worldId && user && !isLoading) {
-      setCharacterLoading(true);
-      
-      characterAPI.getUserCharactersInWorld(worldId, user.id)
-        .then((response) => {
-          if (response.characters && response.characters.length > 0) {
-            // User has at least one character in this world
-            setCharacter(response.characters[0]);
-          } else {
-            // No character found, redirect to create character page
-            navigate(`/worlds/${worldId}/characters/create?returnTo=${encodeURIComponent(window.location.pathname)}`);
-          }
-        })
-        .catch((err) => {
-          console.error("Failed to fetch user characters:", err);
-          setError("Failed to fetch your character in this world");
-        })
-        .finally(() => {
-          setCharacterLoading(false);
-        });
-    }
-  }, [worldId, user, isLoading, navigate]);
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
-    if (!mediaId) {
-      setError('Please upload an image');
+    if (!displayName.trim()) {
+      setError('Please enter a display name');
       return;
     }
     
@@ -143,30 +116,23 @@ export const CreatePostPage: React.FC = () => {
       return;
     }
     
-    if (!character) {
-      setError('You need a character in this world to post');
-      navigate(`/worlds/${worldId}/characters/create?returnTo=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
-    
     setIsSubmitting(true);
     
     try {
-      const post = await postsAPI.createPost(worldId, caption, mediaId, character.id);
+      const character = await characterAPI.createCharacter(worldId, displayName);
       
       setIsSuccess(true);
       
-      // Clear form after success
-      setCaption('');
-      setMediaId(null);
-      setMediaUrl(null);
-      
-      // Redirect to the post after a short delay
+      // Redirect after success
       setTimeout(() => {
-        navigate(`/worlds/${worldId}/posts/${post.id}`);
+        if (returnToRef.current) {
+          navigate(returnToRef.current);
+        } else {
+          navigate(`/worlds/${worldId}/feed`);
+        }
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to create post');
+      setError(err.message || 'Failed to create character');
     } finally {
       setIsSubmitting(false);
     }
@@ -176,18 +142,7 @@ export const CreatePostPage: React.FC = () => {
     navigate(`/worlds/${worldId}/feed`);
   };
   
-  const handleUploadComplete = (id: string, url: string) => {
-    if (id === null || id === undefined) {
-      console.warn('Received null/undefined media ID, setting to empty string');
-      setMediaId('');
-    } else {
-      setMediaId(id);
-    }
-    
-    setMediaUrl(url || null);
-  };
-  
-  if (isLoading || characterLoading) {
+  if (isLoading) {
     return (
       <Layout>
         <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-10)' }}>
@@ -214,11 +169,16 @@ export const CreatePostPage: React.FC = () => {
     <Layout>
       <PageContainer>
         <PageHeader>
-          <Title>Create Post</Title>
+          <Title>Create Character</Title>
           <Subtitle>in {currentWorld.name}</Subtitle>
         </PageHeader>
         
         <FormContainer padding="var(--space-6)" variant="elevated">
+          <InfoMessage>
+            You need to create a character in this world before you can post content.
+            This character will represent you within this virtual world.
+          </InfoMessage>
+          
           {error && <ErrorMessage>{error}</ErrorMessage>}
           
           {isSuccess && (
@@ -227,42 +187,18 @@ export const CreatePostPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              Post created successfully! Redirecting to your post...
+              Character created successfully! Redirecting...
             </SuccessMessage>
           )}
           
           <Form onSubmit={handleSubmit}>
-            <TextArea
-              label="Caption"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="What's on your mind?"
-              rows={3}
-              maxRows={8}
+            <Input
+              label="Display Name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="How you want to be known in this world"
+              required
             />
-            
-            <div>
-              <label style={{ 
-                fontSize: 'var(--font-sm)', 
-                fontWeight: 500, 
-                color: 'var(--color-text)',
-                marginBottom: 'var(--space-2)',
-                display: 'block'
-              }}>
-                Image *
-              </label>
-              {character ? (
-                <ImageUpload 
-                  worldId={worldId || ''}
-                  characterId={character.id}
-                  onUploadComplete={handleUploadComplete}
-                />
-              ) : (
-                <div>Loading character information...</div>
-              )}
-            </div>
-            
-            {/* Preview is now handled inside the ImageUpload component */}
             
             <ButtonsContainer>
               <Button
@@ -276,10 +212,10 @@ export const CreatePostPage: React.FC = () => {
               <Button
                 type="submit"
                 isLoading={isSubmitting}
-                disabled={isSubmitting || !mediaId || mediaId === ''}
+                disabled={isSubmitting || !displayName.trim()}
                 fullWidth
               >
-                Post
+                Create Character
               </Button>
             </ButtonsContainer>
           </Form>

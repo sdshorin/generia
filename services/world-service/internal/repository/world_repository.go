@@ -329,31 +329,14 @@ func (r *PostgresWorldRepository) CheckUserWorld(ctx context.Context, userID, wo
 
 // GetWorldStats gets user and post counts for a world
 func (r *PostgresWorldRepository) GetWorldStats(ctx context.Context, worldID string) (int, int, error) {
-	// Get AI users count
-	usersQuery := `
-		SELECT COUNT(*) FROM users
-		WHERE world_id = $1 AND is_ai = true
-	`
 
 	var usersCount int
-	err := r.db.GetContext(ctx, &usersCount, usersQuery, worldID)
-	if err != nil {
-		logger.Logger.Error("Failed to get world users count", zap.Error(err), zap.String("world_id", worldID))
-		return 0, 0, err
-	}
-
-	// Get posts count
-	postsQuery := `
-		SELECT COUNT(*) FROM posts
-		WHERE world_id = $1
-	`
-
 	var postsCount int
-	err = r.db.GetContext(ctx, &postsCount, postsQuery, worldID)
-	if err != nil {
-		logger.Logger.Error("Failed to get world posts count", zap.Error(err), zap.String("world_id", worldID))
-		return 0, 0, err
-	}
+
+	// TODO: Request character service for users count
+	// TODO: Request post service for posts count
+
+	// TODO: move this to service layer
 
 	return usersCount, postsCount, nil
 }

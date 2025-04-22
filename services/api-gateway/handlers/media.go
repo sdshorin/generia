@@ -45,6 +45,8 @@ type UploadMediaRequest struct {
 	MediaData   string `json:"media_data"` // Base64-encoded media
 	ContentType string `json:"content_type"`
 	Filename    string `json:"filename"`
+	CharacterID string `json:"character_id"` // Character ID who owns the media
+	WorldID     string `json:"world_id"`     // World ID where the media belongs
 }
 
 // GetUploadURLRequest represents a request to get a presigned upload URL
@@ -52,6 +54,8 @@ type GetUploadURLRequest struct {
 	Filename    string `json:"filename"`
 	ContentType string `json:"content_type"`
 	Size        int64  `json:"size"`
+	CharacterID string `json:"character_id"` // Character ID who owns the media
+	WorldID     string `json:"world_id"`     // World ID where the media belongs
 }
 
 // GetUploadURLResponse represents a response with a presigned upload URL
@@ -63,7 +67,8 @@ type GetUploadURLResponse struct {
 
 // ConfirmUploadRequest represents a request to confirm a direct upload
 type ConfirmUploadRequest struct {
-	MediaID string `json:"media_id"`
+	MediaID     string `json:"media_id"`
+	CharacterID string `json:"character_id"` // Character ID who owns the media
 }
 
 // UploadMediaResponse represents a response after uploading media
@@ -77,8 +82,8 @@ func (h *MediaHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "MediaHandler.UploadMedia")
 	defer span.End()
 
-	// Get user ID from context
-	userID, ok := ctx.Value(middleware.UserIDKey).(string)
+	// Check user is authenticated (for authorization check only)
+	_, ok := ctx.Value(middleware.UserIDKey).(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		span.SetAttributes(attribute.Bool("error", true))
@@ -97,6 +102,18 @@ func (h *MediaHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	if req.MediaData == "" {
 		http.Error(w, "Media data is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	if req.CharacterID == "" {
+		http.Error(w, "Character ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	if req.WorldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -159,7 +176,8 @@ func (h *MediaHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
 	err = stream.Send(&mediapb.UploadMediaRequest{
 		Data: &mediapb.UploadMediaRequest_Metadata{
 			Metadata: &mediapb.MediaMetadata{
-				UserId:      userID,
+				CharacterId: req.CharacterID,
+				WorldId:     req.WorldID,
 				Filename:    filename,
 				ContentType: contentType,
 				Size:        int64(len(decodedData)),
@@ -235,9 +253,10 @@ func (h *MediaHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
 
 // GetMediaURLsResponse represents the response for a media URLs request
 type GetMediaURLsResponse struct {
-	MediaID  string            `json:"media_id"`
-	UserID   string            `json:"user_id"`
-	Variants map[string]string `json:"variants"`
+	MediaID     string            `json:"media_id"`
+	CharacterID string            `json:"character_id"`
+	WorldID     string            `json:"world_id,omitempty"`
+	Variants    map[string]string `json:"variants"`
 }
 
 // GetUploadURL handles requests to get a presigned upload URL
@@ -245,8 +264,8 @@ func (h *MediaHandler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "MediaHandler.GetUploadURL")
 	defer span.End()
 
-	// Get user ID from context
-	userID, ok := ctx.Value(middleware.UserIDKey).(string)
+	// Check user is authenticated (for authorization check only)
+	_, ok := ctx.Value(middleware.UserIDKey).(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		span.SetAttributes(attribute.Bool("error", true))
@@ -269,6 +288,18 @@ func (h *MediaHandler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.CharacterID == "" {
+		http.Error(w, "Character ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	if req.WorldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
 	if req.ContentType == "" {
 		// Try to determine content type from filename
 		req.ContentType = http.DetectContentType([]byte{})
@@ -276,7 +307,8 @@ func (h *MediaHandler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 
 	// Get presigned upload URL
 	resp, err := h.mediaClient.GetPresignedUploadURL(ctx, &mediapb.GetPresignedUploadURLRequest{
-		UserId:      userID,
+		CharacterId: req.CharacterID,
+		WorldId:     req.WorldID,
 		Filename:    req.Filename,
 		ContentType: req.ContentType,
 		Size:        req.Size,
@@ -308,8 +340,8 @@ func (h *MediaHandler) ConfirmUpload(w http.ResponseWriter, r *http.Request) {
 	ctx, span := h.tracer.Start(r.Context(), "MediaHandler.ConfirmUpload")
 	defer span.End()
 
-	// Get user ID from context
-	userID, ok := ctx.Value(middleware.UserIDKey).(string)
+	// Check user is authenticated (for authorization check only)
+	_, ok := ctx.Value(middleware.UserIDKey).(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		span.SetAttributes(attribute.Bool("error", true))
@@ -332,10 +364,16 @@ func (h *MediaHandler) ConfirmUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.CharacterID == "" {
+		http.Error(w, "Character ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
 	// Confirm upload
 	resp, err := h.mediaClient.ConfirmUpload(ctx, &mediapb.ConfirmUploadRequest{
-		MediaId: req.MediaID,
-		UserId:  userID,
+		MediaId:     req.MediaID,
+		CharacterId: req.CharacterID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to confirm upload", http.StatusInternalServerError)
@@ -411,9 +449,10 @@ func (h *MediaHandler) GetMediaURLs(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare response
 	response := GetMediaURLsResponse{
-		MediaID:  mediaInfo.MediaId,
-		UserID:   mediaInfo.UserId,
-		Variants: variants,
+		MediaID:     mediaInfo.MediaId,
+		CharacterID: mediaInfo.CharacterId,
+		WorldID:     mediaInfo.WorldId,
+		Variants:    variants,
 	}
 
 	// Send response

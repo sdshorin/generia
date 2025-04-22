@@ -58,7 +58,7 @@ message PostInfo {
 
 message UserInfo {
   string id = 1;
-  string username = 2;
+  string display_name = 2;
   string profile_picture_url = 3; // Опционально
 }
 

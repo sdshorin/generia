@@ -116,7 +116,7 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 			CreatedAt: createdTime.Unix(),
 			User: &feedpb.UserInfo{
 				Id:                post.CharacterId,
-				Username:          post.DisplayName,
+				DisplayName:       post.DisplayName,
 				ProfilePictureUrl: profilePictureURL,
 			},
 			Stats: &feedpb.PostStats{
@@ -199,7 +199,7 @@ func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRe
 			CreatedAt: createdTime.Unix(),
 			User: &feedpb.UserInfo{
 				Id:                post.CharacterId,
-				Username:          post.DisplayName,
+				DisplayName:       post.DisplayName,
 				ProfilePictureUrl: profilePictureURL,
 			},
 			Stats: &feedpb.PostStats{

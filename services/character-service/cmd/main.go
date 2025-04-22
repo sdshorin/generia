@@ -1,52 +1,67 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	pb "github.com/generia/api/grpc/character"
-	"github.com/generia/pkg/config"
-	"github.com/generia/pkg/database"
-	"github.com/generia/pkg/discovery"
-	"github.com/generia/pkg/logger"
-	"github.com/generia/services/character-service/internal/repository"
-	"github.com/generia/services/character-service/internal/service"
+	pb "github.com/sdshorin/generia/api/grpc/character"
+	"github.com/sdshorin/generia/pkg/config"
+	"github.com/sdshorin/generia/pkg/database"
+	"github.com/sdshorin/generia/pkg/discovery"
+	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/services/character-service/internal/repository"
+	"github.com/sdshorin/generia/services/character-service/internal/service"
 )
 
 func main() {
 	// Initialize logger
-	logger := logger.NewLogger()
-	defer logger.Sync()
+	if err := logger.InitDevelopment(); err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer logger.Logger.Sync()
 
-	// Load configuration
-	cfg, err := config.LoadConfig("configs")
+	// Load configuration from env variables
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		logger.Fatal("Failed to load config", err)
+		logger.Logger.Fatal("Failed to load config", zap.Error(err))
 	}
 
 	// Connect to database
-	db, err := database.NewPostgresDB(cfg.Postgres)
+	dbConfig := database.PostgresConfig{
+		Host:     cfg.Database.Host,
+		Port:     cfg.Database.Port,
+		Username: cfg.Database.User,
+		Password: cfg.Database.Password,
+		DBName:   cfg.Database.Name,
+		SSLMode:  cfg.Database.SSLMode,
+	}
+	db, err := database.NewPostgresDB(dbConfig)
 	if err != nil {
-		logger.Fatal("Failed to connect to database", err)
+		logger.Logger.Fatal("Failed to connect to database", zap.Error(err))
 	}
 	defer db.Close()
 
 	// Initialize repository
-	characterRepo := repository.NewCharacterRepository(db, logger)
+	characterRepo := repository.NewCharacterRepository(db.DB)
 
 	// Initialize service
-	characterService := service.NewCharacterService(characterRepo, logger)
+	characterService := service.NewCharacterService(characterRepo)
 
+	// Get port from config or environment
+	// Using port 8089 as specified in docker-compose.yml
+	port := 8089
+	
 	// Initialize gRPC server
-	list, err := net.Listen("tcp", ":50051")
+	list, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -59,22 +74,22 @@ func main() {
 	reflection.Register(grpcServer)
 
 	// Register with service discovery
-	consul, err := discovery.NewConsulClient(cfg.Consul)
+	consul, err := discovery.NewConsulClient(cfg.Consul.Address)
 	if err != nil {
-		logger.Fatal("Failed to connect to Consul", err)
+		logger.Logger.Fatal("Failed to connect to Consul", zap.Error(err))
 	}
 
 	serviceID := "character-service-1"
-	err = consul.Register(serviceID, "character-service", 50051)
+	err = consul.Register(serviceID, "character-service", "character-service", port, []string{"character", "service"})
 	if err != nil {
-		logger.Fatal("Failed to register service", err)
+		logger.Logger.Fatal("Failed to register service", zap.Error(err))
 	}
 
 	// Start server
-	logger.Info("Starting character service on :50051")
+	logger.Logger.Info("Starting character service", zap.Int("port", port))
 	go func() {
 		if err := grpcServer.Serve(list); err != nil {
-			logger.Fatal("Failed to serve", err)
+			logger.Logger.Fatal("Failed to serve", zap.Error(err))
 		}
 	}()
 
@@ -83,14 +98,14 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	<-c
-	logger.Info("Shutting down...")
+	logger.Logger.Info("Shutting down...")
 
 	// Deregister from service discovery
 	if err := consul.Deregister(serviceID); err != nil {
-		logger.Error("Failed to deregister from Consul", err)
+		logger.Logger.Error("Failed to deregister from Consul", zap.Error(err))
 	}
 
 	// Graceful shutdown
 	grpcServer.GracefulStop()
-	logger.Info("Server stopped")
+	logger.Logger.Info("Server stopped")
 }

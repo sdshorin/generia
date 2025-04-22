@@ -4,9 +4,10 @@ import { Media } from '../types';
 
 interface UseMediaUploadOptions {
   worldId: string;
+  characterId: string;
 }
 
-export const useMediaUpload = ({ worldId }: UseMediaUploadOptions) => {
+export const useMediaUpload = ({ worldId, characterId }: UseMediaUploadOptions) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,8 @@ export const useMediaUpload = ({ worldId }: UseMediaUploadOptions) => {
           file.name,
           file.type,
           file.size,
-          worldId
+          worldId,
+          characterId
         );
         
         // Upload file directly to S3/MinIO
@@ -38,7 +40,7 @@ export const useMediaUpload = ({ worldId }: UseMediaUploadOptions) => {
         setProgress(80);
         
         // Confirm upload completion
-        const mediaData = await mediaAPI.confirmUpload(media_id);
+        const mediaData = await mediaAPI.confirmUpload(media_id, characterId);
         setMedia(mediaData);
         setProgress(100);
         
@@ -52,7 +54,7 @@ export const useMediaUpload = ({ worldId }: UseMediaUploadOptions) => {
         uploadInProgress.current = false;
       }
     },
-    [worldId]
+    [worldId, characterId]
   );
 
   // Upload media as base64 (alternative method)
@@ -77,7 +79,8 @@ export const useMediaUpload = ({ worldId }: UseMediaUploadOptions) => {
           mediaData,
           mimeType,
           filename,
-          worldId
+          worldId,
+          characterId
         );
         
         setMedia(response);
@@ -92,7 +95,7 @@ export const useMediaUpload = ({ worldId }: UseMediaUploadOptions) => {
         uploadInProgress.current = false;
       }
     },
-    [worldId]
+    [worldId, characterId]
   );
 
   return {

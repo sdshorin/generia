@@ -478,7 +478,7 @@ func (x *PostInfo) GetMediaUrl() string {
 type UserInfo struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Username          string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	DisplayName       string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	ProfilePictureUrl string                 `protobuf:"bytes,3,opt,name=profile_picture_url,json=profilePictureUrl,proto3" json:"profile_picture_url,omitempty"` // Опционально
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -521,9 +521,9 @@ func (x *UserInfo) GetId() string {
 	return ""
 }
 
-func (x *UserInfo) GetUsername() string {
+func (x *UserInfo) GetDisplayName() string {
 	if x != nil {
-		return x.Username
+		return x.DisplayName
 	}
 	return ""
 }
@@ -805,10 +805,10 @@ const file_feed_feed_proto_rawDesc = "" +
 	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12\"\n" +
 	"\x04user\x18\x06 \x01(\v2\x0e.feed.UserInfoR\x04user\x12%\n" +
 	"\x05stats\x18\a \x01(\v2\x0f.feed.PostStatsR\x05stats\x12\x1b\n" +
-	"\tmedia_url\x18\b \x01(\tR\bmediaUrl\"f\n" +
+	"\tmedia_url\x18\b \x01(\tR\bmediaUrl\"m\n" +
 	"\bUserInfo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername\x12.\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12.\n" +
 	"\x13profile_picture_url\x18\x03 \x01(\tR\x11profilePictureUrl\"r\n" +
 	"\tPostStats\x12\x1f\n" +
 	"\vlikes_count\x18\x01 \x01(\x05R\n" +

@@ -31,9 +31,9 @@ export interface World {
 
 export interface Post {
   id: string;
-  user_id: string;
+  character_id: string;
   world_id: string;
-  username?: string;
+  display_name: string;
   caption: string;
   image_url?: string;
   media_url?: string;
@@ -42,18 +42,18 @@ export interface Post {
   created_at: string;
   updated_at?: string;
   user_liked?: boolean;
-  is_ai?: boolean;
+  is_ai: boolean;
 }
 
 export interface Comment {
   id: string;
   post_id: string;
-  user_id: string;
+  character_id: string;
   world_id: string;
-  username?: string;
+  display_name: string;
   text: string;
   created_at: string;
-  is_ai?: boolean;
+  is_ai: boolean;
 }
 
 export interface Media {
@@ -66,3 +66,5 @@ export interface UploadUrlResponse {
   upload_url: string;
   expires_at: number;
 }
+
+export * from './character';

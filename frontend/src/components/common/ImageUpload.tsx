@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 
 interface ImageUploadProps {
   worldId: string;
+  characterId: string;
   onUploadComplete: (mediaId: string, mediaUrl: string) => void;
   className?: string;
 }
@@ -100,6 +101,7 @@ const ErrorMessage = styled.div`
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
   worldId,
+  characterId,
   onUploadComplete,
   className,
 }) => {
@@ -114,7 +116,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     error,
     uploadMedia,
     clearError
-  } = useMediaUpload({ worldId });
+  } = useMediaUpload({ worldId, characterId });
   
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();

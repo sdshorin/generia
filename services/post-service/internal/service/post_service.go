@@ -48,63 +48,25 @@ func NewPostService(
 // CreatePost handles post creation
 func (s *PostService) CreatePost(ctx context.Context, req *postpb.CreatePostRequest) (*postpb.CreatePostResponse, error) {
 	// Validate input
-	if req.UserId == "" || req.MediaId == "" || req.WorldId == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "user_id, media_id, and world_id are required")
+	if req.UserId == "" || req.MediaId == "" || req.WorldId == "" || req.CharacterId == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "user_id, character_id, media_id, and world_id are required")
 	}
 
-	var characterID string
-
-	// If character ID is provided, validate that it belongs to the user
-	if req.CharacterId != "" {
-		// Get character
-		characterResp, err := s.characterClient.GetCharacter(ctx, &characterpb.GetCharacterRequest{
-			CharacterId: req.CharacterId,
-		})
-		if err != nil {
-			logger.Logger.Error("Failed to get character", zap.Error(err), zap.String("character_id", req.CharacterId))
-			return nil, status.Errorf(codes.Internal, "failed to validate character")
-		}
-
-		// Ensure character belongs to the user
-		if characterResp.RealUserId == nil || *characterResp.RealUserId != req.UserId {
-			return nil, status.Errorf(codes.PermissionDenied, "character does not belong to the user")
-		}
-
-		characterID = req.CharacterId
-	} else {
-		// Get or create a character for the user in this world
-		characters, err := s.characterClient.GetUserCharactersInWorld(ctx, &characterpb.GetUserCharactersInWorldRequest{
-			UserId:  req.UserId,
-			WorldId: req.WorldId,
-		})
-		if err != nil || len(characters.Characters) == 0 {
-			// Need to create a character for this user in this world
-			// First get user info to use as display name
-			userResp, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
-				UserId: req.UserId,
-			})
-			if err != nil {
-				logger.Logger.Error("Failed to get user info", zap.Error(err), zap.String("user_id", req.UserId))
-				return nil, status.Errorf(codes.Internal, "failed to validate user")
-			}
-
-			// Create a character
-			realUserID := req.UserId
-			newCharacter, err := s.characterClient.CreateCharacter(ctx, &characterpb.CreateCharacterRequest{
-				WorldId:     req.WorldId,
-				RealUserId:  &realUserID,
-				DisplayName: userResp.Username,
-			})
-			if err != nil {
-				logger.Logger.Error("Failed to create character", zap.Error(err))
-				return nil, status.Errorf(codes.Internal, "failed to create character")
-			}
-			characterID = newCharacter.Id
-		} else {
-			// Use the first character
-			characterID = characters.Characters[0].Id
-		}
+	// Validate that character belongs to the user
+	characterResp, err := s.characterClient.GetCharacter(ctx, &characterpb.GetCharacterRequest{
+		CharacterId: req.CharacterId,
+	})
+	if err != nil {
+		logger.Logger.Error("Failed to get character", zap.Error(err), zap.String("character_id", req.CharacterId))
+		return nil, status.Errorf(codes.Internal, "failed to validate character")
 	}
+
+	// Ensure character belongs to the user
+	if characterResp.RealUserId == nil || *characterResp.RealUserId != req.UserId {
+		return nil, status.Errorf(codes.PermissionDenied, "character does not belong to the user")
+	}
+
+	characterID := req.CharacterId
 
 	// Validate media
 	mediaResp, err := s.mediaClient.GetMedia(ctx, &mediapb.GetMediaRequest{

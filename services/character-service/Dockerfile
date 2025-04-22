@@ -1,22 +1,43 @@
-FROM golang:1.19-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
+# Install dependencies
+RUN apk update && apk add --no-cache git
+
+# Set working directory
 WORKDIR /app
 
+# Copy go.mod and go.sum files
 COPY go.mod go.sum ./
+
+# Download dependencies
 RUN go mod download
 
+# Copy the entire project
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/character-service ./services/character-service/cmd
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o character-service ./services/character-service/cmd
 
+# Final stage
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
+# Install required packages
+RUN apk --no-cache add ca-certificates tzdata
 
+# Create a non-privileged user
+RUN adduser -D -g '' appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy the binary from the builder stage
 COPY --from=builder /app/character-service .
-COPY --from=builder /app/services/character-service/configs ./configs
 
-EXPOSE 50051
+# Switch to non-privileged user
+USER appuser
 
+# Expose the service port
+EXPOSE 8089
+
+# Run the service
 CMD ["./character-service"]

@@ -16,19 +16,20 @@ Generia is built using a microservices architecture with the following services:
 1. **API Gateway** - Single entry point for client applications
 2. **Auth Service** - Manages user authentication and authorization
 3. **World Service** - Handles creation and management of virtual worlds
-4. **Post Service** - Handles post creation and retrieval
-5. **Media Service** - Manages media uploads and processing
-6. **Interaction Service** - Handles likes and comments
-7. **Feed Service** - Manages user feeds
-8. **Cache Service** - Handles caching of frequently accessed data (TODO)
-9. **AI Worker** - Generates AI users and content for virtual worlds
+4. **Character Service** - Manages user profiles and AI characters within worlds
+5. **Post Service** - Handles post creation and retrieval
+6. **Media Service** - Manages media uploads and processing
+7. **Interaction Service** - Handles likes and comments
+8. **Feed Service** - Manages user feeds
+9. **Cache Service** - Handles caching of frequently accessed data (TODO)
+10. **AI Worker** - Generates AI users and content for virtual worlds
 
 ## Technologies Used
 
 - **Backend:** Go 1.21+
 - **API:** gRPC with Protocol Buffers
 - **Databases:** 
-  - PostgreSQL (Auth, Post, World services)
+  - PostgreSQL (Auth, Post, World, Character services)
   - MongoDB (Interaction service, world generation)
   - Redis (Cache, Feed services)
   - MinIO (Media service)
@@ -73,7 +74,8 @@ docker-compose up -d
 - Create and join virtual worlds with unique themes
 - Generate AI-powered users and content within each world
 - Explore isolated social environments with distinct characteristics
-- Create and share your own posts within the active world
+- Create characters and share your own posts within the active world
+- Interact with AI-generated characters and content
 - Like and comment on content across different worlds
 
 ## API Endpoints
@@ -91,6 +93,11 @@ docker-compose up -d
 - `POST /api/v1/worlds/{world_id}/join` - Join a world
 - `GET /api/v1/worlds/{world_id}/status` - Get world generation status
 - `POST /api/v1/worlds/{world_id}/generate` - Generate content for a world
+
+### Characters
+- `POST /api/v1/worlds/{world_id}/characters` - Create a new character in a world
+- `GET /api/v1/characters/{character_id}` - Get character by ID
+- `GET /api/v1/worlds/{world_id}/users/{user_id}/characters` - Get user's characters in a specific world
 
 ### Posts
 - `POST /api/v1/worlds/{world_id}/posts` - Create a new post
@@ -132,6 +139,7 @@ generia/
 │   ├── api-gateway/   # API Gateway service
 │   ├── auth-service/  # Authentication service
 │   ├── world-service/ # World management service
+│   ├── character-service/ # Character management service
 │   ├── post-service/  # Post management service
 │   ├── media-service/ # Media management service
 │   ├── interaction-service/ # Likes and comments service

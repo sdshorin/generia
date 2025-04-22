@@ -31,6 +31,7 @@ import (
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
 	cachepb "github.com/sdshorin/generia/api/grpc/cache"
 	cdnpb "github.com/sdshorin/generia/api/grpc/cdn"
+	characterpb "github.com/sdshorin/generia/api/grpc/character"
 	feedpb "github.com/sdshorin/generia/api/grpc/feed"
 	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
@@ -48,6 +49,7 @@ type grpcClients struct {
 	cacheClient       cachepb.CacheServiceClient
 	cdnClient         cdnpb.CDNServiceClient
 	worldClient       worldpb.WorldServiceClient
+	characterClient   characterpb.CharacterServiceClient
 }
 
 func main() {
@@ -116,6 +118,7 @@ func main() {
 	interactionHandler := handlers.NewInteractionHandler(clients.interactionClient, tracer)
 	feedHandler := handlers.NewFeedHandler(clients.feedClient, tracer)
 	worldHandler := handlers.NewWorldHandler(clients.worldClient, 30*time.Second)
+	characterHandler := handlers.NewCharacterHandler(clients.characterClient, 30*time.Second)
 
 	// Initialize router
 	router := mux.NewRouter()
@@ -162,6 +165,11 @@ func main() {
 	router.Handle("/api/v1/worlds/{world_id}/join", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.JoinWorld))).Methods("POST")
 	// router.Handle("/api/v1/worlds/{world_id}/status", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorldStatus))).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorld))).Methods("GET")
+
+	// Character routes
+	router.Handle("/api/v1/worlds/{world_id}/characters", jwtMiddleware.RequireAuth(http.HandlerFunc(characterHandler.CreateCharacter))).Methods("POST")
+	router.Handle("/api/v1/characters/{character_id}", jwtMiddleware.Optional(http.HandlerFunc(characterHandler.GetCharacter))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/users/{user_id}/characters", jwtMiddleware.Optional(http.HandlerFunc(characterHandler.GetUserCharactersInWorld))).Methods("GET")
 
 	// Configure server
 	server := &http.Server{
@@ -260,6 +268,11 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		return nil, fmt.Errorf("failed to resolve world service: %w", err)
 	}
 
+	characterAddr, err := discoveryClient.ResolveService("character-service")
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve character service: %w", err)
+	}
+
 	// Create connections
 	authConn, err := grpc.Dial(authAddr, opts...)
 	if err != nil {
@@ -301,6 +314,11 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		return nil, fmt.Errorf("failed to connect to world service: %w", err)
 	}
 
+	characterConn, err := grpc.Dial(characterAddr, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to character service: %w", err)
+	}
+
 	// Create clients
 	return &grpcClients{
 		authClient:        authpb.NewAuthServiceClient(authConn),
@@ -311,5 +329,6 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		cacheClient:       cachepb.NewCacheServiceClient(cacheConn),
 		cdnClient:         cdnpb.NewCDNServiceClient(cdnConn),
 		worldClient:       worldpb.NewWorldServiceClient(worldConn),
+		characterClient:   characterpb.NewCharacterServiceClient(characterConn),
 	}, nil
 }

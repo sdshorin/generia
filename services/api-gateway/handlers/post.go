@@ -1,3 +1,4 @@
+// Package handlers provides HTTP handlers for the API Gateway
 package handlers
 
 import (
@@ -43,8 +44,9 @@ func NewPostHandler(
 
 // CreatePostRequest represents a request to create a post
 type CreatePostRequest struct {
-	Caption string `json:"caption"`
-	MediaID string `json:"media_id"`
+	Caption     string `json:"caption"`
+	MediaID     string `json:"media_id"`
+	CharacterID string `json:"character_id"` // Required character ID
 }
 
 // CreatePostResponse represents a response after creating a post
@@ -82,6 +84,12 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	if req.CharacterID == "" {
+		http.Error(w, "Character ID is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+	
 	// Получаем world_id из URL параметров
 	vars := mux.Vars(r)
 	worldID := vars["world_id"]
@@ -93,10 +101,11 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	// Create post
 	resp, err := h.postClient.CreatePost(ctx, &postpb.CreatePostRequest{
-		UserId:  userID,
-		Caption: req.Caption,
-		MediaId: req.MediaID,
-		WorldId: worldID,
+		UserId:      userID,
+		CharacterId: req.CharacterID,
+		Caption:     req.Caption,
+		MediaId:     req.MediaID,
+		WorldId:     worldID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
@@ -128,14 +137,15 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 // PostResponse represents a post in the API response
 type PostResponse struct {
 	ID            string    `json:"id"`
-	UserID        string    `json:"user_id"`
-	Username      string    `json:"username"`
+	CharacterID   string    `json:"character_id"`
+	DisplayName   string    `json:"display_name"`
 	Caption       string    `json:"caption"`
 	MediaURL      string    `json:"media_url"`
 	CreatedAt     time.Time `json:"created_at"`
 	LikesCount    int       `json:"likes_count"`
 	CommentsCount int       `json:"comments_count"`
 	UserLiked     bool      `json:"user_liked,omitempty"`
+	IsAI          bool      `json:"is_ai"`
 }
 
 // GetPost handles requests to get a post by ID
@@ -194,14 +204,15 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	// Prepare response
 	response := PostResponse{
 		ID:            resp.PostId,
-		UserID:        resp.UserId,
-		Username:      resp.Username,
+		CharacterID:   resp.CharacterId,
+		DisplayName:   resp.DisplayName,
 		Caption:       resp.Caption,
 		MediaURL:      resp.MediaUrl,
 		CreatedAt:     createdAt,
 		LikesCount:    int(resp.LikesCount),
 		CommentsCount: int(resp.CommentsCount),
 		UserLiked:     userLiked,
+		IsAI:          resp.IsAi,
 	}
 
 	// Send response
@@ -297,14 +308,15 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 
 		posts = append(posts, PostResponse{
 			ID:            post.PostId,
-			UserID:        post.UserId,
-			Username:      post.Username,
+			CharacterID:   post.CharacterId,
+			DisplayName:   post.DisplayName,
 			Caption:       post.Caption,
 			MediaURL:      post.MediaUrl,
 			CreatedAt:     createdAt,
 			LikesCount:    int(post.LikesCount),
 			CommentsCount: int(post.CommentsCount),
 			UserLiked:     userLiked,
+			IsAI:          post.IsAi,
 		})
 	}
 
