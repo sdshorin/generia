@@ -10,6 +10,9 @@ service MediaService {
   // Загрузка медиафайла
   rpc UploadMedia(stream UploadMediaRequest) returns (UploadMediaResponse);
   
+  // Внутренний метод для получения ссылки для загрузки AI-сгенерированного медиа (не требует авторизации)
+  rpc UploadAIGeneratedMedia(UploadAIGeneratedMediaRequest) returns (GetPresignedUploadURLResponse);
+  
   // Получение предподписанного URL для прямой загрузки в хранилище
   rpc GetPresignedUploadURL(GetPresignedUploadURLRequest) returns (GetPresignedUploadURLResponse);
   
@@ -37,10 +40,11 @@ message UploadMediaRequest {
 }
 
 message MediaMetadata {
-  string user_id = 1;
-  string filename = 2;
-  string content_type = 3;
-  int64 size = 4;
+  string character_id = 1;
+  string world_id = 2;
+  string filename = 3;
+  string content_type = 4;
+  int64 size = 5;
 }
 
 message UploadMediaResponse {
@@ -61,12 +65,13 @@ message GetMediaRequest {
 
 message Media {
   string media_id = 1;
-  string user_id = 2;
-  string filename = 3;
-  string content_type = 4;
-  int64 size = 5;
-  repeated MediaVariant variants = 6;
-  string created_at = 7; // ISO 8601 format
+  string character_id = 2;
+  string world_id = 3;
+  string filename = 4;
+  string content_type = 5;
+  int64 size = 6;
+  repeated MediaVariant variants = 7;
+  string created_at = 8; // ISO 8601 format
 }
 
 message GetMediaURLRequest {
@@ -90,10 +95,11 @@ message OptimizeImageResponse {
 }
 
 message GetPresignedUploadURLRequest {
-  string user_id = 1;
-  string filename = 2;
-  string content_type = 3;
-  int64 size = 4;
+  string character_id = 1;
+  string world_id = 2;
+  string filename = 3;
+  string content_type = 4;
+  int64 size = 5;
 }
 
 message GetPresignedUploadURLResponse {
@@ -104,12 +110,20 @@ message GetPresignedUploadURLResponse {
 
 message ConfirmUploadRequest {
   string media_id = 1;
-  string user_id = 2;
+  string character_id = 2;
 }
 
 message ConfirmUploadResponse {
   bool success = 1;
   repeated MediaVariant variants = 2;
+}
+
+message UploadAIGeneratedMediaRequest {
+  string character_id = 1;
+  string world_id = 2;
+  string filename = 3;
+  string content_type = 4;
+  int64 size = 5;
 }
 
 message HealthCheckRequest {

@@ -20,6 +20,7 @@ import (
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/pkg/telemetry"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+
 	// "go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -30,6 +31,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	characterpb "github.com/sdshorin/generia/api/grpc/character"
 	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
@@ -110,11 +112,17 @@ func main() {
 	}
 	defer interactionConn.Close()
 
+	characterConn, characterClient, err := createCharacterClient(discoveryClient)
+	if err != nil {
+		logger.Logger.Fatal("Failed to create character client", zap.Error(err))
+	}
+	defer characterConn.Close()
+
 	// Initialize repositories
 	postRepo := repository.NewPostRepository(db)
 
 	// Initialize services
-	postService := service.NewPostService(postRepo, authClient, mediaClient, interactionClient)
+	postService := service.NewPostService(postRepo, authClient, mediaClient, interactionClient, characterClient)
 
 	// Create gRPC server with middleware
 	grpcServer := grpc.NewServer(
@@ -252,6 +260,34 @@ func createInteractionClient(discoveryClient discovery.ServiceDiscovery) (*grpc.
 
 	// Create client
 	client := interactionpb.NewInteractionServiceClient(conn)
+
+	return conn, client, nil
+}
+
+func createCharacterClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, characterpb.CharacterServiceClient, error) {
+	// Get service address from Consul
+	serviceAddress, err := discoveryClient.ResolveService("character-service")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to resolve character service: %w", err)
+	}
+
+	// Create gRPC connection
+	conn, err := grpc.Dial(
+		serviceAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to connect to character service: %w", err)
+	}
+
+	// Create client
+	client := characterpb.NewCharacterServiceClient(conn)
 
 	return conn, client, nil
 }

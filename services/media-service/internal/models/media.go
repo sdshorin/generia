@@ -7,7 +7,7 @@ import (
 // Media represents a media entity in the database
 type Media struct {
 	ID          string    `db:"id" json:"id"`
-	UserID      string    `db:"user_id" json:"user_id"`
+	CharacterId string    `db:"character_id" json:"character_id"`
 	Filename    string    `db:"filename" json:"filename"`
 	ContentType string    `db:"content_type" json:"content_type"`
 	Size        int64     `db:"size" json:"size"`

@@ -18,6 +18,7 @@ type PostRepository interface {
 	Create(ctx context.Context, post *models.Post) error
 	GetByID(ctx context.Context, id string) (*models.Post, error)
 	GetByUserID(ctx context.Context, userID string, limit, offset int) ([]*models.Post, int, error)
+	GetByCharacterID(ctx context.Context, characterID string, limit, offset int) ([]*models.Post, int, error)
 	GetGlobalFeed(ctx context.Context, limit int, cursor string, worldID string) ([]*models.Post, string, error)
 	GetByIDs(ctx context.Context, ids []string) ([]*models.Post, error)
 }
@@ -36,8 +37,8 @@ func NewPostRepository(db *sqlx.DB) PostRepository {
 // Create inserts a new post into the database
 func (r *postRepository) Create(ctx context.Context, post *models.Post) error {
 	query := `
-		INSERT INTO posts (id, user_id, world_id, caption, media_id, created_at, updated_at)
-		VALUES (:id, :user_id, :world_id, :caption, :media_id, :created_at, :updated_at)
+		INSERT INTO posts (id, character_id, is_ai, world_id, caption, media_id, created_at, updated_at)
+		VALUES (:id, :character_id, :is_ai, :world_id, :caption, :media_id, :created_at, :updated_at)
 		RETURNING id
 	`
 
@@ -75,7 +76,7 @@ func (r *postRepository) Create(ctx context.Context, post *models.Post) error {
 // GetByID retrieves a post by ID
 func (r *postRepository) GetByID(ctx context.Context, id string) (*models.Post, error) {
 	query := `
-		SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
+		SELECT id, character_id, is_ai, world_id, caption, media_id, created_at, updated_at
 		FROM posts
 		WHERE id = $1
 	`
@@ -94,19 +95,22 @@ func (r *postRepository) GetByID(ctx context.Context, id string) (*models.Post, 
 }
 
 // GetByUserID retrieves posts by user ID with pagination
+// This method needs to join with the character service
 func (r *postRepository) GetByUserID(ctx context.Context, userID string, limit, offset int) ([]*models.Post, int, error) {
 	query := `
-		SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
-		FROM posts
-		WHERE user_id = $1
-		ORDER BY created_at DESC
+		SELECT p.id, p.character_id, p.is_ai, p.world_id, p.caption, p.media_id, p.created_at, p.updated_at
+		FROM posts p
+		JOIN world_user_characters wuc ON p.character_id = wuc.id
+		WHERE wuc.real_user_id = $1
+		ORDER BY p.created_at DESC
 		LIMIT $2 OFFSET $3
 	`
 
 	countQuery := `
 		SELECT COUNT(*)
-		FROM posts
-		WHERE user_id = $1
+		FROM posts p
+		JOIN world_user_characters wuc ON p.character_id = wuc.id
+		WHERE wuc.real_user_id = $1
 	`
 
 	posts := []*models.Post{}
@@ -130,6 +134,43 @@ func (r *postRepository) GetByUserID(ctx context.Context, userID string, limit, 
 	return posts, total, nil
 }
 
+// GetByCharacterID retrieves posts by character ID with pagination
+func (r *postRepository) GetByCharacterID(ctx context.Context, characterID string, limit, offset int) ([]*models.Post, int, error) {
+	query := `
+		SELECT id, character_id, is_ai, world_id, caption, media_id, created_at, updated_at
+		FROM posts
+		WHERE character_id = $1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3
+	`
+
+	countQuery := `
+		SELECT COUNT(*)
+		FROM posts
+		WHERE character_id = $1
+	`
+
+	posts := []*models.Post{}
+	err := r.db.SelectContext(ctx, &posts, query, characterID, limit, offset)
+	if err != nil {
+		logger.Logger.Error("Failed to get posts by character ID",
+			zap.Error(err),
+			zap.String("character_id", characterID))
+		return nil, 0, err
+	}
+
+	var total int
+	err = r.db.GetContext(ctx, &total, countQuery, characterID)
+	if err != nil {
+		logger.Logger.Error("Failed to count posts by character ID",
+			zap.Error(err),
+			zap.String("character_id", characterID))
+		return nil, 0, err
+	}
+
+	return posts, total, nil
+}
+
 // GetGlobalFeed retrieves posts for the global feed with cursor-based pagination
 func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor string, worldID string) ([]*models.Post, string, error) {
 	var query string
@@ -143,7 +184,7 @@ func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor st
 	if cursor == "" {
 		// First page
 		query = `
-			SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
+			SELECT id, character_id, is_ai, world_id, caption, media_id, created_at, updated_at
 			FROM posts
 			WHERE world_id = $1
 			ORDER BY created_at DESC
@@ -153,7 +194,7 @@ func (r *postRepository) GetGlobalFeed(ctx context.Context, limit int, cursor st
 	} else {
 		// Subsequent pages
 		query = `
-			SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
+			SELECT id, character_id, is_ai, world_id, caption, media_id, created_at, updated_at
 			FROM posts
 			WHERE world_id = $1
 			AND created_at < (
@@ -193,7 +234,7 @@ func (r *postRepository) GetByIDs(ctx context.Context, ids []string) ([]*models.
 	}
 
 	query, args, err := sqlx.In(`
-		SELECT id, user_id, world_id, caption, media_id, created_at, updated_at
+		SELECT id, character_id, is_ai, world_id, caption, media_id, created_at, updated_at
 		FROM posts
 		WHERE id IN (?)
 		ORDER BY created_at DESC

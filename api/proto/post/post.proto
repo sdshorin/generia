@@ -9,11 +9,17 @@ service PostService {
   // Создание поста
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   
+  // Создание AI поста (внутренний метод для AI генератора)
+  rpc CreateAIPost(CreateAIPostRequest) returns (CreatePostResponse);
+  
   // Получение поста по ID
   rpc GetPost(GetPostRequest) returns (Post);
   
   // Получение постов пользователя
   rpc GetUserPosts(GetUserPostsRequest) returns (PostList);
+  
+  // Получение постов по character_id
+  rpc GetCharacterPosts(GetCharacterPostsRequest) returns (PostList);
   
   // Получение нескольких постов по ID
   rpc GetPostsByIds(GetPostsByIdsRequest) returns (PostList);
@@ -27,6 +33,16 @@ service PostService {
 
 message CreatePostRequest {
   string user_id = 1;
+  string character_id = 2; // ID персонажа из character-service
+  string caption = 3;
+  string media_id = 4; // ID медиафайла, полученный от Media Service
+  string world_id = 5; // ID мира, к которому относится пост
+  bool is_ai = 6; // Был ли пост создан через AI
+  repeated string tags = 7; // Опционально, для будущего расширения
+}
+
+message CreateAIPostRequest {
+  string character_id = 1; // ID персонажа из character-service
   string caption = 2;
   string media_id = 3; // ID медиафайла, полученный от Media Service
   string world_id = 4; // ID мира, к которому относится пост
@@ -50,6 +66,13 @@ message GetUserPostsRequest {
   string world_id = 4;
 }
 
+message GetCharacterPostsRequest {
+  string character_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  string world_id = 4;
+}
+
 message GetPostsByIdsRequest {
   repeated string post_ids = 1;
 }
@@ -62,15 +85,16 @@ message GetGlobalFeedRequest {
 
 message Post {
   string post_id = 1;
-  string user_id = 2;
-  string username = 3; // Для отображения в UI
+  string character_id = 2;
+  string display_name = 3; // Имя персонажа для отображения в UI
   string caption = 4;
   string media_url = 5;
   string created_at = 6; // ISO 8601 format
   int32 likes_count = 7; // Количество лайков
   int32 comments_count = 8; // Количество комментариев
   string world_id = 9; // ID мира, к которому относится пост
-  repeated string tags = 10; // Опционально, для будущего расширения
+  bool is_ai = 10; // Был ли пост создан через AI
+  repeated string tags = 11; // Опционально, для будущего расширения
 }
 
 message PostList {

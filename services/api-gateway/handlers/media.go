@@ -399,8 +399,8 @@ func (h *MediaHandler) GetMediaURLs(w http.ResponseWriter, r *http.Request) {
 			ExpiresIn: 3600, // 1 hour
 		})
 		if err != nil {
-			logger.Logger.Error("Failed to get signed URL", 
-				zap.Error(err), 
+			logger.Logger.Error("Failed to get signed URL",
+				zap.Error(err),
 				zap.String("media_id", mediaID),
 				zap.String("variant", variant.Name))
 			// Continue with other variants

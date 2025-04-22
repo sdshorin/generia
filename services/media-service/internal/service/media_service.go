@@ -35,7 +35,7 @@ func NewMediaService(repo repository.MediaRepository, minioClient *minio.Client,
 }
 
 // CreateMedia creates a new media record
-func (s *MediaService) CreateMedia(ctx context.Context, userID, filename, contentType string, size int64, data []byte) (*models.Media, error) {
+func (s *MediaService) CreateMedia(ctx context.Context, characterID, filename, contentType string, size int64, data []byte) (*models.Media, error) {
 	// Generate a unique ID
 	id, err := GenerateID()
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *MediaService) CreateMedia(ctx context.Context, userID, filename, conten
 	}
 
 	// Generate object name for MinIO
-	objectName := fmt.Sprintf("%s/%s%s", userID, id, filepath.Ext(filename))
+	objectName := fmt.Sprintf("%s/%s%s", characterID, id, filepath.Ext(filename))
 
 	// Upload to MinIO
 	reader := bytes.NewReader(data)
@@ -57,7 +57,7 @@ func (s *MediaService) CreateMedia(ctx context.Context, userID, filename, conten
 	// Create media record
 	media := &models.Media{
 		ID:          id,
-		UserID:      userID,
+		CharacterId: characterID,
 		Filename:    filename,
 		ContentType: contentType,
 		Size:        size,
@@ -75,7 +75,7 @@ func (s *MediaService) CreateMedia(ctx context.Context, userID, filename, conten
 }
 
 // GeneratePresignedPutURL generates a presigned URL for client-side uploading
-func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, userID, filename, contentType string, size int64) (*models.Media, string, time.Time, error) {
+func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, characterID, filename, contentType string, size int64) (*models.Media, string, time.Time, error) {
 	// Generate a unique ID
 	id, err := GenerateID()
 	if err != nil {
@@ -83,7 +83,7 @@ func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, userID, file
 	}
 
 	// Generate object name for MinIO
-	objectName := fmt.Sprintf("%s/%s%s", userID, id, filepath.Ext(filename))
+	objectName := fmt.Sprintf("%s/%s%s", characterID, id, filepath.Ext(filename))
 
 	// Generate presigned PUT URL
 	expiry := time.Minute * 10 // 10 minutes expiry for upload
@@ -95,7 +95,7 @@ func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, userID, file
 	// Create media record (status pending until confirmed after upload)
 	media := &models.Media{
 		ID:          id,
-		UserID:      userID,
+		CharacterId: characterID,
 		Filename:    filename,
 		ContentType: contentType,
 		Size:        size,
@@ -114,11 +114,15 @@ func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, userID, file
 }
 
 // ConfirmMediaUpload confirms that a media file has been uploaded via presigned URL
-func (s *MediaService) ConfirmMediaUpload(ctx context.Context, mediaID string) error {
+func (s *MediaService) ConfirmMediaUpload(ctx context.Context, mediaID, characterID string) error {
 	// Get media from database
 	media, err := s.repo.GetMediaByID(ctx, mediaID)
 	if err != nil {
 		return fmt.Errorf("failed to get media from database: %w", err)
+	}
+
+	if media.CharacterId != characterID {
+		return fmt.Errorf("character ID mismatch")
 	}
 
 	// Check if object exists in MinIO
@@ -157,7 +161,7 @@ func (s *MediaService) GetPresignedURL(ctx context.Context, media *models.Media,
 	if variant == "original" {
 		objectName = media.ObjectName
 	} else {
-		objectName = fmt.Sprintf("%s/%s_%s%s", media.UserID, media.ID, variant, filepath.Ext(media.Filename))
+		objectName = fmt.Sprintf("%s/%s_%s%s", media.CharacterId, media.ID, variant, filepath.Ext(media.Filename))
 	}
 
 	// If no variants exist yet but original is requested, use the object name

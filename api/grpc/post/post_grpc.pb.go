@@ -19,12 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PostService_CreatePost_FullMethodName    = "/post.PostService/CreatePost"
-	PostService_GetPost_FullMethodName       = "/post.PostService/GetPost"
-	PostService_GetUserPosts_FullMethodName  = "/post.PostService/GetUserPosts"
-	PostService_GetPostsByIds_FullMethodName = "/post.PostService/GetPostsByIds"
-	PostService_GetGlobalFeed_FullMethodName = "/post.PostService/GetGlobalFeed"
-	PostService_HealthCheck_FullMethodName   = "/post.PostService/HealthCheck"
+	PostService_CreatePost_FullMethodName        = "/post.PostService/CreatePost"
+	PostService_CreateAIPost_FullMethodName      = "/post.PostService/CreateAIPost"
+	PostService_GetPost_FullMethodName           = "/post.PostService/GetPost"
+	PostService_GetUserPosts_FullMethodName      = "/post.PostService/GetUserPosts"
+	PostService_GetCharacterPosts_FullMethodName = "/post.PostService/GetCharacterPosts"
+	PostService_GetPostsByIds_FullMethodName     = "/post.PostService/GetPostsByIds"
+	PostService_GetGlobalFeed_FullMethodName     = "/post.PostService/GetGlobalFeed"
+	PostService_HealthCheck_FullMethodName       = "/post.PostService/HealthCheck"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -35,10 +37,14 @@ const (
 type PostServiceClient interface {
 	// Создание поста
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
+	// Создание AI поста (внутренний метод для AI генератора)
+	CreateAIPost(ctx context.Context, in *CreateAIPostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
 	// Получение поста по ID
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Post, error)
 	// Получение постов пользователя
 	GetUserPosts(ctx context.Context, in *GetUserPostsRequest, opts ...grpc.CallOption) (*PostList, error)
+	// Получение постов по character_id
+	GetCharacterPosts(ctx context.Context, in *GetCharacterPostsRequest, opts ...grpc.CallOption) (*PostList, error)
 	// Получение нескольких постов по ID
 	GetPostsByIds(ctx context.Context, in *GetPostsByIdsRequest, opts ...grpc.CallOption) (*PostList, error)
 	// Получение постов для глобальной ленты
@@ -65,6 +71,16 @@ func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostReques
 	return out, nil
 }
 
+func (c *postServiceClient) CreateAIPost(ctx context.Context, in *CreateAIPostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreatePostResponse)
+	err := c.cc.Invoke(ctx, PostService_CreateAIPost_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postServiceClient) GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Post, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Post)
@@ -79,6 +95,16 @@ func (c *postServiceClient) GetUserPosts(ctx context.Context, in *GetUserPostsRe
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PostList)
 	err := c.cc.Invoke(ctx, PostService_GetUserPosts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) GetCharacterPosts(ctx context.Context, in *GetCharacterPostsRequest, opts ...grpc.CallOption) (*PostList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostList)
+	err := c.cc.Invoke(ctx, PostService_GetCharacterPosts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,10 +149,14 @@ func (c *postServiceClient) HealthCheck(ctx context.Context, in *HealthCheckRequ
 type PostServiceServer interface {
 	// Создание поста
 	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
+	// Создание AI поста (внутренний метод для AI генератора)
+	CreateAIPost(context.Context, *CreateAIPostRequest) (*CreatePostResponse, error)
 	// Получение поста по ID
 	GetPost(context.Context, *GetPostRequest) (*Post, error)
 	// Получение постов пользователя
 	GetUserPosts(context.Context, *GetUserPostsRequest) (*PostList, error)
+	// Получение постов по character_id
+	GetCharacterPosts(context.Context, *GetCharacterPostsRequest) (*PostList, error)
 	// Получение нескольких постов по ID
 	GetPostsByIds(context.Context, *GetPostsByIdsRequest) (*PostList, error)
 	// Получение постов для глобальной ленты
@@ -146,11 +176,17 @@ type UnimplementedPostServiceServer struct{}
 func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
 }
+func (UnimplementedPostServiceServer) CreateAIPost(context.Context, *CreateAIPostRequest) (*CreatePostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAIPost not implemented")
+}
 func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
 func (UnimplementedPostServiceServer) GetUserPosts(context.Context, *GetUserPostsRequest) (*PostList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPosts not implemented")
+}
+func (UnimplementedPostServiceServer) GetCharacterPosts(context.Context, *GetCharacterPostsRequest) (*PostList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCharacterPosts not implemented")
 }
 func (UnimplementedPostServiceServer) GetPostsByIds(context.Context, *GetPostsByIdsRequest) (*PostList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPostsByIds not implemented")
@@ -200,6 +236,24 @@ func _PostService_CreatePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_CreateAIPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAIPostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).CreateAIPost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_CreateAIPost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).CreateAIPost(ctx, req.(*CreateAIPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetPostRequest)
 	if err := dec(in); err != nil {
@@ -232,6 +286,24 @@ func _PostService_GetUserPosts_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostServiceServer).GetUserPosts(ctx, req.(*GetUserPostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_GetCharacterPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCharacterPostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetCharacterPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetCharacterPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetCharacterPosts(ctx, req.(*GetCharacterPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -302,12 +374,20 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostService_CreatePost_Handler,
 		},
 		{
+			MethodName: "CreateAIPost",
+			Handler:    _PostService_CreateAIPost_Handler,
+		},
+		{
 			MethodName: "GetPost",
 			Handler:    _PostService_GetPost_Handler,
 		},
 		{
 			MethodName: "GetUserPosts",
 			Handler:    _PostService_GetUserPosts_Handler,
+		},
+		{
+			MethodName: "GetCharacterPosts",
+			Handler:    _PostService_GetCharacterPosts_Handler,
 		},
 		{
 			MethodName: "GetPostsByIds",

@@ -33,6 +33,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	characterpb "github.com/sdshorin/generia/api/grpc/character"
 	feedpb "github.com/sdshorin/generia/api/grpc/feed"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
@@ -41,10 +42,11 @@ import (
 // FeedService implements the feed service
 type FeedService struct {
 	feedpb.UnimplementedFeedServiceServer
-	logger      *zap.Logger
-	authClient  authpb.AuthServiceClient
-	postClient  postpb.PostServiceClient
-	mediaClient mediapb.MediaServiceClient
+	logger          *zap.Logger
+	authClient      authpb.AuthServiceClient
+	postClient      postpb.PostServiceClient
+	mediaClient     mediapb.MediaServiceClient
+	characterClient characterpb.CharacterServiceClient
 }
 
 // GetGlobalFeed implements the GetGlobalFeed method
@@ -88,25 +90,33 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 			createdTime = time.Now() // Fallback to current time
 		}
 
-		// Get user profile picture if available
+		// Get character info
 		var profilePictureURL string
-		userResp, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
-			UserId: post.UserId,
+		characterResp, err := s.characterClient.GetCharacter(ctx, &characterpb.GetCharacterRequest{
+			CharacterId: post.CharacterId,
 		})
-		if err == nil && userResp.ProfilePictureUrl != "" {
-			profilePictureURL = userResp.ProfilePictureUrl
+		if err == nil && characterResp.AvatarMediaId != nil && *characterResp.AvatarMediaId != "" {
+			// Get media URL for avatar
+			mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+				MediaId:   *characterResp.AvatarMediaId,
+				Variant:   "small", // Use small variant for avatars
+				ExpiresIn: 3600,    // 1 hour
+			})
+			if err == nil {
+				profilePictureURL = mediaResp.Url
+			}
 		}
 
 		// Add post to feed - the post.MediaUrl field already contains the actual URL
 		feedPost := &feedpb.PostInfo{
 			Id:        post.PostId,
-			UserId:    post.UserId,
+			UserId:    post.CharacterId,
 			Caption:   post.Caption,
 			MediaUrl:  post.MediaUrl, // MediaURL from post service already contains the fully formed URL
 			CreatedAt: createdTime.Unix(),
 			User: &feedpb.UserInfo{
-				Id:                post.UserId,
-				Username:          post.Username,
+				Id:                post.CharacterId,
+				Username:          post.DisplayName,
 				ProfilePictureUrl: profilePictureURL,
 			},
 			Stats: &feedpb.PostStats{
@@ -163,25 +173,33 @@ func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRe
 			createdTime = time.Now() // Fallback to current time
 		}
 
-		// Get user profile picture if available
+		// Get character info
 		var profilePictureURL string
-		userResp, err := s.authClient.GetUserInfo(ctx, &authpb.GetUserInfoRequest{
-			UserId: post.UserId,
+		characterResp, err := s.characterClient.GetCharacter(ctx, &characterpb.GetCharacterRequest{
+			CharacterId: post.CharacterId,
 		})
-		if err == nil && userResp.ProfilePictureUrl != "" {
-			profilePictureURL = userResp.ProfilePictureUrl
+		if err == nil && characterResp.AvatarMediaId != nil && *characterResp.AvatarMediaId != "" {
+			// Get media URL for avatar
+			mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+				MediaId:   *characterResp.AvatarMediaId,
+				Variant:   "small", // Use small variant for avatars
+				ExpiresIn: 3600,    // 1 hour
+			})
+			if err == nil {
+				profilePictureURL = mediaResp.Url
+			}
 		}
 
 		// Add post to feed
 		feedPost := &feedpb.PostInfo{
 			Id:        post.PostId,
-			UserId:    post.UserId,
+			UserId:    post.CharacterId,
 			Caption:   post.Caption,
 			MediaUrl:  post.MediaUrl, // MediaURL from post service already contains the fully formed URL
 			CreatedAt: createdTime.Unix(),
 			User: &feedpb.UserInfo{
-				Id:                post.UserId,
-				Username:          post.Username,
+				Id:                post.CharacterId,
+				Username:          post.DisplayName,
 				ProfilePictureUrl: profilePictureURL,
 			},
 			Stats: &feedpb.PostStats{
@@ -291,12 +309,19 @@ func main() {
 	}
 	defer mediaConn.Close()
 
+	characterConn, characterClient, err := createCharacterClient(discoveryClient)
+	if err != nil {
+		logger.Logger.Fatal("Failed to create character client", zap.Error(err))
+	}
+	defer characterConn.Close()
+
 	// Initialize feed service
 	feedService := &FeedService{
-		logger:      logger.Logger,
-		authClient:  authClient,
-		postClient:  postClient,
-		mediaClient: mediaClient,
+		logger:          logger.Logger,
+		authClient:      authClient,
+		postClient:      postClient,
+		mediaClient:     mediaClient,
+		characterClient: characterClient,
 	}
 
 	// Create gRPC server with middleware
@@ -435,6 +460,34 @@ func createMediaClient(discoveryClient discovery.ServiceDiscovery) (*grpc.Client
 
 	// Create client
 	client := mediapb.NewMediaServiceClient(conn)
+
+	return conn, client, nil
+}
+
+func createCharacterClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, characterpb.CharacterServiceClient, error) {
+	// Get service address from Consul
+	serviceAddress, err := discoveryClient.ResolveService("character-service")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to resolve character service: %w", err)
+	}
+
+	// Create gRPC connection
+	conn, err := grpc.Dial(
+		serviceAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to connect to character service: %w", err)
+	}
+
+	// Create client
+	client := characterpb.NewCharacterServiceClient(conn)
 
 	return conn, client, nil
 }

@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(30) NOT NULL UNIQUE,
     email VARCHAR(255) UNIQUE, -- Allow NULL for AI users
     password_hash VARCHAR(255), -- Allow NULL for AI users
-    is_ai BOOLEAN NOT NULL DEFAULT FALSE, -- TODO - delete
-    world_id UUID REFERENCES worlds(id) ON DELETE CASCADE, -- NULL for real users, non-NULL for AI users
+    -- todo - add credits
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -30,6 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- /api/v1/worlds/{world_id}/join - POST
 -- /api/v1/worlds - POST
 -- Пока что не используются - все миры видны всем пользователям (и так и хочется оставить. Хочется, чтобы часть миров были открытыми, а часть - приватными)
+-- в будущем будет заменено таблицей world_memberships
 -- User worlds table (many-to-many relationship for real users and worlds they can access)
 CREATE TABLE IF NOT EXISTS user_worlds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -48,10 +48,23 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- World user characters table (used by character-service)
+CREATE TABLE IF NOT EXISTS world_user_characters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    world_id UUID NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
+    real_user_id UUID REFERENCES users(id) ON DELETE SET NULL,    -- NULL => AI-NPC
+    is_ai BOOLEAN GENERATED ALWAYS AS (real_user_id IS NULL) STORED,
+    display_name TEXT NOT NULL,
+    avatar_media_id UUID,
+    meta JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Posts table (used by post-service)
 CREATE TABLE IF NOT EXISTS posts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
+    character_id UUID REFERENCES world_user_characters(id) ON DELETE SET NULL,
+    is_ai BOOLEAN NOT NULL DEFAULT FALSE,
     world_id UUID NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
     caption TEXT,
     media_id UUID NOT NULL,
@@ -64,7 +77,7 @@ CREATE TABLE IF NOT EXISTS posts (
 -- Media table (used by media-service)
 CREATE TABLE IF NOT EXISTS media (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
+    character_id UUID NOT NULL,
     world_id UUID REFERENCES worlds(id) ON DELETE CASCADE,
     filename TEXT NOT NULL,
     content_type TEXT NOT NULL,
@@ -92,15 +105,24 @@ CREATE TABLE IF NOT EXISTS media_variants (
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_worlds_creator_id ON worlds(creator_id);
 CREATE INDEX IF NOT EXISTS idx_worlds_status ON worlds(status);
-CREATE INDEX IF NOT EXISTS idx_users_world_id ON users(world_id);
-CREATE INDEX IF NOT EXISTS idx_users_is_ai ON users(is_ai);
 CREATE INDEX IF NOT EXISTS idx_user_worlds_user_id ON user_worlds(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_worlds_world_id ON user_worlds(world_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_hash ON refresh_tokens(token_hash);
-CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
+
+-- World user characters indexes
+CREATE INDEX IF NOT EXISTS idx_world_user_characters_real_user_id ON world_user_characters(real_user_id);
+CREATE INDEX IF NOT EXISTS idx_world_user_characters_world_id ON world_user_characters(world_id);
+CREATE INDEX IF NOT EXISTS idx_world_user_characters_real_user_id_world_id ON world_user_characters(real_user_id, world_id);
+CREATE INDEX IF NOT EXISTS idx_world_user_characters_is_ai ON world_user_characters(is_ai);
+
+-- Posts indexes
+CREATE INDEX IF NOT EXISTS idx_posts_character_id ON posts(character_id);
 CREATE INDEX IF NOT EXISTS idx_posts_world_id ON posts(world_id);
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at);
-CREATE INDEX IF NOT EXISTS idx_media_user_id ON media(user_id);
+CREATE INDEX IF NOT EXISTS idx_posts_is_ai ON posts(is_ai);
+
+-- Media indexes
+CREATE INDEX IF NOT EXISTS idx_media_character_id ON media(character_id);
 CREATE INDEX IF NOT EXISTS idx_media_world_id ON media(world_id);
 CREATE INDEX IF NOT EXISTS idx_media_variants_media_id ON media_variants(media_id);

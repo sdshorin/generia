@@ -67,16 +67,18 @@ func (x HealthCheckResponse_Status) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use HealthCheckResponse_Status.Descriptor instead.
 func (HealthCheckResponse_Status) EnumDescriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{9, 0}
+	return file_post_post_proto_rawDescGZIP(), []int{11, 0}
 }
 
 type CreatePostRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
-	MediaId       string                 `protobuf:"bytes,3,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"` // ID медиафайла, полученный от Media Service
-	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"` // ID мира, к которому относится пост
-	Tags          []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`                      // Опционально, для будущего расширения
+	CharacterId   string                 `protobuf:"bytes,2,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"` // ID персонажа из character-service
+	Caption       string                 `protobuf:"bytes,3,opt,name=caption,proto3" json:"caption,omitempty"`
+	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"` // ID медиафайла, полученный от Media Service
+	WorldId       string                 `protobuf:"bytes,5,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"` // ID мира, к которому относится пост
+	IsAi          bool                   `protobuf:"varint,6,opt,name=is_ai,json=isAi,proto3" json:"is_ai,omitempty"`         // Был ли пост создан через AI
+	Tags          []string               `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`                      // Опционально, для будущего расширения
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -118,6 +120,13 @@ func (x *CreatePostRequest) GetUserId() string {
 	return ""
 }
 
+func (x *CreatePostRequest) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
 func (x *CreatePostRequest) GetCaption() string {
 	if x != nil {
 		return x.Caption
@@ -139,7 +148,90 @@ func (x *CreatePostRequest) GetWorldId() string {
 	return ""
 }
 
+func (x *CreatePostRequest) GetIsAi() bool {
+	if x != nil {
+		return x.IsAi
+	}
+	return false
+}
+
 func (x *CreatePostRequest) GetTags() []string {
+	if x != nil {
+		return x.Tags
+	}
+	return nil
+}
+
+type CreateAIPostRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharacterId   string                 `protobuf:"bytes,1,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"` // ID персонажа из character-service
+	Caption       string                 `protobuf:"bytes,2,opt,name=caption,proto3" json:"caption,omitempty"`
+	MediaId       string                 `protobuf:"bytes,3,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"` // ID медиафайла, полученный от Media Service
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"` // ID мира, к которому относится пост
+	Tags          []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`                      // Опционально, для будущего расширения
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAIPostRequest) Reset() {
+	*x = CreateAIPostRequest{}
+	mi := &file_post_post_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAIPostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAIPostRequest) ProtoMessage() {}
+
+func (x *CreateAIPostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_post_post_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAIPostRequest.ProtoReflect.Descriptor instead.
+func (*CreateAIPostRequest) Descriptor() ([]byte, []int) {
+	return file_post_post_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateAIPostRequest) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
+func (x *CreateAIPostRequest) GetCaption() string {
+	if x != nil {
+		return x.Caption
+	}
+	return ""
+}
+
+func (x *CreateAIPostRequest) GetMediaId() string {
+	if x != nil {
+		return x.MediaId
+	}
+	return ""
+}
+
+func (x *CreateAIPostRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
+func (x *CreateAIPostRequest) GetTags() []string {
 	if x != nil {
 		return x.Tags
 	}
@@ -156,7 +248,7 @@ type CreatePostResponse struct {
 
 func (x *CreatePostResponse) Reset() {
 	*x = CreatePostResponse{}
-	mi := &file_post_post_proto_msgTypes[1]
+	mi := &file_post_post_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -168,7 +260,7 @@ func (x *CreatePostResponse) String() string {
 func (*CreatePostResponse) ProtoMessage() {}
 
 func (x *CreatePostResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[1]
+	mi := &file_post_post_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -181,7 +273,7 @@ func (x *CreatePostResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePostResponse.ProtoReflect.Descriptor instead.
 func (*CreatePostResponse) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{1}
+	return file_post_post_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreatePostResponse) GetPostId() string {
@@ -208,7 +300,7 @@ type GetPostRequest struct {
 
 func (x *GetPostRequest) Reset() {
 	*x = GetPostRequest{}
-	mi := &file_post_post_proto_msgTypes[2]
+	mi := &file_post_post_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -220,7 +312,7 @@ func (x *GetPostRequest) String() string {
 func (*GetPostRequest) ProtoMessage() {}
 
 func (x *GetPostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[2]
+	mi := &file_post_post_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -233,7 +325,7 @@ func (x *GetPostRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPostRequest.ProtoReflect.Descriptor instead.
 func (*GetPostRequest) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{2}
+	return file_post_post_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetPostRequest) GetPostId() string {
@@ -262,7 +354,7 @@ type GetUserPostsRequest struct {
 
 func (x *GetUserPostsRequest) Reset() {
 	*x = GetUserPostsRequest{}
-	mi := &file_post_post_proto_msgTypes[3]
+	mi := &file_post_post_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +366,7 @@ func (x *GetUserPostsRequest) String() string {
 func (*GetUserPostsRequest) ProtoMessage() {}
 
 func (x *GetUserPostsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[3]
+	mi := &file_post_post_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,7 +379,7 @@ func (x *GetUserPostsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPostsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserPostsRequest) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{3}
+	return file_post_post_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetUserPostsRequest) GetUserId() string {
@@ -318,6 +410,74 @@ func (x *GetUserPostsRequest) GetWorldId() string {
 	return ""
 }
 
+type GetCharacterPostsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharacterId   string                 `protobuf:"bytes,1,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	WorldId       string                 `protobuf:"bytes,4,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCharacterPostsRequest) Reset() {
+	*x = GetCharacterPostsRequest{}
+	mi := &file_post_post_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCharacterPostsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCharacterPostsRequest) ProtoMessage() {}
+
+func (x *GetCharacterPostsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_post_post_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCharacterPostsRequest.ProtoReflect.Descriptor instead.
+func (*GetCharacterPostsRequest) Descriptor() ([]byte, []int) {
+	return file_post_post_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetCharacterPostsRequest) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
+func (x *GetCharacterPostsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetCharacterPostsRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *GetCharacterPostsRequest) GetWorldId() string {
+	if x != nil {
+		return x.WorldId
+	}
+	return ""
+}
+
 type GetPostsByIdsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostIds       []string               `protobuf:"bytes,1,rep,name=post_ids,json=postIds,proto3" json:"post_ids,omitempty"`
@@ -327,7 +487,7 @@ type GetPostsByIdsRequest struct {
 
 func (x *GetPostsByIdsRequest) Reset() {
 	*x = GetPostsByIdsRequest{}
-	mi := &file_post_post_proto_msgTypes[4]
+	mi := &file_post_post_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +499,7 @@ func (x *GetPostsByIdsRequest) String() string {
 func (*GetPostsByIdsRequest) ProtoMessage() {}
 
 func (x *GetPostsByIdsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[4]
+	mi := &file_post_post_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,7 +512,7 @@ func (x *GetPostsByIdsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPostsByIdsRequest.ProtoReflect.Descriptor instead.
 func (*GetPostsByIdsRequest) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{4}
+	return file_post_post_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetPostsByIdsRequest) GetPostIds() []string {
@@ -373,7 +533,7 @@ type GetGlobalFeedRequest struct {
 
 func (x *GetGlobalFeedRequest) Reset() {
 	*x = GetGlobalFeedRequest{}
-	mi := &file_post_post_proto_msgTypes[5]
+	mi := &file_post_post_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -385,7 +545,7 @@ func (x *GetGlobalFeedRequest) String() string {
 func (*GetGlobalFeedRequest) ProtoMessage() {}
 
 func (x *GetGlobalFeedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[5]
+	mi := &file_post_post_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -398,7 +558,7 @@ func (x *GetGlobalFeedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGlobalFeedRequest.ProtoReflect.Descriptor instead.
 func (*GetGlobalFeedRequest) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{5}
+	return file_post_post_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetGlobalFeedRequest) GetLimit() int32 {
@@ -425,22 +585,23 @@ func (x *GetGlobalFeedRequest) GetWorldId() string {
 type Post struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"` // Для отображения в UI
+	CharacterId   string                 `protobuf:"bytes,2,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"` // Имя персонажа для отображения в UI
 	Caption       string                 `protobuf:"bytes,4,opt,name=caption,proto3" json:"caption,omitempty"`
 	MediaUrl      string                 `protobuf:"bytes,5,opt,name=media_url,json=mediaUrl,proto3" json:"media_url,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`              // ISO 8601 format
 	LikesCount    int32                  `protobuf:"varint,7,opt,name=likes_count,json=likesCount,proto3" json:"likes_count,omitempty"`          // Количество лайков
 	CommentsCount int32                  `protobuf:"varint,8,opt,name=comments_count,json=commentsCount,proto3" json:"comments_count,omitempty"` // Количество комментариев
 	WorldId       string                 `protobuf:"bytes,9,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`                    // ID мира, к которому относится пост
-	Tags          []string               `protobuf:"bytes,10,rep,name=tags,proto3" json:"tags,omitempty"`                                        // Опционально, для будущего расширения
+	IsAi          bool                   `protobuf:"varint,10,opt,name=is_ai,json=isAi,proto3" json:"is_ai,omitempty"`                           // Был ли пост создан через AI
+	Tags          []string               `protobuf:"bytes,11,rep,name=tags,proto3" json:"tags,omitempty"`                                        // Опционально, для будущего расширения
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Post) Reset() {
 	*x = Post{}
-	mi := &file_post_post_proto_msgTypes[6]
+	mi := &file_post_post_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -452,7 +613,7 @@ func (x *Post) String() string {
 func (*Post) ProtoMessage() {}
 
 func (x *Post) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[6]
+	mi := &file_post_post_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -465,7 +626,7 @@ func (x *Post) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Post.ProtoReflect.Descriptor instead.
 func (*Post) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{6}
+	return file_post_post_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Post) GetPostId() string {
@@ -475,16 +636,16 @@ func (x *Post) GetPostId() string {
 	return ""
 }
 
-func (x *Post) GetUserId() string {
+func (x *Post) GetCharacterId() string {
 	if x != nil {
-		return x.UserId
+		return x.CharacterId
 	}
 	return ""
 }
 
-func (x *Post) GetUsername() string {
+func (x *Post) GetDisplayName() string {
 	if x != nil {
-		return x.Username
+		return x.DisplayName
 	}
 	return ""
 }
@@ -531,6 +692,13 @@ func (x *Post) GetWorldId() string {
 	return ""
 }
 
+func (x *Post) GetIsAi() bool {
+	if x != nil {
+		return x.IsAi
+	}
+	return false
+}
+
 func (x *Post) GetTags() []string {
 	if x != nil {
 		return x.Tags
@@ -549,7 +717,7 @@ type PostList struct {
 
 func (x *PostList) Reset() {
 	*x = PostList{}
-	mi := &file_post_post_proto_msgTypes[7]
+	mi := &file_post_post_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -561,7 +729,7 @@ func (x *PostList) String() string {
 func (*PostList) ProtoMessage() {}
 
 func (x *PostList) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[7]
+	mi := &file_post_post_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -574,7 +742,7 @@ func (x *PostList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostList.ProtoReflect.Descriptor instead.
 func (*PostList) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{7}
+	return file_post_post_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *PostList) GetPosts() []*Post {
@@ -606,7 +774,7 @@ type HealthCheckRequest struct {
 
 func (x *HealthCheckRequest) Reset() {
 	*x = HealthCheckRequest{}
-	mi := &file_post_post_proto_msgTypes[8]
+	mi := &file_post_post_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -618,7 +786,7 @@ func (x *HealthCheckRequest) String() string {
 func (*HealthCheckRequest) ProtoMessage() {}
 
 func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[8]
+	mi := &file_post_post_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -631,7 +799,7 @@ func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
 func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{8}
+	return file_post_post_proto_rawDescGZIP(), []int{10}
 }
 
 type HealthCheckResponse struct {
@@ -643,7 +811,7 @@ type HealthCheckResponse struct {
 
 func (x *HealthCheckResponse) Reset() {
 	*x = HealthCheckResponse{}
-	mi := &file_post_post_proto_msgTypes[9]
+	mi := &file_post_post_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -655,7 +823,7 @@ func (x *HealthCheckResponse) String() string {
 func (*HealthCheckResponse) ProtoMessage() {}
 
 func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_post_post_proto_msgTypes[9]
+	mi := &file_post_post_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -668,7 +836,7 @@ func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
 func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_post_post_proto_rawDescGZIP(), []int{9}
+	return file_post_post_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *HealthCheckResponse) GetStatus() HealthCheckResponse_Status {
@@ -682,9 +850,17 @@ var File_post_post_proto protoreflect.FileDescriptor
 
 const file_post_post_proto_rawDesc = "" +
 	"\n" +
-	"\x0fpost/post.proto\x12\x04post\"\x90\x01\n" +
+	"\x0fpost/post.proto\x12\x04post\"\xc8\x01\n" +
 	"\x11CreatePostRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
+	"\fcharacter_id\x18\x02 \x01(\tR\vcharacterId\x12\x18\n" +
+	"\acaption\x18\x03 \x01(\tR\acaption\x12\x19\n" +
+	"\bmedia_id\x18\x04 \x01(\tR\amediaId\x12\x19\n" +
+	"\bworld_id\x18\x05 \x01(\tR\aworldId\x12\x13\n" +
+	"\x05is_ai\x18\x06 \x01(\bR\x04isAi\x12\x12\n" +
+	"\x04tags\x18\a \x03(\tR\x04tags\"\x9c\x01\n" +
+	"\x13CreateAIPostRequest\x12!\n" +
+	"\fcharacter_id\x18\x01 \x01(\tR\vcharacterId\x12\x18\n" +
 	"\acaption\x18\x02 \x01(\tR\acaption\x12\x19\n" +
 	"\bmedia_id\x18\x03 \x01(\tR\amediaId\x12\x19\n" +
 	"\bworld_id\x18\x04 \x01(\tR\aworldId\x12\x12\n" +
@@ -700,17 +876,22 @@ const file_post_post_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x03 \x01(\x05R\x06offset\x12\x19\n" +
+	"\bworld_id\x18\x04 \x01(\tR\aworldId\"\x86\x01\n" +
+	"\x18GetCharacterPostsRequest\x12!\n" +
+	"\fcharacter_id\x18\x01 \x01(\tR\vcharacterId\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\x12\x19\n" +
 	"\bworld_id\x18\x04 \x01(\tR\aworldId\"1\n" +
 	"\x14GetPostsByIdsRequest\x12\x19\n" +
 	"\bpost_ids\x18\x01 \x03(\tR\apostIds\"_\n" +
 	"\x14GetGlobalFeedRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x19\n" +
-	"\bworld_id\x18\x03 \x01(\tR\aworldId\"\xa1\x02\n" +
+	"\bworld_id\x18\x03 \x01(\tR\aworldId\"\xc7\x02\n" +
 	"\x04Post\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
-	"\busername\x18\x03 \x01(\tR\busername\x12\x18\n" +
+	"\apost_id\x18\x01 \x01(\tR\x06postId\x12!\n" +
+	"\fcharacter_id\x18\x02 \x01(\tR\vcharacterId\x12!\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12\x18\n" +
 	"\acaption\x18\x04 \x01(\tR\acaption\x12\x1b\n" +
 	"\tmedia_url\x18\x05 \x01(\tR\bmediaUrl\x12\x1d\n" +
 	"\n" +
@@ -718,9 +899,10 @@ const file_post_post_proto_rawDesc = "" +
 	"\vlikes_count\x18\a \x01(\x05R\n" +
 	"likesCount\x12%\n" +
 	"\x0ecomments_count\x18\b \x01(\x05R\rcommentsCount\x12\x19\n" +
-	"\bworld_id\x18\t \x01(\tR\aworldId\x12\x12\n" +
-	"\x04tags\x18\n" +
-	" \x03(\tR\x04tags\"c\n" +
+	"\bworld_id\x18\t \x01(\tR\aworldId\x12\x13\n" +
+	"\x05is_ai\x18\n" +
+	" \x01(\bR\x04isAi\x12\x12\n" +
+	"\x04tags\x18\v \x03(\tR\x04tags\"c\n" +
 	"\bPostList\x12 \n" +
 	"\x05posts\x18\x01 \x03(\v2\n" +
 	".post.PostR\x05posts\x12\x14\n" +
@@ -733,13 +915,15 @@ const file_post_post_proto_rawDesc = "" +
 	"\x06Status\x12\v\n" +
 	"\aUNKNOWN\x10\x00\x12\v\n" +
 	"\aSERVING\x10\x01\x12\x0f\n" +
-	"\vNOT_SERVING\x10\x022\xf4\x02\n" +
+	"\vNOT_SERVING\x10\x022\xfe\x03\n" +
 	"\vPostService\x12?\n" +
 	"\n" +
-	"CreatePost\x12\x17.post.CreatePostRequest\x1a\x18.post.CreatePostResponse\x12+\n" +
+	"CreatePost\x12\x17.post.CreatePostRequest\x1a\x18.post.CreatePostResponse\x12C\n" +
+	"\fCreateAIPost\x12\x19.post.CreateAIPostRequest\x1a\x18.post.CreatePostResponse\x12+\n" +
 	"\aGetPost\x12\x14.post.GetPostRequest\x1a\n" +
 	".post.Post\x129\n" +
-	"\fGetUserPosts\x12\x19.post.GetUserPostsRequest\x1a\x0e.post.PostList\x12;\n" +
+	"\fGetUserPosts\x12\x19.post.GetUserPostsRequest\x1a\x0e.post.PostList\x12C\n" +
+	"\x11GetCharacterPosts\x12\x1e.post.GetCharacterPostsRequest\x1a\x0e.post.PostList\x12;\n" +
 	"\rGetPostsByIds\x12\x1a.post.GetPostsByIdsRequest\x1a\x0e.post.PostList\x12;\n" +
 	"\rGetGlobalFeed\x12\x1a.post.GetGlobalFeedRequest\x1a\x0e.post.PostList\x12B\n" +
 	"\vHealthCheck\x12\x18.post.HealthCheckRequest\x1a\x19.post.HealthCheckResponseB,Z*github.com/sdshorin/generia/api/proto/postb\x06proto3"
@@ -757,37 +941,43 @@ func file_post_post_proto_rawDescGZIP() []byte {
 }
 
 var file_post_post_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_post_post_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_post_post_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_post_post_proto_goTypes = []any{
-	(HealthCheckResponse_Status)(0), // 0: post.HealthCheckResponse.Status
-	(*CreatePostRequest)(nil),       // 1: post.CreatePostRequest
-	(*CreatePostResponse)(nil),      // 2: post.CreatePostResponse
-	(*GetPostRequest)(nil),          // 3: post.GetPostRequest
-	(*GetUserPostsRequest)(nil),     // 4: post.GetUserPostsRequest
-	(*GetPostsByIdsRequest)(nil),    // 5: post.GetPostsByIdsRequest
-	(*GetGlobalFeedRequest)(nil),    // 6: post.GetGlobalFeedRequest
-	(*Post)(nil),                    // 7: post.Post
-	(*PostList)(nil),                // 8: post.PostList
-	(*HealthCheckRequest)(nil),      // 9: post.HealthCheckRequest
-	(*HealthCheckResponse)(nil),     // 10: post.HealthCheckResponse
+	(HealthCheckResponse_Status)(0),  // 0: post.HealthCheckResponse.Status
+	(*CreatePostRequest)(nil),        // 1: post.CreatePostRequest
+	(*CreateAIPostRequest)(nil),      // 2: post.CreateAIPostRequest
+	(*CreatePostResponse)(nil),       // 3: post.CreatePostResponse
+	(*GetPostRequest)(nil),           // 4: post.GetPostRequest
+	(*GetUserPostsRequest)(nil),      // 5: post.GetUserPostsRequest
+	(*GetCharacterPostsRequest)(nil), // 6: post.GetCharacterPostsRequest
+	(*GetPostsByIdsRequest)(nil),     // 7: post.GetPostsByIdsRequest
+	(*GetGlobalFeedRequest)(nil),     // 8: post.GetGlobalFeedRequest
+	(*Post)(nil),                     // 9: post.Post
+	(*PostList)(nil),                 // 10: post.PostList
+	(*HealthCheckRequest)(nil),       // 11: post.HealthCheckRequest
+	(*HealthCheckResponse)(nil),      // 12: post.HealthCheckResponse
 }
 var file_post_post_proto_depIdxs = []int32{
-	7,  // 0: post.PostList.posts:type_name -> post.Post
+	9,  // 0: post.PostList.posts:type_name -> post.Post
 	0,  // 1: post.HealthCheckResponse.status:type_name -> post.HealthCheckResponse.Status
 	1,  // 2: post.PostService.CreatePost:input_type -> post.CreatePostRequest
-	3,  // 3: post.PostService.GetPost:input_type -> post.GetPostRequest
-	4,  // 4: post.PostService.GetUserPosts:input_type -> post.GetUserPostsRequest
-	5,  // 5: post.PostService.GetPostsByIds:input_type -> post.GetPostsByIdsRequest
-	6,  // 6: post.PostService.GetGlobalFeed:input_type -> post.GetGlobalFeedRequest
-	9,  // 7: post.PostService.HealthCheck:input_type -> post.HealthCheckRequest
-	2,  // 8: post.PostService.CreatePost:output_type -> post.CreatePostResponse
-	7,  // 9: post.PostService.GetPost:output_type -> post.Post
-	8,  // 10: post.PostService.GetUserPosts:output_type -> post.PostList
-	8,  // 11: post.PostService.GetPostsByIds:output_type -> post.PostList
-	8,  // 12: post.PostService.GetGlobalFeed:output_type -> post.PostList
-	10, // 13: post.PostService.HealthCheck:output_type -> post.HealthCheckResponse
-	8,  // [8:14] is the sub-list for method output_type
-	2,  // [2:8] is the sub-list for method input_type
+	2,  // 3: post.PostService.CreateAIPost:input_type -> post.CreateAIPostRequest
+	4,  // 4: post.PostService.GetPost:input_type -> post.GetPostRequest
+	5,  // 5: post.PostService.GetUserPosts:input_type -> post.GetUserPostsRequest
+	6,  // 6: post.PostService.GetCharacterPosts:input_type -> post.GetCharacterPostsRequest
+	7,  // 7: post.PostService.GetPostsByIds:input_type -> post.GetPostsByIdsRequest
+	8,  // 8: post.PostService.GetGlobalFeed:input_type -> post.GetGlobalFeedRequest
+	11, // 9: post.PostService.HealthCheck:input_type -> post.HealthCheckRequest
+	3,  // 10: post.PostService.CreatePost:output_type -> post.CreatePostResponse
+	3,  // 11: post.PostService.CreateAIPost:output_type -> post.CreatePostResponse
+	9,  // 12: post.PostService.GetPost:output_type -> post.Post
+	10, // 13: post.PostService.GetUserPosts:output_type -> post.PostList
+	10, // 14: post.PostService.GetCharacterPosts:output_type -> post.PostList
+	10, // 15: post.PostService.GetPostsByIds:output_type -> post.PostList
+	10, // 16: post.PostService.GetGlobalFeed:output_type -> post.PostList
+	12, // 17: post.PostService.HealthCheck:output_type -> post.HealthCheckResponse
+	10, // [10:18] is the sub-list for method output_type
+	2,  // [2:10] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -804,7 +994,7 @@ func file_post_post_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_post_post_proto_rawDesc), len(file_post_post_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

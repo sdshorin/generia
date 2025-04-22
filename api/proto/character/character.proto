@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package generia.character;
+
+option go_package = "github.com/generia/api/grpc/character";
+
+// Character service for managing characters in worlds
+service CharacterService {
+  // Create a character profile for a real user or AI
+  rpc CreateCharacter(CreateCharacterRequest) returns (Character);
+  
+  // Get a character by ID
+  rpc GetCharacter(GetCharacterRequest) returns (Character);
+  
+  // Get a user's characters in a specific world
+  rpc GetUserCharactersInWorld(GetUserCharactersInWorldRequest) returns (CharacterList);
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Request to create a new character
+message CreateCharacterRequest {
+  string world_id = 1;
+  optional string real_user_id = 2; // If empty, creates an AI character
+  string display_name = 3;
+  optional string avatar_media_id = 4;
+  optional string meta = 5; // JSON string with additional character data
+}
+
+// Request to get a character by ID
+message GetCharacterRequest {
+  string character_id = 1;
+}
+
+// Request to get all characters for a user in a world
+message GetUserCharactersInWorldRequest {
+  string user_id = 1;
+  string world_id = 2;
+}
+
+// Character representation
+message Character {
+  string id = 1;
+  string world_id = 2;
+  optional string real_user_id = 3; // Empty for AI characters
+  bool is_ai = 4;
+  string display_name = 5;
+  optional string avatar_media_id = 6;
+  optional string meta = 7; // JSON string
+  string created_at = 8;
+}
+
+// List of characters
+message CharacterList {
+  repeated Character characters = 1;
+}
+
+// Health check request
+message HealthCheckRequest {}
+
+// Health check response
+message HealthCheckResponse {
+  string status = 1;
+}
