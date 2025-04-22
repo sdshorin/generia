@@ -54,7 +54,7 @@ services:
       - generia_network
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand('ping').ok"]
-      interval: 10s
+      interval: 100s
       timeout: 10s
       retries: 5
 

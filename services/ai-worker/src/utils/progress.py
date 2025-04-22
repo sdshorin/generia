@@ -92,8 +92,8 @@ class ProgressManager:
                     status=status
                 )
                 
-                if self.kafka_producer:
-                    await self.kafka_producer.send_progress_update(world_id, current_status)
+                # if self.kafka_producer:
+                #     await self.kafka_producer.send_progress_update(world_id, current_status)
                 
                 return current_status
             except Exception as e:

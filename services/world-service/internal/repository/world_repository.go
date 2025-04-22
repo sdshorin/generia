@@ -17,7 +17,6 @@ type WorldRepository interface {
 	GetAll(ctx context.Context, limit, offset int, status string) ([]*models.World, int, error)
 	GetByUser(ctx context.Context, userID string, limit, offset int, status string) ([]*models.World, int, error)
 	UpdateStatus(ctx context.Context, id, status string) error
-	UpdateGenerationStatus(ctx context.Context, id, status string) error
 
 	// User world operations
 	AddUserToWorld(ctx context.Context, userID, worldID string) error
@@ -26,9 +25,8 @@ type WorldRepository interface {
 	CheckUserWorld(ctx context.Context, userID, worldID string) (bool, error)
 
 	// Generation tasks
-	CreateGenerationTask(ctx context.Context, task *models.WorldGenerationTask) error
-	GetGenerationTasks(ctx context.Context, worldID string) ([]*models.WorldGenerationTask, error)
-	UpdateGenerationTask(ctx context.Context, taskID, status, result string) error
+
+	// UpdateGenerationTask(ctx context.Context, taskID, status, result string) error
 	GetWorldStats(ctx context.Context, worldID string) (int, int, error) // usersCount, postsCount, error
 }
 
@@ -59,7 +57,8 @@ func (r *PostgresWorldRepository) Create(ctx context.Context, world *models.Worl
 		world.Description,
 		world.Prompt,
 		world.CreatorID,
-		world.GenerationStatus,
+		"",
+		// world.GenerationStatus,
 		world.Status,
 	)
 
@@ -219,29 +218,9 @@ func (r *PostgresWorldRepository) UpdateStatus(ctx context.Context, id, status s
 
 	_, err := r.db.ExecContext(ctx, query, status, id)
 	if err != nil {
-		logger.Logger.Error("Failed to update world status", 
-			zap.Error(err), 
-			zap.String("id", id), 
-			zap.String("status", status))
-		return err
-	}
-
-	return nil
-}
-
-// UpdateGenerationStatus updates the generation status of a world
-func (r *PostgresWorldRepository) UpdateGenerationStatus(ctx context.Context, id, status string) error {
-	query := `
-		UPDATE worlds
-		SET generation_status = $1, updated_at = NOW()
-		WHERE id = $2
-	`
-
-	_, err := r.db.ExecContext(ctx, query, status, id)
-	if err != nil {
-		logger.Logger.Error("Failed to update world generation status", 
-			zap.Error(err), 
-			zap.String("id", id), 
+		logger.Logger.Error("Failed to update world status",
+			zap.Error(err),
+			zap.String("id", id),
 			zap.String("status", status))
 		return err
 	}
@@ -261,9 +240,9 @@ func (r *PostgresWorldRepository) AddUserToWorld(ctx context.Context, userID, wo
 	`
 	err := r.db.GetContext(ctx, &exists, checkQuery, userID, worldID)
 	if err != nil {
-		logger.Logger.Error("Failed to check if user-world relationship exists", 
-			zap.Error(err), 
-			zap.String("user_id", userID), 
+		logger.Logger.Error("Failed to check if user-world relationship exists",
+			zap.Error(err),
+			zap.String("user_id", userID),
 			zap.String("world_id", worldID))
 		return err
 	}
@@ -279,9 +258,9 @@ func (r *PostgresWorldRepository) AddUserToWorld(ctx context.Context, userID, wo
 
 	_, err = r.db.ExecContext(ctx, query, userID, worldID)
 	if err != nil {
-		logger.Logger.Error("Failed to add user to world", 
-			zap.Error(err), 
-			zap.String("user_id", userID), 
+		logger.Logger.Error("Failed to add user to world",
+			zap.Error(err),
+			zap.String("user_id", userID),
 			zap.String("world_id", worldID))
 		return err
 	}
@@ -298,9 +277,9 @@ func (r *PostgresWorldRepository) RemoveUserFromWorld(ctx context.Context, userI
 
 	_, err := r.db.ExecContext(ctx, query, userID, worldID)
 	if err != nil {
-		logger.Logger.Error("Failed to remove user from world", 
-			zap.Error(err), 
-			zap.String("user_id", userID), 
+		logger.Logger.Error("Failed to remove user from world",
+			zap.Error(err),
+			zap.String("user_id", userID),
 			zap.String("world_id", worldID))
 		return err
 	}
@@ -326,7 +305,6 @@ func (r *PostgresWorldRepository) GetUserWorlds(ctx context.Context, userID stri
 	return userWorlds, nil
 }
 
-
 // CheckUserWorld checks if a user has access to a world
 func (r *PostgresWorldRepository) CheckUserWorld(ctx context.Context, userID, worldID string) (bool, error) {
 	query := `
@@ -339,79 +317,14 @@ func (r *PostgresWorldRepository) CheckUserWorld(ctx context.Context, userID, wo
 	var exists bool
 	err := r.db.GetContext(ctx, &exists, query, userID, worldID)
 	if err != nil {
-		logger.Logger.Error("Failed to check user access to world", 
-			zap.Error(err), 
-			zap.String("user_id", userID), 
+		logger.Logger.Error("Failed to check user access to world",
+			zap.Error(err),
+			zap.String("user_id", userID),
 			zap.String("world_id", worldID))
 		return false, err
 	}
 
 	return exists, nil
-}
-
-// CreateGenerationTask creates a new generation task
-func (r *PostgresWorldRepository) CreateGenerationTask(ctx context.Context, task *models.WorldGenerationTask) error {
-	query := `
-		INSERT INTO world_generation_tasks (world_id, task_type, status, parameters)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id, created_at, updated_at
-	`
-
-	row := r.db.QueryRowContext(
-		ctx,
-		query,
-		task.WorldID,
-		task.TaskType,
-		task.Status,
-		task.Parameters,
-	)
-
-	err := row.Scan(&task.ID, &task.CreatedAt, &task.UpdatedAt)
-	if err != nil {
-		logger.Logger.Error("Failed to create generation task", zap.Error(err))
-		return err
-	}
-
-	return nil
-}
-
-// GetGenerationTasks gets all generation tasks for a world
-func (r *PostgresWorldRepository) GetGenerationTasks(ctx context.Context, worldID string) ([]*models.WorldGenerationTask, error) {
-	query := `
-		SELECT id, world_id, task_type, status, parameters, result, created_at, updated_at
-		FROM world_generation_tasks
-		WHERE world_id = $1
-		ORDER BY created_at DESC
-	`
-
-	tasks := []*models.WorldGenerationTask{}
-	err := r.db.SelectContext(ctx, &tasks, query, worldID)
-	if err != nil {
-		logger.Logger.Error("Failed to get generation tasks", zap.Error(err), zap.String("world_id", worldID))
-		return nil, err
-	}
-
-	return tasks, nil
-}
-
-// UpdateGenerationTask updates a generation task's status and result
-func (r *PostgresWorldRepository) UpdateGenerationTask(ctx context.Context, taskID, status, result string) error {
-	query := `
-		UPDATE world_generation_tasks
-		SET status = $1, result = $2, updated_at = NOW()
-		WHERE id = $3
-	`
-
-	_, err := r.db.ExecContext(ctx, query, status, result, taskID)
-	if err != nil {
-		logger.Logger.Error("Failed to update generation task", 
-			zap.Error(err), 
-			zap.String("task_id", taskID), 
-			zap.String("status", status))
-		return err
-	}
-
-	return nil
 }
 
 // GetWorldStats gets user and post counts for a world

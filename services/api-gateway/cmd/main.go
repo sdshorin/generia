@@ -92,16 +92,16 @@ func main() {
 		if err == nil {
 			break
 		}
-		
-		logger.Logger.Warn("Failed to initialize gRPC clients, retrying...", 
-			zap.Error(err), 
+
+		logger.Logger.Warn("Failed to initialize gRPC clients, retrying...",
+			zap.Error(err),
 			zap.Int("attempt", attempt),
 			zap.Int("maxAttempts", 5))
-		
+
 		// Wait before retrying
 		time.Sleep(5 * time.Second)
 	}
-	
+
 	if clients == nil {
 		logger.Logger.Fatal("Failed to initialize gRPC clients after multiple attempts", zap.Error(err))
 	}
@@ -155,13 +155,12 @@ func main() {
 	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/comments", jwtMiddleware.RequireAuth(http.HandlerFunc(interactionHandler.AddComment))).Methods("POST")
 	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/comments", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetComments))).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}/posts/{id}/likes", jwtMiddleware.Optional(http.HandlerFunc(interactionHandler.GetLikes))).Methods("GET")
-	
+
 	// World routes - сначала конкретные маршруты, затем маршруты с параметрами
 	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorlds))).Methods("GET")
 	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.CreateWorld))).Methods("POST")
 	router.Handle("/api/v1/worlds/{world_id}/join", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.JoinWorld))).Methods("POST")
-	router.Handle("/api/v1/worlds/{world_id}/status", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorldStatus))).Methods("GET")
-	router.Handle("/api/v1/worlds/{world_id}/generate", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GenerateContent))).Methods("POST")
+	// router.Handle("/api/v1/worlds/{world_id}/status", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorldStatus))).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorld))).Methods("GET")
 
 	// Configure server

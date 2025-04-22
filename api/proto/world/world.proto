@@ -17,12 +17,6 @@ service WorldService {
   // Join a world (add to user's available worlds)
   rpc JoinWorld(JoinWorldRequest) returns (JoinWorldResponse) {}
   
-  // Generate AI content for a world
-  rpc GenerateContent(GenerateContentRequest) returns (GenerateContentResponse) {}
-  
-  // Get generation status for a world
-  rpc GetGenerationStatus(GetGenerationStatusRequest) returns (GetGenerationStatusResponse) {}
-  
   // Health check
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
 }
@@ -84,33 +78,9 @@ message JoinWorldResponse {
 }
 
 
-// GenerateContentRequest is the request for generating AI content for a world
-message GenerateContentRequest {
-  string world_id = 1;
-  int32 users_count = 2;
-  int32 posts_count = 3;
-  bool force = 4;
-}
-
-// GenerateContentResponse is the response for generating AI content
-message GenerateContentResponse {
-  bool success = 1;
-  string message = 2;
-  string task_id = 3;
-}
-
 // GetGenerationStatusRequest is the request for getting the generation status of a world
 message GetGenerationStatusRequest {
   string world_id = 1;
-}
-
-// GetGenerationStatusResponse is the response containing generation status info
-message GetGenerationStatusResponse {
-  string status = 1; // pending, in_progress, completed, failed
-  string message = 2;
-  int32 users_generated = 3;
-  int32 posts_generated = 4;
-  float progress_percentage = 5;
 }
 
 // HealthCheckRequest is the request for performing a health check

@@ -20,7 +20,7 @@ Generia is built using a microservices architecture with the following services:
 5. **Media Service** - Manages media uploads and processing
 6. **Interaction Service** - Handles likes and comments
 7. **Feed Service** - Manages user feeds
-8. **Cache Service** - Handles caching of frequently accessed data
+8. **Cache Service** - Handles caching of frequently accessed data (TODO)
 9. **AI Worker** - Generates AI users and content for virtual worlds
 
 ## Technologies Used
@@ -29,7 +29,7 @@ Generia is built using a microservices architecture with the following services:
 - **API:** gRPC with Protocol Buffers
 - **Databases:** 
   - PostgreSQL (Auth, Post, World services)
-  - MongoDB (Interaction service)
+  - MongoDB (Interaction service, world generation)
   - Redis (Cache, Feed services)
   - MinIO (Media service)
 - **Service Discovery:** Consul

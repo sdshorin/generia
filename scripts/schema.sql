@@ -20,12 +20,16 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(30) NOT NULL UNIQUE,
     email VARCHAR(255) UNIQUE, -- Allow NULL for AI users
     password_hash VARCHAR(255), -- Allow NULL for AI users
-    is_ai BOOLEAN NOT NULL DEFAULT FALSE,
+    is_ai BOOLEAN NOT NULL DEFAULT FALSE, -- TODO - delete
     world_id UUID REFERENCES worlds(id) ON DELETE CASCADE, -- NULL for real users, non-NULL for AI users
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+
+-- /api/v1/worlds/{world_id}/join - POST
+-- /api/v1/worlds - POST
+-- Пока что не используются - все миры видны всем пользователям (и так и хочется оставить. Хочется, чтобы часть миров были открытыми, а часть - приватными)
 -- User worlds table (many-to-many relationship for real users and worlds they can access)
 CREATE TABLE IF NOT EXISTS user_worlds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -55,6 +59,8 @@ CREATE TABLE IF NOT EXISTS posts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+
+-- TODO: Разобарться как хранить медиа (все медиа - в s3)
 -- Media table (used by media-service)
 CREATE TABLE IF NOT EXISTS media (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -70,6 +76,7 @@ CREATE TABLE IF NOT EXISTS media (
 );
 
 -- Media variants table (used by media-service)
+-- TODO: Разобарться как хранить медиа (все медиа - в s3)
 CREATE TABLE IF NOT EXISTS media_variants (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     media_id UUID NOT NULL REFERENCES media(id) ON DELETE CASCADE,
@@ -80,17 +87,7 @@ CREATE TABLE IF NOT EXISTS media_variants (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- World generation tasks table
-CREATE TABLE IF NOT EXISTS world_generation_tasks (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    world_id UUID NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
-    task_type VARCHAR(50) NOT NULL, -- users, posts, media
-    status VARCHAR(20) NOT NULL DEFAULT 'pending', -- pending, in_progress, completed, failed
-    parameters JSONB,
-    result JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_worlds_creator_id ON worlds(creator_id);
@@ -107,5 +104,3 @@ CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at);
 CREATE INDEX IF NOT EXISTS idx_media_user_id ON media(user_id);
 CREATE INDEX IF NOT EXISTS idx_media_world_id ON media(world_id);
 CREATE INDEX IF NOT EXISTS idx_media_variants_media_id ON media_variants(media_id);
-CREATE INDEX IF NOT EXISTS idx_world_generation_tasks_world_id ON world_generation_tasks(world_id);
-CREATE INDEX IF NOT EXISTS idx_world_generation_tasks_status ON world_generation_tasks(status);

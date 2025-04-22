@@ -215,98 +215,42 @@ func (h *WorldHandler) JoinWorld(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-
 // GetWorldStatus handles GET /worlds/{world_id}/status
-func (h *WorldHandler) GetWorldStatus(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	userIDValue := ctx.Value(middleware.UserIDKey)
-	if userIDValue == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-	userID, ok := userIDValue.(string)
-	if !ok || userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+// func (h *WorldHandler) GetWorldStatus(w http.ResponseWriter, r *http.Request) {
+// 	ctx := r.Context()
+// 	userIDValue := ctx.Value(middleware.UserIDKey)
+// 	if userIDValue == nil {
+// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+// 		return
+// 	}
+// 	userID, ok := userIDValue.(string)
+// 	if !ok || userID == "" {
+// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+// 		return
+// 	}
 
-	vars := mux.Vars(r)
-	worldID := vars["world_id"]
-	if worldID == "" {
-		http.Error(w, "world_id is required", http.StatusBadRequest)
-		return
-	}
+// 	vars := mux.Vars(r)
+// 	worldID := vars["world_id"]
+// 	if worldID == "" {
+// 		http.Error(w, "world_id is required", http.StatusBadRequest)
+// 		return
+// 	}
 
-	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
-	defer cancel()
+// 	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
+// 	defer cancel()
 
-	resp, err := h.worldClient.GetGenerationStatus(timeoutCtx, &worldpb.GetGenerationStatusRequest{
-		WorldId: worldID,
-	})
+// 	resp, err := h.worldClient.GetGenerationStatus(timeoutCtx, &worldpb.GetGenerationStatusRequest{
+// 		WorldId: worldID,
+// 	})
 
-	if err != nil {
-		logger.Logger.Error("Failed to get world generation status",
-			zap.Error(err),
-			zap.String("world_id", worldID))
-		http.Error(w, "Failed to get world generation status", http.StatusInternalServerError)
-		return
-	}
+// 	if err != nil {
+// 		logger.Logger.Error("Failed to get world generation status",
+// 			zap.Error(err),
+// 			zap.String("world_id", worldID))
+// 		http.Error(w, "Failed to get world generation status", http.StatusInternalServerError)
+// 		return
+// 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
-}
-
-// GenerateContent handles POST /worlds/{world_id}/generate
-func (h *WorldHandler) GenerateContent(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	userIDValue := ctx.Value(middleware.UserIDKey)
-	if userIDValue == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-	userID, ok := userIDValue.(string)
-	if !ok || userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	vars := mux.Vars(r)
-	worldID := vars["world_id"]
-	if worldID == "" {
-		http.Error(w, "world_id is required", http.StatusBadRequest)
-		return
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-
-	var req models.AIGenerationRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		http.Error(w, "Invalid request format", http.StatusBadRequest)
-		return
-	}
-
-	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
-	defer cancel()
-
-	resp, err := h.worldClient.GenerateContent(timeoutCtx, &worldpb.GenerateContentRequest{
-		WorldId:    worldID,
-		UsersCount: int32(req.UsersCount),
-		PostsCount: int32(req.PostsCount),
-		Force:      false,
-	})
-
-	if err != nil {
-		logger.Logger.Error("Failed to generate content",
-			zap.Error(err),
-			zap.String("world_id", worldID))
-		http.Error(w, "Failed to generate content", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(resp)
+// }
