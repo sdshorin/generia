@@ -3,12 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
@@ -24,7 +22,6 @@ import (
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/pkg/telemetry"
-	"github.com/sdshorin/generia/services/media-service/internal/models"
 	"github.com/sdshorin/generia/services/media-service/internal/repository"
 	"github.com/sdshorin/generia/services/media-service/internal/service"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -48,134 +45,6 @@ type MediaService struct {
 	minioClient *minio.Client
 	db          *sqlx.DB
 	bucket      string
-}
-
-// UploadMedia implements the UploadMedia method (streaming)
-func (s *MediaService) UploadMedia(stream mediapb.MediaService_UploadMediaServer) error {
-	ctx := stream.Context()
-	s.logger.Info("UploadMedia called (stream)")
-
-	// Get metadata from first message
-	req, err := stream.Recv()
-	if err != nil {
-		s.logger.Error("Failed to receive initial message", zap.Error(err))
-		return err
-	}
-
-	metadata, ok := req.Data.(*mediapb.UploadMediaRequest_Metadata)
-	if !ok {
-		s.logger.Error("First message is not metadata")
-		return fmt.Errorf("first message must contain metadata")
-	}
-
-	s.logger.Info("Received metadata",
-		zap.String("character_id", metadata.Metadata.CharacterId),
-		zap.String("filename", metadata.Metadata.Filename),
-		zap.String("content_type", metadata.Metadata.ContentType),
-		zap.Int64("size", metadata.Metadata.Size))
-
-	// Generate a unique ID using the exported function from service package
-	id, err := service.GenerateID()
-	if err != nil {
-		s.logger.Error("Failed to generate ID", zap.Error(err))
-		return err
-	}
-
-	// Generate object name for MinIO
-	objectName := fmt.Sprintf("%s/%s%s", metadata.Metadata.CharacterId, id, filepath.Ext(metadata.Metadata.Filename))
-
-	// Create PutObject options
-	opts := minio.PutObjectOptions{
-		ContentType: metadata.Metadata.ContentType,
-	}
-
-	// Create a pipe to connect the gRPC stream to the MinIO upload
-	pr, pw := io.Pipe()
-
-	// Start uploading to MinIO in a goroutine
-	minioErrCh := make(chan error, 1)
-	go func() {
-		_, err := s.minioClient.PutObject(
-			ctx,
-			s.bucket,
-			objectName,
-			pr,
-			metadata.Metadata.Size,
-			opts,
-		)
-		if err != nil {
-			s.logger.Error("Failed to upload to MinIO", zap.Error(err))
-			minioErrCh <- err
-			_ = pr.CloseWithError(err)
-			return
-		}
-		minioErrCh <- nil
-	}()
-
-	// Read chunks from the stream and write to the pipe
-	for {
-		req, err := stream.Recv()
-		if err == io.EOF {
-			// End of stream
-			break
-		}
-		if err != nil {
-			s.logger.Error("Failed to receive chunk", zap.Error(err))
-			_ = pw.CloseWithError(err)
-			return err
-		}
-
-		chunk, ok := req.Data.(*mediapb.UploadMediaRequest_Chunk)
-		if !ok {
-			s.logger.Error("Message is not a chunk")
-			_ = pw.CloseWithError(fmt.Errorf("expected chunk data"))
-			return fmt.Errorf("expected chunk data")
-		}
-
-		_, err = pw.Write(chunk.Chunk)
-		if err != nil {
-			s.logger.Error("Failed to write chunk to pipe", zap.Error(err))
-			return err
-		}
-	}
-
-	// Close the pipe to signal the end of the data
-	_ = pw.Close()
-
-	// Wait for MinIO upload to complete
-	if err := <-minioErrCh; err != nil {
-		return err
-	}
-
-	// Create media record in the database
-	media := &models.Media{
-		ID:          id,
-		CharacterId: metadata.Metadata.CharacterId,
-		Filename:    metadata.Metadata.Filename,
-		ContentType: metadata.Metadata.ContentType,
-		Size:        metadata.Metadata.Size,
-		BucketName:  s.bucket,
-		ObjectName:  objectName,
-	}
-
-	repo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
-	err = repo.CreateMedia(ctx, media)
-	if err != nil {
-		s.logger.Error("Failed to store media in database", zap.Error(err))
-		return err
-	}
-
-	// Prepare response
-	return stream.SendAndClose(&mediapb.UploadMediaResponse{
-		MediaId: id,
-		Variants: []*mediapb.MediaVariant{
-			{
-				Name:   "original",
-				Width:  0, // We don't know the dimensions yet
-				Height: 0,
-			},
-		},
-	})
 }
 
 // GetPresignedUploadURL generates a presigned URL for direct upload to storage

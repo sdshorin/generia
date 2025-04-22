@@ -27,6 +27,8 @@ KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "ai-worker")
 
 # API Keys
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+RUNWARE_API_KEY = os.getenv("RUNWARE_API_KEY", "")
+
 
 # LLM Configuration
 DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "openai/gpt-3.5-turbo")
@@ -56,6 +58,9 @@ def validate_config() -> Dict[str, Any]:
     
     if not OPENROUTER_API_KEY:
         issues.append("OPENROUTER_API_KEY not set")
+        
+    if not RUNWARE_API_KEY:
+        issues.append("RUNWARE_API_KEY not set")
     
     return {
         "valid": len(issues) == 0,

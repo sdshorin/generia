@@ -108,14 +108,6 @@ message Media {
 }
 ```
 
-### Новый метод для AI
-Добавлен метод для загрузки AI-генерируемых медиа:
-
-```proto
-// Внутренний метод для получения ссылки для загрузки AI-сгенерированного медиа (не требует авторизации)
-rpc UploadAIGeneratedMedia(UploadAIGeneratedMediaRequest) returns (GetPresignedUploadURLResponse);
-```
-
 ## 4. Обновление Post сервиса
 
 ### API изменения

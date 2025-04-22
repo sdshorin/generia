@@ -3,8 +3,13 @@ aiokafka==0.8.1
 motor==3.3.2
 pymongo==4.6.1
 pydantic==2.5.3
-google-generativeai==0.3.2
-python-dotenv==1.0.0
+python-dotenv
 aiohttp==3.9.1
 uvloop==0.19.0
 python-json-logger==2.0.7
+grpcio==1.71.0
+grpcio-tools==1.71.0
+protobuf==5.29.0 #5.26.1
+requests==2.31.0
+runware==0.4.8
+Pillow==10.0.1

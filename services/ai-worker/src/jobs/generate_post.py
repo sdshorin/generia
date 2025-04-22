@@ -25,13 +25,13 @@ class GeneratePostJob(BaseJob):
         world_id = self.task.world_id
         post_topic = self.task.parameters.get("post_topic", "")
         post_brief = self.task.parameters.get("post_brief", "")
-        has_image = self.task.parameters.get("has_image", False)
         emotional_tone = self.task.parameters.get("emotional_tone", "")
         post_type = self.task.parameters.get("post_type", "")
         relevance_to_character = self.task.parameters.get("relevance_to_character", "")
         character_name = self.task.parameters.get("character_name", "")
         character_description = self.task.parameters.get("character_description", {})
-        username = self.task.parameters.get("username", "")
+        username = character_description.get("username", "")
+        character_id = self.task.parameters.get("character_id", "")
         character_index = self.task.parameters.get("character_index", 0)
         post_index = self.task.parameters.get("post_index", 0)
         
@@ -53,7 +53,6 @@ class GeneratePostJob(BaseJob):
             speaking_style=character_description.get("speaking_style", ""),
             post_topic=post_topic,
             post_brief=post_brief,
-            has_image=has_image,
             emotional_tone=emotional_tone,
             post_type=post_type,
             relevance_to_character=relevance_to_character
@@ -84,7 +83,7 @@ class GeneratePostJob(BaseJob):
             now = datetime.utcnow()
             image_task_id = None
             
-            if has_image and post_detail.image_prompt:
+            if post_detail.image_prompt:
                 image_task_id = str(uuid.uuid4())
                 image_task = Task(
                     _id=image_task_id,
@@ -98,8 +97,10 @@ class GeneratePostJob(BaseJob):
                         "post_content": post_detail.content,
                         "character_name": character_name,
                         "username": username,
+                        "character_id": character_id,
                         "character_index": character_index,
-                        "post_index": post_index
+                        "post_index": post_index,
+                        "tags": post_detail.hashtags
                     },
                     created_at=now,
                     updated_at=now,
@@ -107,50 +108,8 @@ class GeneratePostJob(BaseJob):
                 )
                 next_tasks.append({"task": image_task})
             
-            # Определяем, нужно ли создавать пост через API
-            should_create_post = not has_image  # Если нет изображения, создаем пост сразу
-            user_id = None
-            post_id = None
             
-            # Если у сервисного клиента есть доступ к API, и пост не требует изображения,
-            # сразу создаем пост через сервисный клиент
-            if should_create_post and self.service_client:
-                try:
-                    # Сначала получаем ID пользователя
-                    user_result = await self.service_client.create_ai_user(
-                        world_id=world_id,
-                        username=username,
-                        display_name=character_name,
-                        bio=character_description.get("bio", ""),
-                        task_id=self.task.id
-                    )
-                    
-                    user_id = user_result.get("id")
-                    
-                    if user_id:
-                        # Создаем пост
-                        post_result = await self.service_client.create_post(
-                            world_id=world_id,
-                            user_id=user_id,
-                            content=post_detail.content,
-                            task_id=self.task.id
-                        )
-                        
-                        post_id = post_result.get("id")
-                        
-                        if post_id:
-                            logger.info(f"Created post {post_id} for user {username} in world {world_id}")
-                            
-                            # Увеличиваем счетчик созданных постов
-                            if self.progress_manager:
-                                await self.progress_manager.increment_task_counter(
-                                    world_id=world_id,
-                                    field="posts_created"
-                                )
-                
-                except Exception as e:
-                    logger.error(f"Error creating post via API: {str(e)}")
-                    # Продолжаем выполнение даже в случае ошибки
+            
             
             # Создаем следующие задачи, если есть
             created_task_ids = []
@@ -159,17 +118,15 @@ class GeneratePostJob(BaseJob):
             
             # Передаем информацию о посте в результат
             return {
+                "character_id": character_id,
                 "character_name": character_name,
                 "username": username,
                 "content": post_detail.content,
-                "has_image": has_image,
                 "image_prompt": post_detail.image_prompt,
                 "hashtags": post_detail.hashtags,
                 "mood": post_detail.mood,
                 "context": post_detail.context,
-                "next_tasks": created_task_ids,
-                "post_id": post_id,
-                "user_id": user_id
+                "next_tasks": created_task_ids
             }
             
         except Exception as e:

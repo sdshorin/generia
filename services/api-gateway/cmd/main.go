@@ -147,7 +147,6 @@ func main() {
 	router.Handle("/api/v1/worlds/{world_id}/users/{user_id}/posts", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetUserPosts))).Methods("GET")
 
 	// Media routes - Legacy and Direct Upload
-	router.Handle("/api/v1/media/upload", jwtMiddleware.RequireAuth(http.HandlerFunc(mediaHandler.UploadMedia))).Methods("POST")
 	router.Handle("/api/v1/media/upload-url", jwtMiddleware.RequireAuth(http.HandlerFunc(mediaHandler.GetUploadURL))).Methods("POST")
 	router.Handle("/api/v1/media/confirm", jwtMiddleware.RequireAuth(http.HandlerFunc(mediaHandler.ConfirmUpload))).Methods("POST")
 	router.HandleFunc("/api/v1/media/{id}", mediaHandler.GetMediaURLs).Methods("GET")

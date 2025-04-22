@@ -32,7 +32,7 @@ class KafkaConsumer:
         """
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
-        self.group_id = f"{group_id}-{uuid.uuid4().hex[:8]}"  # Уникальный group_id для каждого экземпляра
+        self.group_id = group_id  # Используем стабильный group_id
         self.processor = processor
         self.consumer = None
         self.running = False
@@ -56,8 +56,8 @@ class KafkaConsumer:
                 self.topic,
                 bootstrap_servers=self.bootstrap_servers,
                 group_id=self.group_id,
-                auto_offset_reset="earliest",
-                enable_auto_commit=True,
+                auto_offset_reset="latest",  # Избегаем обработки старых сообщений при первом запуске
+                enable_auto_commit=True,     # Оставляем автокоммит, но в будущей версии заменим на manual commit
                 value_deserializer=lambda m: json.loads(m.decode("utf-8"))
             )
             

@@ -100,17 +100,17 @@ class MongoDBManager:
         Returns:
             Task object or None if task not found
         """
-        logger.info(f"Searching for task in database: task_id={task_id}, collection={self.tasks_collection.name}, database={self.tasks_collection.database.name}")
+        # logger.info(f"Searching for task in database: task_id={task_id}, collection={self.tasks_collection.name}, database={self.tasks_collection.database.name}")
         
         # Log the query that will be executed
         query = {"_id": task_id}
-        logger.info(f"Executing query: {query}")
+        # logger.info(f"Executing query: {query}")
         
         # Execute the query
         doc = await self.tasks_collection.find_one(query)
         
         if doc:
-            logger.info(f"Task found: {doc}")
+            # logger.info(f"Task fou    nd: {doc}")
             return Task(**doc)
         
         logger.warning(f"Task not found: task_id={task_id}, collection={self.tasks_collection.name}, database={self.tasks_collection.database.name}")
@@ -228,10 +228,10 @@ class MongoDBManager:
             )
             
             success = result.matched_count > 0
-            if success:
-                logger.info(f"Task {task_id} claimed by worker {worker_id}")
-            else:
-                logger.warning(f"Failed to claim task {task_id} (race condition)")
+            # if success:
+            #     logger.info(f"Task {task_id} claimed by worker {worker_id}")
+            # else:
+            #     logger.warning(f"Failed to claim task {task_id} (race condition)")
             
             return success
     
@@ -464,7 +464,7 @@ class MongoDBManager:
                 }}
             )
             
-            logger.info(f"Updated stage {stage} status to {status} for world {world_id}")
+            # logger.info(f"Updated stage {stage} status to {status} for world {world_id}")
             return current_status
         except Exception as e:
             error_msg = f"Failed to update stage status for world {world_id}: {str(e)}"
@@ -513,7 +513,7 @@ class MongoDBManager:
         
         updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})
         
-        logger.debug(f"Incremented {field} counter by {increment} for world {world_id}")
+        # logger.debug(f"Incremented {field} counter by {increment} for world {world_id}")
         
         return updated_status
     
@@ -547,6 +547,6 @@ class MongoDBManager:
         
         updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})
         
-        logger.info(f"Updated progress for world {world_id}: {updates.keys()}")
+        # logger.info(f"Updated progress for world {world_id}: {updates.keys()}")
         
         return updated_status

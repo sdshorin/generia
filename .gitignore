@@ -4,3 +4,5 @@ Makefile
 .env
 services/ai-worker/src/__pycache__/**
 services/ai-worker/src/*/__pycache__/**
+services/ai-worker/.venv/
+**/__pycache__/

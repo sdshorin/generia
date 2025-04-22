@@ -164,13 +164,13 @@ class TaskManager:
                             field="tasks_failed"
                         )
                     
-                    # Отправляем уведомление о неудаче
-                    if self.kafka_producer:
-                        await self.kafka_producer.send_task_update(
-                            task_id=task.id,
-                            status=TaskStatus.FAILED,
-                            event_type="task_failed"
-                        )
+                    # # Отправляем уведомление о неудаче
+                    # if self.kafka_producer:
+                    #     await self.kafka_producer.send_task_update(
+                    #         task_id=task.id,
+                    #         status=TaskStatus.FAILED,
+                    #         event_type="task_failed"
+                    #     )
                     
                     return
                 
@@ -210,13 +210,13 @@ class TaskManager:
                         )
                     
                     # Отправляем уведомление о завершении
-                    if self.kafka_producer:
-                        await self.kafka_producer.send_task_update(
-                            task_id=task.id,
-                            status=TaskStatus.COMPLETED,
-                            result=result,
-                            event_type="task_completed"
-                        )
+                    # if self.kafka_producer:
+                    #     await self.kafka_producer.send_task_update(
+                    #         task_id=task.id,
+                    #         status=TaskStatus.COMPLETED,
+                    #         result=result,
+                    #         event_type="task_completed"
+                    #     )
                     
                     # Вызываем обработчик успешного выполнения
                     await job.on_success(result)
@@ -260,12 +260,12 @@ class TaskManager:
                     )
                     
                     # Отправляем уведомление о неудаче
-                    if self.kafka_producer:
-                        await self.kafka_producer.send_task_update(
-                            task_id=task.id,
-                            status=status,
-                            event_type=event_type
-                        )
+                    # if self.kafka_producer:
+                    #     await self.kafka_producer.send_task_update(
+                    #         task_id=task.id,
+                    #         status=status,
+                    #         event_type=event_type
+                    #     )
                     
                     # Вызываем обработчик ошибки
                     try:

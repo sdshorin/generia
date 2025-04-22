@@ -6,12 +6,7 @@ package media;
 option go_package = "github.com/sdshorin/generia/api/proto/media";
 
 // MediaService предоставляет API для управления медиафайлами
-service MediaService {
-  // Загрузка медиафайла
-  rpc UploadMedia(stream UploadMediaRequest) returns (UploadMediaResponse);
-  
-  // Внутренний метод для получения ссылки для загрузки AI-сгенерированного медиа (не требует авторизации)
-  rpc UploadAIGeneratedMedia(UploadAIGeneratedMediaRequest) returns (GetPresignedUploadURLResponse);
+service MediaService {  
   
   // Получение предподписанного URL для прямой загрузки в хранилище
   rpc GetPresignedUploadURL(GetPresignedUploadURLRequest) returns (GetPresignedUploadURLResponse);
@@ -32,12 +27,6 @@ service MediaService {
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
 }
 
-message UploadMediaRequest {
-  oneof data {
-    MediaMetadata metadata = 1;
-    bytes chunk = 2;
-  }
-}
 
 message MediaMetadata {
   string character_id = 1;
@@ -45,11 +34,6 @@ message MediaMetadata {
   string filename = 3;
   string content_type = 4;
   int64 size = 5;
-}
-
-message UploadMediaResponse {
-  string media_id = 1;
-  repeated MediaVariant variants = 2; // URLs для различных размеров
 }
 
 message MediaVariant {
@@ -118,13 +102,6 @@ message ConfirmUploadResponse {
   repeated MediaVariant variants = 2;
 }
 
-message UploadAIGeneratedMediaRequest {
-  string character_id = 1;
-  string world_id = 2;
-  string filename = 3;
-  string content_type = 4;
-  int64 size = 5;
-}
 
 message HealthCheckRequest {
   // Пустой запрос

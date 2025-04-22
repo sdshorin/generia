@@ -5,7 +5,8 @@ import sys
 import uuid
 from datetime import datetime
 
-from .config import validate_config, MAX_CONCURRENT_TASKS, MAX_CONCURRENT_LLM_REQUESTS, MAX_CONCURRENT_IMAGE_REQUESTS
+from .config import validate_config, MAX_CONCURRENT_TASKS, MAX_CONCURRENT_LLM_REQUESTS, MAX_CONCURRENT_IMAGE_REQUESTS, API_GATEWAY_URL
+from .utils.discovery import ConsulServiceDiscovery
 from .constants import TaskType
 from .db import MongoDBManager
 from .kafka import KafkaConsumer, KafkaProducer
@@ -51,9 +52,10 @@ async def initialize_components():
     await kafka_producer.start()
     logger.info("Kafka producer started")
     
-    # Initialize external API clients
+    # Initialize service client with Consul discovery
     service_client = ServiceClient(db_manager=db_manager)
-    logger.info("Service client initialized")
+    await service_client.initialize()
+    logger.info("Service client initialized with Consul service discovery")
     
     # Initialize images and LLM (order is important)
     image_generator = ImageGenerator(db_manager=db_manager, service_client=service_client)

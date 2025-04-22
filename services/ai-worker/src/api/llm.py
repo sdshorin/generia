@@ -14,6 +14,9 @@ from ..utils.circuit_breaker import circuit_breaker
 from ..utils.retries import with_retries
 from ..db.models import ApiRequestHistory
 
+MODEL = "google/gemini-2.0-flash-001"
+# "google/gemini-flash-1.5-8b",
+
 T = TypeVar('T')
 
 class LLMClient:
@@ -33,12 +36,12 @@ class LLMClient:
         self.db_manager = db_manager
         self.semaphore = asyncio.Semaphore(15)  # Limit the number of concurrent requests
     
-    @circuit_breaker(name="llm_content", failure_threshold=3, recovery_timeout=60.0)
+    @circuit_breaker(name="llm_content", failure_threshold=3, recovery_timeout=60.0, timeout=120.0)
     @with_retries(max_retries=2)
     async def generate_content(
         self,
         prompt: str,
-        model: str = "google/gemini-flash-1.5-8b",
+        model: str = MODEL,
         temperature: float = 0.7,
         max_output_tokens: int = 1024,
         task_id: Optional[str] = None,
@@ -97,8 +100,8 @@ class LLMClient:
                 )
                 
                 # Логируем статус ответа и заголовки
-                logger.info(f"OpenRouter API response status: {response.status_code}")
-                logger.info(f"OpenRouter API response headers: {dict(response.headers)}")
+                # logger.info(f"OpenRouter API response status: {response.status_code}")
+                # logger.info(f"OpenRouter API response headers: {dict(response.headers)}")
                 
                 if response.status_code != 200:
                     error_text = response.text
@@ -108,7 +111,7 @@ class LLMClient:
                 response_data = response.json()
                 
                 # Логируем полный ответ от API
-                logger.info(f"OpenRouter API full response: {json.dumps(response_data, indent=2)}")
+                # logger.info(f"OpenRouter API full response: {json.dumps(response_data, indent=2)}")
                 
                 duration_ms = int((time.time() - start_time) * 1000)
                 
@@ -133,7 +136,7 @@ class LLMClient:
                 content = response_data["choices"][0]["message"]["content"]
                 
                 # Логируем полученный контент
-                logger.info(f"OpenRouter API content: {content}")
+                # logger.info(f"OpenRouter API content: {content}")
                 
                 # Prepare response for logging
                 result = {
@@ -157,10 +160,10 @@ class LLMClient:
                     )
                     await self.db_manager.log_api_request(log_entry)
                 
-                logger.info(
-                    f"LLM API call completed in {duration_ms}ms. "
-                    f"Model: {model}, TaskID: {task_id or 'manual'}"
-                )
+                # logger.info(
+                #     f"LLM API call completed in {duration_ms}ms. "
+                #     f"Model: {model}, TaskID: {task_id or 'manual'}"
+                # )
                 
                 return result
                 
@@ -185,14 +188,14 @@ class LLMClient:
                 logger.error(f"LLM API error: {str(e)}")
                 raise
     
-    @circuit_breaker(name="llm_structured", failure_threshold=3, recovery_timeout=60.0)
+    @circuit_breaker(name="llm_structured", failure_threshold=3, recovery_timeout=60.0, timeout=120.0)
     @with_retries(max_retries=2)
     async def generate_structured_content(
         self,
         prompt: str,
         response_schema: Union[Type[BaseModel], List[Type[BaseModel]], Dict[str, Any]],
         # model: str = "openai/gpt-4o-mini",
-        model: str = "google/gemini-flash-1.5-8b",
+        model: str = MODEL,
         temperature: float = 0.2,
         max_output_tokens: int = 2048,
         task_id: Optional[str] = None,
@@ -316,7 +319,7 @@ class LLMClient:
                         
                         add_required_to_objects(schema_dict)
                 
-                logger.info(f"schema_dict: {schema_dict}")
+                # logger.info(f"schema_dict: {schema_dict}")
                 headers = {
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
@@ -360,7 +363,7 @@ class LLMClient:
                 )
                 
                 # Логируем статус ответа и заголовки
-                logger.info(f"OpenRouter API response status: {response.status_code}")
+                # logger.info(f"OpenRouter API response status: {response.status_code}")
                 # logger.info(f"OpenRouter API response headers: {dict(response.headers)}")
                 
                 if response.status_code != 200:
@@ -371,7 +374,7 @@ class LLMClient:
                 response_data = response.json()
                 
                 # Логируем полный ответ от API
-                logger.info(f"OpenRouter API full response: {json.dumps(response_data, indent=2)}")
+                # logger.info(f"OpenRouter API full response: {json.dumps(response_data, indent=2)}")
                 
                 duration_ms = int((time.time() - start_time) * 1000)
                 
@@ -400,7 +403,7 @@ class LLMClient:
                 
                 try:
                     structured_response = json.loads(content)
-                    logger.info(f"Parsed structured response: {json.dumps(structured_response, indent=2)}")
+                    # logger.info(f"Parsed structured response: {json.dumps(structured_response, indent=2)}")
                     
                     # Преобразуем словарь в объект Pydantic, если передан класс схемы
                     if not isinstance(response_schema, dict):
@@ -434,10 +437,10 @@ class LLMClient:
                     )
                     await self.db_manager.log_api_request(log_entry)
                 
-                logger.info(
-                    f"LLM API structured call completed in {duration_ms}ms. "
-                    f"Model: {model}, TaskID: {task_id or 'manual'}"
-                )
+                # logger.info(
+                #     f"LLM API structured call completed in {duration_ms}ms. "
+                #     f"Model: {model}, TaskID: {task_id or 'manual'}"
+                # )
                 
                 return structured_response
                 

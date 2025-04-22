@@ -112,7 +112,7 @@ class GenerateCharacterBatchJob(BaseJob):
             return {
                 "characters_count": len(character_batch.characters),
                 "world_interpretation": character_batch.world_interpretation,
-                "character_connections": character_batch.character_connections,
+                "character_connections": [conn.model_dump() for conn in character_batch.character_connections],
                 "next_tasks": created_task_ids,
             }
             

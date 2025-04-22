@@ -74,8 +74,8 @@ class GenerateWorldImageJob(BaseJob):
             # Генерируем фоновое изображение
             header_image = await self.image_generator.generate_image(
                 prompt=image_prompts.header_prompt,
-                width=1200,
-                height=400,
+                width=512,
+                height=512,
                 task_id=self.task.id,
                 world_id=world_id,
                 filename=f"world_{world_id}_header.png",
@@ -87,8 +87,8 @@ class GenerateWorldImageJob(BaseJob):
             # Генерируем иконку
             icon_image = await self.image_generator.generate_image(
                 prompt=image_prompts.icon_prompt,
-                width=200,
-                height=200,
+                width=512,
+                height=512,
                 task_id=self.task.id,
                 world_id=world_id,
                 filename=f"world_{world_id}_icon.png",

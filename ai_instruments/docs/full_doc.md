@@ -703,7 +703,6 @@ service PostService {
 
 ```protobuf
 service MediaService {
-  rpc UploadMedia(stream UploadMediaRequest) returns (UploadMediaResponse);
   rpc GetMedia(GetMediaRequest) returns (Media);
   rpc GetMediaURL(GetMediaURLRequest) returns (GetMediaURLResponse);
   rpc OptimizeImage(OptimizeImageRequest) returns (OptimizeImageResponse);

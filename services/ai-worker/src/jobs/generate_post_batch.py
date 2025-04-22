@@ -27,7 +27,11 @@ class GeneratePostBatchJob(BaseJob):
         character_description = self.task.parameters.get("character_description", {})
         posts_count = int(self.task.parameters.get("posts_count", 5))
         username = character_description.get("username", "")
+        character_id = self.task.parameters.get("character_id", "")
         character_index = character_description.get("character_index", 0)
+        
+        if not character_id:
+            raise ValueError("Character ID is required to generate posts")
         
         # Получаем параметры мира
         world_params = await self.get_world_parameters(world_id)
@@ -93,12 +97,12 @@ class GeneratePostBatchJob(BaseJob):
                     parameters={
                         "post_topic": post.topic,
                         "post_brief": post.content_brief,
-                        "has_image": post.has_image,
                         "emotional_tone": post.emotional_tone,
                         "post_type": post.post_type,
                         "relevance_to_character": post.relevance_to_character,
                         "character_name": character_name,
                         "character_description": character_description,
+                        "character_id": character_id,
                         "username": username,
                         "character_index": character_index,
                         "post_index": i
@@ -113,6 +117,7 @@ class GeneratePostBatchJob(BaseJob):
             
             # Передаем информацию о пакете постов в результат
             return {
+                "character_id": character_id,
                 "character_name": character_name,
                 "username": username,
                 "posts_count": len(post_batch.posts),
