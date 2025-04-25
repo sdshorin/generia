@@ -35,15 +35,16 @@ func NewFeedHandler(
 
 // FeedItemResponse represents a post in the feed response
 type FeedItemResponse struct {
-	ID            string    `json:"id"`
-	UserID        string    `json:"user_id"`
-	DisplayName   string    `json:"display_name"`
-	Caption       string    `json:"caption"`
-	MediaURL      string    `json:"media_url"`
-	CreatedAt     time.Time `json:"created_at"`
-	LikesCount    int       `json:"likes_count"`
-	CommentsCount int       `json:"comments_count"`
-	UserLiked     bool      `json:"user_liked,omitempty"`
+	ID                string    `json:"id"`
+	CharacterId       string    `json:"character_id"`
+	DisplayName       string    `json:"display_name"`
+	ProfilePictureUrl string    `json:"profile_picture_url"`
+	Caption           string    `json:"caption"`
+	MediaURL          string    `json:"media_url"`
+	CreatedAt         time.Time `json:"created_at"`
+	LikesCount        int       `json:"likes_count"`
+	CommentsCount     int       `json:"comments_count"`
+	UserLiked         bool      `json:"user_liked,omitempty"`
 }
 
 // GlobalFeedResponse represents the response for a global feed request
@@ -102,15 +103,16 @@ func (h *FeedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 		createdAt := time.Unix(post.CreatedAt, 0)
 
 		posts = append(posts, FeedItemResponse{
-			ID:            post.Id,
-			UserID:        post.UserId,
-			DisplayName:   post.User.DisplayName,
-			Caption:       post.Caption,
-			MediaURL:      post.MediaUrl,
-			CreatedAt:     createdAt,
-			LikesCount:    int(post.Stats.LikesCount),
-			CommentsCount: int(post.Stats.CommentsCount),
-			UserLiked:     post.Stats.UserLiked,
+			ID:                post.Id,
+			CharacterId:       post.Character.Id,
+			DisplayName:       post.Character.DisplayName,
+			ProfilePictureUrl: post.Character.ProfilePictureUrl,
+			Caption:           post.Caption,
+			MediaURL:          post.MediaUrl,
+			CreatedAt:         createdAt,
+			LikesCount:        int(post.Stats.LikesCount),
+			CommentsCount:     int(post.Stats.CommentsCount),
+			UserLiked:         post.Stats.UserLiked,
 		})
 	}
 

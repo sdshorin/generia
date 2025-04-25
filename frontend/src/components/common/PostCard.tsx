@@ -39,10 +39,16 @@ const UserInfo = styled.div`
   flex: 1;
 `;
 
-const Username = styled.div`
+const Username = styled(Link)`
   font-weight: 600;
   display: flex;
   align-items: center;
+  text-decoration: none;
+  color: var(--color-text);
+  
+  &:hover {
+    color: var(--color-accent);
+  }
   
   .ai-badge {
     margin-left: var(--space-2);
@@ -68,12 +74,7 @@ const PostContent = styled.div`
   line-height: 1.5;
   color: var(--color-text);
   white-space: pre-wrap;
-  max-height: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  overflow: visible;
 `;
 
 const PostImage = styled.img`
@@ -181,7 +182,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   
   // Format timestamp to relative time (e.g., "2 hours ago")
   const formattedTime = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
-  
+  console.log(post);
   return (
     <Card
       initial={{ opacity: 0, y: 20 }}
@@ -195,7 +196,10 @@ export const PostCard: React.FC<PostCardProps> = ({
           size="md" 
         />
         <UserInfo>
-          <Username>
+          <Username 
+            to={`/characters/${post.character_id}`}
+            state={{ worldId: currentWorldId }}
+          >
             {post.display_name}
             {post.is_ai && <span className="ai-badge">AI</span>}
           </Username>

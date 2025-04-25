@@ -378,11 +378,10 @@ func (x *GetUserFeedResponse) GetHasMore() bool {
 type PostInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Caption       string                 `protobuf:"bytes,3,opt,name=caption,proto3" json:"caption,omitempty"`
 	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
 	CreatedAt     int64                  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // Unix timestamp
-	User          *UserInfo              `protobuf:"bytes,6,opt,name=user,proto3" json:"user,omitempty"`
+	Character     *CharacterInfo         `protobuf:"bytes,6,opt,name=character,proto3" json:"character,omitempty"`
 	Stats         *PostStats             `protobuf:"bytes,7,opt,name=stats,proto3" json:"stats,omitempty"`
 	MediaUrl      string                 `protobuf:"bytes,8,opt,name=media_url,json=mediaUrl,proto3" json:"media_url,omitempty"` // URL для доступа к медиафайлу
 	unknownFields protoimpl.UnknownFields
@@ -426,13 +425,6 @@ func (x *PostInfo) GetId() string {
 	return ""
 }
 
-func (x *PostInfo) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
 func (x *PostInfo) GetCaption() string {
 	if x != nil {
 		return x.Caption
@@ -454,9 +446,9 @@ func (x *PostInfo) GetCreatedAt() int64 {
 	return 0
 }
 
-func (x *PostInfo) GetUser() *UserInfo {
+func (x *PostInfo) GetCharacter() *CharacterInfo {
 	if x != nil {
-		return x.User
+		return x.Character
 	}
 	return nil
 }
@@ -475,7 +467,7 @@ func (x *PostInfo) GetMediaUrl() string {
 	return ""
 }
 
-type UserInfo struct {
+type CharacterInfo struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	DisplayName       string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
@@ -484,20 +476,20 @@ type UserInfo struct {
 	sizeCache         protoimpl.SizeCache
 }
 
-func (x *UserInfo) Reset() {
-	*x = UserInfo{}
+func (x *CharacterInfo) Reset() {
+	*x = CharacterInfo{}
 	mi := &file_feed_feed_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UserInfo) String() string {
+func (x *CharacterInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UserInfo) ProtoMessage() {}
+func (*CharacterInfo) ProtoMessage() {}
 
-func (x *UserInfo) ProtoReflect() protoreflect.Message {
+func (x *CharacterInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_feed_feed_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -509,26 +501,26 @@ func (x *UserInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UserInfo.ProtoReflect.Descriptor instead.
-func (*UserInfo) Descriptor() ([]byte, []int) {
+// Deprecated: Use CharacterInfo.ProtoReflect.Descriptor instead.
+func (*CharacterInfo) Descriptor() ([]byte, []int) {
 	return file_feed_feed_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *UserInfo) GetId() string {
+func (x *CharacterInfo) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *UserInfo) GetDisplayName() string {
+func (x *CharacterInfo) GetDisplayName() string {
 	if x != nil {
 		return x.DisplayName
 	}
 	return ""
 }
 
-func (x *UserInfo) GetProfilePictureUrl() string {
+func (x *CharacterInfo) GetProfilePictureUrl() string {
 	if x != nil {
 		return x.ProfilePictureUrl
 	}
@@ -795,18 +787,17 @@ const file_feed_feed_proto_rawDesc = "" +
 	"\x05posts\x18\x01 \x03(\v2\x0e.feed.PostInfoR\x05posts\x12\x1f\n" +
 	"\vnext_cursor\x18\x02 \x01(\tR\n" +
 	"nextCursor\x12\x19\n" +
-	"\bhas_more\x18\x03 \x01(\bR\ahasMore\"\xef\x01\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\"\xe5\x01\n" +
 	"\bPostInfo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\acaption\x18\x03 \x01(\tR\acaption\x12\x19\n" +
 	"\bmedia_id\x18\x04 \x01(\tR\amediaId\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12\"\n" +
-	"\x04user\x18\x06 \x01(\v2\x0e.feed.UserInfoR\x04user\x12%\n" +
+	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x121\n" +
+	"\tcharacter\x18\x06 \x01(\v2\x13.feed.CharacterInfoR\tcharacter\x12%\n" +
 	"\x05stats\x18\a \x01(\v2\x0f.feed.PostStatsR\x05stats\x12\x1b\n" +
-	"\tmedia_url\x18\b \x01(\tR\bmediaUrl\"m\n" +
-	"\bUserInfo\x12\x0e\n" +
+	"\tmedia_url\x18\b \x01(\tR\bmediaUrl\"r\n" +
+	"\rCharacterInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12.\n" +
 	"\x13profile_picture_url\x18\x03 \x01(\tR\x11profilePictureUrl\"r\n" +
@@ -860,7 +851,7 @@ var file_feed_feed_proto_goTypes = []any{
 	(*GetUserFeedRequest)(nil),                       // 4: feed.GetUserFeedRequest
 	(*GetUserFeedResponse)(nil),                      // 5: feed.GetUserFeedResponse
 	(*PostInfo)(nil),                                 // 6: feed.PostInfo
-	(*UserInfo)(nil),                                 // 7: feed.UserInfo
+	(*CharacterInfo)(nil),                            // 7: feed.CharacterInfo
 	(*PostStats)(nil),                                // 8: feed.PostStats
 	(*InvalidateFeedCacheRequest)(nil),               // 9: feed.InvalidateFeedCacheRequest
 	(*InvalidateFeedCacheResponse)(nil),              // 10: feed.InvalidateFeedCacheResponse
@@ -870,7 +861,7 @@ var file_feed_feed_proto_goTypes = []any{
 var file_feed_feed_proto_depIdxs = []int32{
 	6,  // 0: feed.GetGlobalFeedResponse.posts:type_name -> feed.PostInfo
 	6,  // 1: feed.GetUserFeedResponse.posts:type_name -> feed.PostInfo
-	7,  // 2: feed.PostInfo.user:type_name -> feed.UserInfo
+	7,  // 2: feed.PostInfo.character:type_name -> feed.CharacterInfo
 	8,  // 3: feed.PostInfo.stats:type_name -> feed.PostStats
 	0,  // 4: feed.InvalidateFeedCacheRequest.type:type_name -> feed.InvalidateFeedCacheRequest.InvalidationType
 	1,  // 5: feed.HealthCheckResponse.status:type_name -> feed.HealthCheckResponse.Status

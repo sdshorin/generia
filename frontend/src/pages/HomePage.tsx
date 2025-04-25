@@ -238,7 +238,7 @@ export const HomePage: React.FC = () => {
       
       try {
         setIsLoading(true);
-        const data = await worldsAPI.getWorlds(5, 0);
+        const data = await worldsAPI.getWorlds(5, '');
         setPopularWorlds(data.worlds || []);
         
         // If we have worlds but no current world, load the first one
@@ -268,7 +268,7 @@ export const HomePage: React.FC = () => {
       try {
         setIsLoadingPosts(true);
         setRecentPosts([]); // Очистить прежние посты во время загрузки
-        const data = await postsAPI.getFeed(currentWorld.id, 6, 0);
+        const data = await postsAPI.getFeed(currentWorld.id, 6, '');
         setRecentPosts(data.posts || []);
       } catch (error) {
         console.error('Failed to fetch recent posts:', error);

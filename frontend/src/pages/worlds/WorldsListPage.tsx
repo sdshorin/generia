@@ -182,9 +182,13 @@ export const WorldsListPage: React.FC = () => {
     reset,
     sentinelRef
   } = useInfiniteScroll({
-    fetchItems: async (page, limit) => {
-      const response = await worldsAPI.getWorlds(limit, page * limit);
-      return response.worlds || [];
+    fetchItems: async (limit, cursor) => {
+      const response = await worldsAPI.getWorlds(limit, cursor);
+      return {
+        items: response.worlds || [],
+        nextCursor: response.next_cursor || '',
+        hasMore: response.has_more || false
+      };
     },
     limit: 12
   });

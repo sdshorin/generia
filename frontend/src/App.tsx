@@ -15,6 +15,7 @@ import { CreatePostPage } from './pages/posts/CreatePostPage';
 import { ViewPostPage } from './pages/posts/ViewPostPage';
 import { CreateCharacterPage } from './pages/posts/CreateCharacterPage';
 import { ProfilePage } from './pages/user/ProfilePage';
+import { CharacterPage } from './pages/characters/CharacterPage';
 
 const App: React.FC = () => {
   return (
@@ -66,6 +67,11 @@ const App: React.FC = () => {
             <Route path="/worlds/:worldId/characters/create" element={
               <ProtectedRoute>
                 <CreateCharacterPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/characters/:characterId" element={
+              <ProtectedRoute>
+                <CharacterPage />
               </ProtectedRoute>
             } />
             

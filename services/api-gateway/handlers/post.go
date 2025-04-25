@@ -83,13 +83,13 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
-	
+
 	if req.CharacterID == "" {
 		http.Error(w, "Character ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
-	
+
 	// Получаем world_id из URL параметров
 	vars := mux.Vars(r)
 	worldID := vars["world_id"]
@@ -157,13 +157,13 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID := vars["id"]
 	worldID := vars["world_id"]
-	
+
 	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
-	
+
 	if worldID == "" {
 		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
@@ -172,7 +172,7 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 
 	// Get post
 	resp, err := h.postClient.GetPost(ctx, &postpb.GetPostRequest{
-		PostId: postID,
+		PostId:  postID,
 		WorldId: worldID,
 	})
 	if err != nil {
@@ -239,13 +239,13 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["user_id"]
 	worldID := vars["world_id"]
-	
+
 	if userID == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
-	
+
 	if worldID == "" {
 		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
@@ -331,4 +331,70 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		logger.Logger.Error("Failed to encode response", zap.Error(err))
 	}
+}
+
+// GetCharacterPosts handles requests to get posts for a specific character in a world
+func (h *PostHandler) GetCharacterPosts(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.tracer.Start(r.Context(), "PostHandler.GetCharacterPosts")
+	defer span.End()
+
+	// Get parameters from URL
+	vars := mux.Vars(r)
+	worldID := vars["world_id"]
+	characterID := vars["character_id"]
+
+	if worldID == "" || characterID == "" {
+		http.Error(w, "World ID and Character ID are required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	// Get pagination parameters
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	if limit <= 0 {
+		limit = 20 // Default limit
+	}
+
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+	if offset < 0 {
+		offset = 0
+	}
+
+	// Call PostService
+	resp, err := h.postClient.GetCharacterPosts(ctx, &postpb.GetCharacterPostsRequest{
+		CharacterId: characterID,
+		WorldId:     worldID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
+
+	if err != nil {
+		http.Error(w, "Failed to get character posts", http.StatusInternalServerError)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Failed to get character posts", zap.Error(err))
+		return
+	}
+
+	// Convert posts to response format
+	posts := make([]PostResponse, len(resp.Posts))
+	for i, post := range resp.Posts {
+		posts[i] = PostResponse{
+			ID:            post.PostId,
+			CharacterID:   post.CharacterId,
+			DisplayName:   post.DisplayName,
+			Caption:       post.Caption,
+			MediaURL:      post.MediaUrl,
+			CreatedAt:     time.Unix(0, 0), // TODO: Parse created_at from string
+			LikesCount:    int(post.LikesCount),
+			CommentsCount: int(post.CommentsCount),
+			IsAI:          post.IsAi,
+		}
+	}
+
+	// Return response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(FeedResponse{
+		Posts: posts,
+		Total: len(posts),
+	})
 }

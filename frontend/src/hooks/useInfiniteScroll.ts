@@ -1,9 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 
+interface FetchResponse<T> {
+  items: T[];
+  nextCursor?: string;
+  hasMore: boolean;
+}
+
 interface InfiniteScrollOptions<T> {
   initialData?: T[];
-  fetchItems: (page: number, limit: number) => Promise<T[]>;
+  fetchItems: (limit: number, cursor: string) => Promise<FetchResponse<T>>;
   limit?: number;
 }
 
@@ -13,7 +19,7 @@ export function useInfiniteScroll<T>({
   limit = 10,
 }: InfiniteScrollOptions<T>) {
   const [items, setItems] = useState<T[]>(initialData);
-  const [page, setPage] = useState(0);
+  const [cursor, setCursor] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,14 +39,11 @@ export function useInfiniteScroll<T>({
     setError(null);
     
     try {
-      const newItems = await fetchItems(page, limit);
+      const response = await fetchItems(limit, cursor);
       
-      if (newItems.length < limit) {
-        setHasMore(false);
-      }
-      
-      setItems(prev => [...prev, ...newItems]);
-      setPage(prev => prev + 1);
+      setItems(prev => [...prev, ...response.items]);
+      setCursor(response.nextCursor || '');
+      setHasMore(response.hasMore);
     } catch (err) {
       setError('Failed to load more items. Please try again.');
       console.error('Error loading more items:', err);
@@ -48,12 +51,12 @@ export function useInfiniteScroll<T>({
       setIsLoading(false);
       requestInProgress.current = false;
     }
-  }, [fetchItems, page, limit, isLoading, hasMore]);
+  }, [fetchItems, cursor, limit, isLoading, hasMore]);
 
   // Reset everything
   const reset = useCallback(() => {
     setItems([]);
-    setPage(0);
+    setCursor('');
     setHasMore(true);
     setError(null);
   }, []);

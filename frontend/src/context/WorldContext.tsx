@@ -9,7 +9,7 @@ interface WorldContextType {
   currentWorld: World | null;
   isLoading: boolean;
   error: string | null;
-  loadWorlds: (limit?: number, offset?: number) => Promise<void>;
+  loadWorlds: (limit?: number, cursor?: string) => Promise<void>;
   createWorld: (name: string, description: string, prompt: string) => Promise<World>;
   joinWorld: (worldId: string) => Promise<void>;
   setCurrentWorld: (world: World | null) => void;
@@ -51,13 +51,13 @@ export const WorldProvider: React.FC<WorldProviderProps> = ({ children }) => {
   }, []);
 
   // Load worlds from API
-  const loadWorlds = useCallback(async (limit = 10, offset = 0) => {
+  const loadWorlds = useCallback(async (limit = 10, cursor = '') => {
     if (!isAuthenticated) return;
     
     try {
       setIsLoading(true);
       setError(null);
-      const data = await worldsAPI.getWorlds(limit, offset);
+      const data = await worldsAPI.getWorlds(limit, cursor);
       setWorlds(data.worlds || []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load worlds');

@@ -360,8 +360,8 @@ func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID
 	// Parameters for initialization task
 	parameters := map[string]interface{}{
 		"user_prompt": world.Prompt,
-		"users_count": 3, // Default value
-		"posts_count": 6, // Default value
+		"users_count": 20,  // Default value
+		"posts_count": 100, // Default value
 		"created_at":  time.Now().Format(time.RFC3339),
 	}
 

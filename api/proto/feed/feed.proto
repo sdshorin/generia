@@ -47,16 +47,15 @@ message GetUserFeedResponse {
 
 message PostInfo {
   string id = 1;
-  string user_id = 2;
   string caption = 3;
   string media_id = 4;
   int64 created_at = 5; // Unix timestamp
-  UserInfo user = 6;
+  CharacterInfo character = 6;
   PostStats stats = 7;
   string media_url = 8; // URL для доступа к медиафайлу
 }
 
-message UserInfo {
+message CharacterInfo {
   string id = 1;
   string display_name = 2;
   string profile_picture_url = 3; // Опционально

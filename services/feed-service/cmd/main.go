@@ -110,11 +110,10 @@ func (s *FeedService) GetGlobalFeed(ctx context.Context, req *feedpb.GetGlobalFe
 		// Add post to feed - the post.MediaUrl field already contains the actual URL
 		feedPost := &feedpb.PostInfo{
 			Id:        post.PostId,
-			UserId:    post.CharacterId,
 			Caption:   post.Caption,
 			MediaUrl:  post.MediaUrl, // MediaURL from post service already contains the fully formed URL
 			CreatedAt: createdTime.Unix(),
-			User: &feedpb.UserInfo{
+			Character: &feedpb.CharacterInfo{
 				Id:                post.CharacterId,
 				DisplayName:       post.DisplayName,
 				ProfilePictureUrl: profilePictureURL,
@@ -193,11 +192,10 @@ func (s *FeedService) GetUserFeed(ctx context.Context, req *feedpb.GetUserFeedRe
 		// Add post to feed
 		feedPost := &feedpb.PostInfo{
 			Id:        post.PostId,
-			UserId:    post.CharacterId,
 			Caption:   post.Caption,
 			MediaUrl:  post.MediaUrl, // MediaURL from post service already contains the fully formed URL
 			CreatedAt: createdTime.Unix(),
-			User: &feedpb.UserInfo{
+			Character: &feedpb.CharacterInfo{
 				Id:                post.CharacterId,
 				DisplayName:       post.DisplayName,
 				ProfilePictureUrl: profilePictureURL,

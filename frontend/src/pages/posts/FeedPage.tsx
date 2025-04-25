@@ -152,10 +152,14 @@ export const FeedPage: React.FC = () => {
     reset,
     sentinelRef
   } = useInfiniteScroll<Post>({
-    fetchItems: async (page, limit) => {
-      if (!worldId) return [];
-      const response = await postsAPI.getFeed(worldId, limit, page * limit);
-      return response.posts || [];
+    fetchItems: async (limit, cursor) => {
+      if (!worldId) return { items: [], hasMore: false };
+      const response = await postsAPI.getFeed(worldId, limit, cursor);
+      return { 
+        items: response.posts || [],
+        nextCursor: response.next_cursor || '',
+        hasMore: response.has_more || false
+      };
     },
     limit: 10
   });
@@ -163,12 +167,26 @@ export const FeedPage: React.FC = () => {
   const worldIdRef = useRef<string | null>(null);
   
   useEffect(() => {
+    async function fetchInitialPosts() {
+      try {
+        if (!currentWorld) return;
+        setIsLoading(true);
+        reset(); // Clear existing posts when switching worlds
+      } catch (error) {
+        console.error('Failed to fetch initial posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     if (worldId && worldIdRef.current !== worldId) {
       worldIdRef.current = worldId;
       loadCurrentWorld(worldId);
       setIsLoading(false);
+    } else if (currentWorld && currentWorld.id === worldId) {
+      fetchInitialPosts();
     }
-  }, [worldId, loadCurrentWorld]);
+  }, [worldId, currentWorld, reset, loadCurrentWorld]);
   
   const handlePostLike = (postId: string, isLiked: boolean) => {
     // Update post in the list

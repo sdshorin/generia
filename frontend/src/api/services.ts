@@ -34,8 +34,8 @@ export const authAPI = {
 
 // Worlds API
 export const worldsAPI = {
-  getWorlds: async (limit = 10, offset = 0) => {
-    const response = await axiosInstance.get(`/worlds?limit=${limit}&offset=${offset}`);
+  getWorlds: async (limit = 10, cursor = '') => {
+    const response = await axiosInstance.get(`/worlds?limit=${limit}&cursor=${cursor}`);
     return response.data;
   },
   
@@ -71,8 +71,8 @@ export const worldsAPI = {
 
 // Posts API
 export const postsAPI = {
-  getFeed: async (worldId: string, limit = 10, offset = 0) => {
-    const response = await axiosInstance.get(`/worlds/${worldId}/feed?limit=${limit}&offset=${offset}`);
+  getFeed: async (worldId: string, limit = 10, cursor = '') => {
+    const response = await axiosInstance.get(`/worlds/${worldId}/feed?limit=${limit}&cursor=${cursor}`);
     return response.data;
   },
   
@@ -114,6 +114,11 @@ export const characterAPI = {
   
   getUserCharactersInWorld: async (worldId: string, userId: string) => {
     const response = await axiosInstance.get(`/worlds/${worldId}/users/${userId}/characters`);
+    return response.data;
+  },
+
+  getCharacterPosts: async (worldId: string, characterId: string, limit = 20, offset = 0) => {
+    const response = await axiosInstance.get(`/worlds/${worldId}/character/${characterId}/posts?limit=${limit}&offset=${offset}`);
     return response.data;
   }
 };
