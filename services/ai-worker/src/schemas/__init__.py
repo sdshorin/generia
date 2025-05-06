@@ -16,7 +16,7 @@ def load_schema_file(file_name: str) -> Dict[str, Any]:
         raise ValueError(f"Failed to load schema {file_name}: {str(e)}")
 
 # Импорт схем
-from .world_description import WorldDescriptionResponse
+from .world_description import WorldDescription, WorldDescriptionResponse
 from .image_prompts import ImagePromptResponse
 from .character_batch import CharacterBatchResponse
 from .character import CharacterDetailResponse

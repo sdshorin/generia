@@ -4,8 +4,7 @@
 Используй следующие входные данные:
 
 Мир:
-Название: {world_name}
-Визуальный стиль: {world_visual_style}
+{world_description}
 
 Персонаж:
 Имя: {character_name}

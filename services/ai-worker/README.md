@@ -1,97 +1,104 @@
-# AI Worker Service для Generia
+# AI Worker Service for Generia
 
-Микросервис AI Worker отвечает за генерацию AI-контента в проекте Generia, включая описания миров, пользователей и посты. В этом документе описывается архитектура, принципы работы и инструкции по запуску сервиса.
+The AI Worker is a microservice responsible for generating AI content in the Generia platform, including world descriptions, characters, and posts. This document explains the architecture, operational principles, and setup instructions.
 
-## Оглавление
+## Contents
 
-- [Обзор](#обзор)
-- [Архитектура](#архитектура)
-  - [Компоненты системы](#компоненты-системы)
-  - [Поток данных](#поток-данных)
-  - [Схема задач](#схема-задач)
-- [Типы задач](#типы-задач)
-- [Технические детали](#технические-детали)
-  - [Взаимодействие с LLM](#взаимодействие-с-llm)
-  - [Генерация изображений](#генерация-изображений)
-  - [Асинхронная обработка](#асинхронная-обработка)
-  - [Обработка ошибок](#обработка-ошибок)
-  - [Мониторинг прогресса](#мониторинг-прогресса)
-- [Настройка и запуск](#настройка-и-запуск)
-  - [Переменные окружения](#переменные-окружения)
-  - [Тестирование](#тестирование)
-  - [Интеграция с основной системой](#интеграция-с-основной-системой)
-- [Структура проекта](#структура-проекта)
-- [Отладка и мониторинг](#отладка-и-мониторинг)
-- [Примеры генерируемого контента](#примеры-генерируемого-контента)
+- [Overview](#overview)
+- [Architecture](#architecture)
+  - [System Components](#system-components)
+  - [Data Flow](#data-flow)
+  - [Task Workflow](#task-workflow)
+- [Task Types](#task-types)
+- [Technical Details](#technical-details)
+  - [LLM Integration](#llm-integration)
+  - [Image Generation](#image-generation)
+  - [Asynchronous Processing](#asynchronous-processing)
+  - [Error Handling](#error-handling)
+  - [Progress Monitoring](#progress-monitoring)
+- [Configuration and Deployment](#configuration-and-deployment)
+  - [Environment Variables](#environment-variables)
+  - [Testing](#testing)
+  - [Integration with Core System](#integration-with-core-system)
+- [Project Structure](#project-structure)
+- [Debugging and Monitoring](#debugging-and-monitoring)
+- [Example Content](#example-content)
 
-## Обзор
+## Overview
 
-AI Worker — это микросервис, который генерирует разнообразный контент для виртуальных миров платформы Generia. Он использует Google Gemini API для генерации текстов и систему генерации изображений для создания визуального контента. Микросервис работает в асинхронном режиме, получая задачи из Kafka и отправляя результаты в MongoDB и через API Gateway.
+AI Worker is a microservice that generates diverse content for Generia's virtual worlds. It uses OpenRouter API (with models like Google Gemini) for text generation and Runware API for image creation. The service operates asynchronously, receiving tasks from Kafka and sending results to MongoDB and through the API Gateway.
 
-Основные возможности:
-- Генерация подробных описаний виртуальных миров
-- Создание фоновых изображений и иконок для миров
-- Создание детализированных профилей AI-пользователей
-- Генерация аватаров для пользователей
-- Создание постов от имени AI-пользователей
-- Генерация изображений для постов
-- Мониторинг прогресса генерации в реальном времени
+Key capabilities:
+- Generate detailed virtual world descriptions
+- Create background images and icons for worlds
+- Generate detailed AI character profiles
+- Create character avatars
+- Generate posts from AI characters
+- Create images for posts
+- Monitor generation progress in real time
 
-## Архитектура
+## Architecture
 
-### Компоненты системы
+### System Components
 
-AI Worker построен на следующих ключевых компонентах:
+The AI Worker is built on these key components:
 
-1. **Система задач**:
-   - `TaskManager`: Управляет очередью задач и их выполнением
-   - `JobFactory`: Создает объекты конкретных задач на основе их типа
-   - `BaseJob`: Базовый класс для всех типов задач
+1. **Task System**: 
+   - Event-driven task execution through Kafka messages
+   - Job Factory pattern for creating appropriate task handlers
+   - Specialized job classes for each content generation type
+   - Reference: [src/core/factory.py](../src/core/factory.py), [src/core/task.py](../src/core/task.py)
 
-2. **Брокер сообщений**:
-   - `KafkaConsumer`: Получает сообщения о новых задачах
-   - `KafkaProducer`: Отправляет события о прогрессе и завершении задач
+2. **Message Broker**:
+   - Kafka for receiving task notifications and sending progress updates
+   - Event-driven model for immediate task processing
+   - Reference: [src/kafka/consumer.py](../src/kafka/consumer.py), [src/kafka/producer.py](../src/kafka/producer.py)
 
-3. **База данных**:
-   - `MongoDBManager`: Управляет хранением и извлечением данных
-   - Коллекции: tasks, world_generation_status, world_parameters, api_requests_history
+3. **Database**:
+   - MongoDB for storing tasks, world parameters, and generation status
+   - Collections: tasks, world_generation_status, world_parameters, api_requests_history
+   - Reference: [src/db/mongo.py](../src/db/mongo.py), [src/db/models.py](../src/db/models.py)
 
-4. **Внешние API**:
-   - `LLMClient`: Клиент для взаимодействия с Google Gemini API
-   - `ImageGenerator`: Генератор изображений
-   - `ServiceClient`: Клиент для взаимодействия с другими микросервисами
+4. **External APIs**:
+   - OpenRouter API client for accessing LLM services (including Google Gemini)
+   - Runware API for image generation
+   - Service client for communicating with other microservices
+   - Reference: [src/api/llm.py](../src/api/llm.py), [src/api/image_generator.py](../src/api/image_generator.py)
 
-5. **Утилиты**:
-   - `ProgressManager`: Отслеживает и обновляет прогресс генерации
-   - `CircuitBreaker`: Защищает от сбоев внешних API
-   - `Logger`: Система логирования
+5. **Utilities**:
+   - Progress tracking through MongoDB collections
+   - Circuit breaker pattern for API resilience
+   - Structured logging system
+   - Reference: [src/utils/progress.py](../src/utils/progress.py), [src/utils/circuit_breaker.py](../src/utils/circuit_breaker.py)
 
-### Поток данных
+### Data Flow
 
-Процесс генерации контента происходит следующим образом:
+The content generation process follows this sequence:
 
-1. Пользователь создает мир через API Gateway, передавая промпт с описанием мира.
-2. World Service создает начальную задачу `init_world_creation` в MongoDB и отправляет уведомление о ней в Kafka.
-3. AI Worker получает сообщение из Kafka и немедленно начинает обработку задачи:
-   - Загружает детали задачи из MongoDB
-   - Создает запись о статусе генерации в MongoDB
-   - Выполняет задачу с использованием соответствующего Job-класса
-4. Для каждого этапа создаются соответствующие задачи, которые также выполняются по схеме "событие из Kafka → немедленная обработка":
-   - Генерация описания мира
-   - Генерация изображений мира
-   - Создание AI-пользователей
-   - Генерация аватаров пользователей
-   - Создание постов для каждого пользователя
-   - Генерация изображений для постов
-5. Прогресс генерации отслеживается и обновляется в MongoDB, а также отправляется в Kafka для информирования других сервисов.
-6. Результаты (пользователи, посты, изображения) создаются через API Gateway в соответствующих сервисах.
-7. По завершении генерации статус мира обновляется в World Service.
+1. User creates a world through API Gateway, providing a prompt with world description
+2. World Service creates an initial `init_world_creation` task in MongoDB and sends a notification to Kafka
+3. AI Worker receives the Kafka message and immediately processes the task:
+   - Loads task details from MongoDB
+   - Creates a generation status record in MongoDB
+   - Executes the task using the appropriate Job class
+4. Each phase creates corresponding tasks that follow the same "Kafka event → immediate processing" pattern:
+   - World description generation
+   - World image generation
+   - AI character batch creation
+   - Character avatar generation
+   - Post generation for each character
+   - Image generation for posts
+5. Generation progress is tracked in MongoDB and sent to Kafka to notify other services
+6. Results (characters, posts, images) are created through API Gateway in respective services
+7. Upon completion, the world status is updated in World Service
 
-AI Worker работает по событийно-ориентированной модели (event-driven): задачи запускаются немедленно при получении сообщения из Kafka, без периодического опроса базы данных. Это обеспечивает минимальную задержку обработки задач, снижает нагрузку на MongoDB и позволяет эффективно масштабировать систему горизонтально.
+[TODO: добавить, что информация о мире сохраняется в world_parameters в MongoDB, и затем используется в последующих задачах]
 
-### Схема задач
+AI Worker follows an event-driven model: tasks start immediately when a Kafka message is received, without periodically polling the database. This minimizes processing delays, reduces MongoDB load, and enables efficient horizontal scaling.
 
-Задачи выполняются в определенной последовательности с зависимостями:
+### Task Workflow
+
+Tasks execute in a specific sequence with dependencies:
 
 ```
 init_world_creation
@@ -105,7 +112,7 @@ generate_world_description
 generate_world_image    generate_character_batch
                             │
                             ▼
-                      generate_character (для каждого персонажа)
+                      generate_character (for each character)
                             │
                             ├───────────────────┐
                             │                   │
@@ -113,104 +120,113 @@ generate_world_image    generate_character_batch
                   generate_character_avatar  generate_post_batch
                                                 │
                                                 ▼
-                                          generate_post (для каждого поста)
+                                          generate_post (for each post)
                                                 │
                                                 ▼
-                                        generate_post_image (если пост с изображением)
+                                        generate_post_image (if post has image)
 ```
 
-## Типы задач
+## Task Types
 
-AI Worker выполняет следующие типы задач:
+AI Worker performs these task types:
 
-1. **init_world_creation**: Инициализирует процесс генерации мира, создает запись о статусе и запускает генерацию описания.
+1. **init_world_creation**: Initializes the world generation process, creates a status record, and starts description generation.
+   Reference: [src/jobs/init_world_creation.py](../src/jobs/init_world_creation.py)
 
-2. **generate_world_description**: Генерирует детальное описание мира на основе промпта пользователя, включая название, тему, технологический уровень, социальную структуру и т.д.
+2. **generate_world_description**: Generates detailed world description based on user prompt, including name, theme, technology level, social structure, etc.
+   Reference: [src/jobs/generate_world_description.py](../src/jobs/generate_world_description.py)
 
-3. **generate_world_image**: Создает изображения для мира (фоновое изображение и иконку) на основе описания мира.
+3. **generate_world_image**: Creates world images (background and icon) based on description.
+   Reference: [src/jobs/generate_world_image.py](../src/jobs/generate_world_image.py)
 
-4. **generate_character_batch**: Генерирует набор базовых описаний персонажей для мира, распределяя их по различным социальным группам и ролям.
+4. **generate_character_batch**: Generates a set of basic character descriptions, distributing them across social groups and roles.
+   Reference: [src/jobs/generate_character_batch.py](../src/jobs/generate_character_batch.py)
 
-5. **generate_character**: Создает детальное описание отдельного персонажа, включая личность, внешность, историю, интересы и стиль речи, создает AI-character
+5. **generate_character**: Creates detailed description for an individual character including personality, appearance, interests, and speech style, then creates the AI character.
+   Reference: [src/jobs/generate_character.py](../src/jobs/generate_character.py)
 
-6. **generate_character_avatar**: Генерирует аватар для персонажа на основе его описания
+6. **generate_character_avatar**: Creates character avatar based on description.
+   Reference: [src/jobs/generate_character_avatar.py](../src/jobs/generate_character_avatar.py)
 
-7. **generate_post_batch**: Создает набор концепций постов для персонажа, формируя логическую сюжетную линию.
+7. **generate_post_batch**: Creates post concepts for a character, forming a logical storyline.
+   Reference: [src/jobs/generate_post_batch.py](../src/jobs/generate_post_batch.py)
 
-8. **generate_post**: Генерирует полный текст поста на основе концепции, включая хэштеги, настроение и контекст.
+8. **generate_post**: Generates full post text based on the concept, including hashtags, mood, and context.
+   Reference: [src/jobs/generate_post.py](../src/jobs/generate_post.py)
 
-9. **generate_post_image**: Создает изображение для поста и публикует пост через Post Service.
+9. **generate_post_image**: Creates image for a post and publishes the post through Post Service.
+   Reference: [src/jobs/generate_post_image.py](../src/jobs/generate_post_image.py)
 
-## Технические детали
+## Technical Details
 
-### Взаимодействие с LLM
+### LLM Integration
 
-Для генерации текстового контента используется Google Gemini API через `LLMClient`. Основные особенности:
+For text content generation, the service uses OpenRouter API (with models like Google Gemini) through `LLMClient`. Key features:
 
-- **Промпты**: Детальные промпты для каждого типа задачи хранятся в отдельных файлах в директории `prompts/`.
-- **Структурированный вывод**: Используется механизм структурированного вывода через JSON-схемы (Pydantic-модели).
-- **Идемпотентность**: Каждый запрос имеет уникальный ID и логируется в MongoDB для возможности отладки.
-- **Circuit Breaker**: Защита от недоступности API с экспоненциальной задержкой и восстановлением.
-- **Асинхронные запросы**: Все запросы выполняются асинхронно с ограничением параллельных запросов.
+- **Prompts**: Detailed prompts for each task type stored in separate files in the `prompts/` directory
+- **Structured Output**: Uses structured output through JSON schemas (Pydantic models)
+- **Schema Processing**: Sophisticated JSON schema handling with reference replacement and strict validation
+- **Idempotence**: Each request has a unique ID and is logged in MongoDB for debugging
+- **Circuit Breaker**: Protection against API failures with exponential backoff and recovery
+- **Asynchronous Requests**: All requests execute asynchronously with limited parallel requests
 
-Пример запроса к LLM:
+Reference: [src/api/llm.py](../src/api/llm.py)
 
-```python
-world_description = await self.llm_client.generate_structured_content(
-    prompt=prompt,
-    response_schema=WorldDescriptionResponse,
-    temperature=0.8,
-    max_output_tokens=4096,
-    task_id=self.task.id,
-    world_id=world_id
-)
+### Image Generation
+
+Image generation works through `ImageGenerator` using the Runware API:
+
+- **Prompt Enhancement**: Optional enhancement of image prompts for better results
+- **Media Service Integration**: Generated images upload through Media Service
+- **Presigned URL Flow**: Uses presigned URL generation and confirmation process 
+- **Concurrent Request Limiting**: Uses semaphores to prevent API overload
+- **Download and Upload**: Downloads generated images and uploads them to Media Service
+
+Reference: [src/api/image_generator.py](../src/api/image_generator.py)
+
+### Asynchronous Processing
+
+The entire microservice is built on an asynchronous model:
+
+- **asyncio**: Used for I/O-bound tasks without blocking
+- **Semaphores**: Limit simultaneous tasks and requests to external APIs
+- **Horizontal Scaling**: Multiple instances can run concurrently, processing tasks from the same Kafka topic
+- **Retry Limiting**: Retries with exponential backoff to handle temporary failures
+
+Reference: [src/main.py](../src/main.py)
+
+### Error Handling
+
+The system includes multi-layered error handling:
+
+- **Retries**: Up to 4 attempts for critical tasks, up to 2 for non-critical ones
+- **Circuit Breaker**: Protection against external API unavailability with three states (CLOSED, OPEN, HALF-OPEN)
+- **Idempotence**: Protection against repeated task processing with atomic operations in MongoDB
+- **Error Logging**: Detailed logging of all errors with context
+- **Partial Generation**: If one object (e.g., a post) fails, others continue generating
+
+Reference: [src/utils/circuit_breaker.py](../src/utils/circuit_breaker.py), [src/utils/retries.py](../src/utils/retries.py)
+
+### Progress Monitoring
+
+Generation progress is tracked and updated in real-time:
+
+- **WorldGenerationStatus**: Stores information on current generation state
+- **Generation Phases**: Each phase has its status (PENDING, IN_PROGRESS, COMPLETED, FAILED)
+- **Counters**: Tracks created and planned characters and posts
+- **Kafka Events**: Sends progress update events
+- **API Call Limits**: Tracks external API calls with set limits
+
+Reference: [src/utils/progress.py](../src/utils/progress.py)
+
+## Configuration and Deployment
+
+### Environment Variables
+
+The service requires these environment variables:
+
 ```
-
-### Генерация изображений
-
-Генерация изображений работает через `ImageGenerator`:
-
-- **Интеграция с Media Service**: Сгенерированные изображения загружаются через Media Service.
-- **Ограничение параллельных запросов**: Для предотвращения перегрузки API используется семафор.
-- **Заглушка для разработки**: В текущей версии реализована заглушка, которая в будущем будет заменена на интеграцию с реальным API.
-
-### Асинхронная обработка
-
-Весь микросервис построен на асинхронной модели:
-
-- **asyncio**: Используется для обработки I/O-bound задач без блокировки.
-- **Семафоры**: Ограничивают количество одновременных задач и запросов к внешним API.
-- **Масштабирование**: Поддерживается горизонтальное масштабирование через запуск нескольких инстансов.
-- **Ограничение повторных попыток**: Повторные попытки с экспоненциальной задержкой для обработки временных сбоев.
-
-### Обработка ошибок
-
-Система включает многоуровневую обработку ошибок:
-
-- **Повторные попытки**: Для критичных задач - до 4 попыток, для некритичных - до 2.
-- **Circuit Breaker**: Защита от недоступности внешних API с тремя состояниями (CLOSED, OPEN, HALF-OPEN).
-- **Идемпотентность**: Защита от повторной обработки одной и той же задачи с атомарными операциями в MongoDB.
-- **Логирование ошибок**: Детальное логирование всех ошибок с контекстом.
-- **Частичная генерация**: При ошибке генерации одного объекта (например, поста) остальные продолжают создаваться.
-
-### Мониторинг прогресса
-
-Прогресс генерации контента отслеживается и обновляется в реальном времени:
-
-- **WorldGenerationStatus**: Хранит информацию о текущем состоянии генерации.
-- **Этапы генерации**: Каждый этап имеет свой статус (PENDING, IN_PROGRESS, COMPLETED, FAILED).
-- **Счетчики**: Учитываются созданные и запланированные пользователи и посты.
-- **События Kafka**: Отправляются события об обновлении прогресса.
-- **Лимиты API-вызовов**: Отслеживается количество вызовов внешних API с заданными лимитами.
-
-## Настройка и запуск
-
-### Переменные окружения
-
-Для работы сервиса необходимо настроить следующие переменные окружения:
-
-```
-# Основные настройки
+# Core settings
 SERVICE_NAME=ai-worker
 SERVICE_HOST=0.0.0.0
 SERVICE_PORT=8081
@@ -225,10 +241,11 @@ KAFKA_TOPIC_TASKS=generia-tasks
 KAFKA_TOPIC_PROGRESS=generia-progress
 KAFKA_GROUP_ID=ai-worker
 
-# API-ключи
-GEMINI_API_KEY=your_gemini_api_key
+# API Keys
+OPENROUTER_API_KEY=your_openrouter_api_key
+RUNWARE_API_KEY=your_runware_api_key
 
-# Ограничения
+# Service limits
 MAX_CONCURRENT_TASKS=100
 MAX_CONCURRENT_LLM_REQUESTS=15
 MAX_CONCURRENT_IMAGE_REQUESTS=10
@@ -243,97 +260,100 @@ MINIO_USE_SSL=false
 # API Gateway
 API_GATEWAY_URL=http://api-gateway:8080
 
-# Логирование
-LOG_LEVEL=DEBUG
+# Logging
+LOG_LEVEL=INFO
 ```
 
-### Тестирование
+Reference: [src/config.py](../src/config.py)
 
-AI Worker можно протестировать с использованием основных сервисов из docker-compose.yml. Для тестирования нужно выполнить следующие шаги:
+### Testing
 
-1. Запустить необходимые сервисы из основного docker-compose.yml:
+You can test AI Worker using core services from docker-compose.yml:
+
+1. Start required services:
 
 ```bash
-# Запустить минимальный набор сервисов для тестирования
+# Start minimum service set for testing
 docker-compose up -d mongodb kafka minio ai-worker
 ```
 
-2. Отправить тестовое сообщение с помощью скрипта test_run.py:
+2. Send test message using the send_message.py script:
 
 ```bash
-# Базовое использование
-python test_run.py --prompt "Фэнтезийный мир с магией и драконами"
+# Basic usage
+python send_message.py --prompt "Fantasy world with magic and dragons"
 
-# С дополнительными параметрами
-python test_run.py --prompt "Киберпанк мир с высокими технологиями" --users 5 --posts 20
+# With additional parameters
+python send_message.py --prompt "Cyberpunk world with high technology" --users 5 --posts 20
 
-# С указанием адреса Kafka брокера
-python test_run.py --prompt "Постапокалиптический мир" --kafka "localhost:9092"
+# With Kafka broker address
+python send_message.py --prompt "Post-apocalyptic world" --kafka "localhost:9092"
 ```
 
-3. Отслеживать прогресс в логах:
+3. Track progress in logs:
 
 ```bash
 docker-compose logs -f ai-worker
 ```
 
-4. Сгенерированные изображения будут сохранены в MinIO и доступны через Media Service.
+4. Generated images save to MinIO and are accessible through Media Service
 
-5. Проверить результаты генерации в MongoDB:
+5. Check generation results in MongoDB:
 
 ```bash
-# Подключение к MongoDB 
+# Connect to MongoDB
 docker exec -it generia-mongodb mongo -u admin -p password generia_ai_worker
 
-# Просмотр статуса генерации
+# View generation status
 db.world_generation_status.find().pretty()
 
-# Просмотр сгенерированных параметров мира
+# View generated world parameters
 db.world_parameters.find().pretty()
 
-# Просмотр всех задач
+# View all tasks
 db.tasks.find().pretty()
 ```
 
-### Интеграция с основной системой
+Reference: [send_message.py](../send_message.py)
 
-AI Worker уже интегрирован в основную инфраструктуру Generia через docker-compose.yml. Сервис автоматически взаимодействует с другими компонентами:
+### Integration with Core System
 
-1. Получает задачи от World Service через Kafka
-2. Сохраняет данные в MongoDB
-3. Загружает изображения через MinIO и Media Service
-4. Создает пользователей через Auth Service
-5. Создает посты через Post Service
-6. Отправляет события прогресса через Kafka
+AI Worker integrates with Generia's core infrastructure through docker-compose.yml. The service automatically interacts with other components:
 
-## Структура проекта
+1. Receives tasks from World Service via Kafka
+2. Stores data in MongoDB
+3. Uploads images through MinIO and Media Service
+4. Creates characters through Character Service
+5. Creates posts through Post Service
+6. Sends progress events through Kafka
+
+## Project Structure
 
 ```
 ai-worker/
-├── Dockerfile                  # Dockerfile для сборки контейнера
-├── .env.example                # Пример конфигурации переменных окружения
-├── requirements.txt            # Python-зависимости
-├── README.md                   # Документация (этот файл)
-├── test_run.py                 # Скрипт для отправки тестовых событий
-├── src/                        # Исходный код
-│   ├── main.py                 # Точка входа приложения
-│   ├── config.py               # Конфигурация из переменных окружения
-│   ├── constants.py            # Константы и перечисления
-│   ├── api/                    # Клиенты для внешних API
-│   │   ├── llm.py              # Клиент для Gemini API
-│   │   ├── image_generator.py  # Генератор изображений
-│   │   └── services.py         # Клиент для других микросервисов
-│   ├── core/                   # Ядро системы
-│   │   ├── base_job.py         # Базовый класс для заданий
-│   │   ├── task.py             # Менеджер задач
-│   │   └── factory.py          # Фабрика заданий
-│   ├── db/                     # Работа с БД
-│   │   ├── mongo.py            # Менеджер MongoDB
-│   │   └── models.py           # Модели данных
-│   ├── kafka/                  # Работа с Kafka
-│   │   ├── consumer.py         # Потребитель сообщений
-│   │   └── producer.py         # Производитель сообщений
-│   ├── jobs/                   # Реализации конкретных заданий
+├── Dockerfile                  # Container build definition
+├── requirements.txt            # Python dependencies
+├── README.md                   # Documentation
+├── send_message.py             # Script for sending test events
+├── src/                        # Source code
+│   ├── main.py                 # Application entry point
+│   ├── config.py               # Environment variable configuration
+│   ├── constants.py            # Constants and enumerations
+│   ├── api/                    # External API clients
+│   │   ├── llm.py              # OpenRouter (LLM) client
+│   │   ├── image_generator.py  # Runware image generator
+│   │   └── services.py         # Client for other microservices
+│   ├── core/                   # Core system
+│   │   ├── base_job.py         # Base job class
+│   │   ├── task.py             # Task manager
+│   │   └── factory.py          # Job factory
+│   ├── db/                     # Database operations
+│   │   ├── mongo.py            # MongoDB manager
+│   │   └── models.py           # Data models
+│   ├── kafka/                  # Kafka integration
+│   │   ├── consumer.py         # Message consumer
+│   │   └── producer.py         # Message producer
+│   ├── jobs/                   # Specific job implementations
 │   │   ├── init_world_creation.py
 │   │   ├── generate_world_description.py
 │   │   ├── generate_world_image.py
@@ -343,7 +363,7 @@ ai-worker/
 │   │   ├── generate_post_batch.py
 │   │   ├── generate_post.py
 │   │   └── generate_post_image.py
-│   ├── prompts/                # Промпты для LLM
+│   ├── prompts/                # LLM prompts
 │   │   ├── world_description.txt
 │   │   ├── world_image.txt
 │   │   ├── character_batch.txt
@@ -352,54 +372,52 @@ ai-worker/
 │   │   ├── post_batch.txt
 │   │   ├── post_detail.txt
 │   │   └── post_image.txt
-│   ├── schemas/                # Схемы для структурированного вывода
+│   ├── schemas/                # Structured output schemas
 │   │   ├── world_description.py
 │   │   ├── image_prompts.py
 │   │   ├── character_batch.py
 │   │   ├── character.py
 │   │   ├── post_batch.py
 │   │   └── post.py
-│   └── utils/                  # Утилиты
-│       ├── circuit_breaker.py  # Реализация Circuit Breaker
-│       ├── logger.py           # Настройка логирования
-│       ├── progress.py         # Отслеживание прогресса
-│       └── retries.py          # Повторные попытки
-└── tests/                      # Тесты
-    ├── unit/                   # Модульные тесты
-    └── integration/            # Интеграционные тесты
+│   └── utils/                  # Utilities
+│       ├── circuit_breaker.py  # Circuit Breaker implementation
+│       ├── logger.py           # Logging configuration
+│       ├── progress.py         # Progress tracking
+│       ├── media_uploader.py   # Media upload utilities
+│       └── retries.py          # Retry mechanisms
 ```
 
-## Отладка и мониторинг
+## Debugging and Monitoring
 
-Для отладки и мониторинга AI Worker предоставляет несколько инструментов:
+For debugging and monitoring, AI Worker provides several tools:
 
-- **Детальное логирование**: Логи включают информацию о выполняемых задачах, времени их выполнения и ошибках.
-- **API-запросы в MongoDB**: Все запросы к внешним API сохраняются в коллекции `api_requests_history`.
-- **Мониторинг прогресса**: Прогресс генерации можно отслеживать через API World Service.
-- **Kafka-сообщения**: События о выполнении задач и обновлении прогресса отправляются в Kafka.
+- **Detailed Logging**: Logs include information about executing tasks, execution time, and errors
+- **API Requests in MongoDB**: All external API requests save to the `api_requests_history` collection
+- **Progress Monitoring**: Generation progress can be tracked via World Service API
+- **Kafka Messages**: Task execution and progress update events send to Kafka
 
-Для доступа к MongoDB:
+To access MongoDB:
 
 ```bash
 docker exec -it generia-mongodb mongo -u admin -p password
 ```
 
-Команды для проверки состояния:
+Commands to check status:
 
 ```javascript
-// Просмотр статуса генерации
+// View generation status
 db.world_generation_status.findOne({_id: "your_world_id"})
 
-// Просмотр задач для конкретного мира
+// View tasks for specific world
 db.tasks.find({world_id: "your_world_id"})
 
-// Просмотр ошибок в API-запросах
+// View errors in API requests
 db.api_requests_history.find({error: {$exists: true}})
 ```
 
-## Примеры генерируемого контента
+## Example Content
 
-### Пример описания мира
+### World Description Example
 
 ```json
 {
@@ -420,7 +438,7 @@ db.api_requests_history.find({error: {$exists: true}})
 }
 ```
 
-### Пример персонажа
+### Character Example
 
 ```json
 {
@@ -435,7 +453,7 @@ db.api_requests_history.find({error: {$exists: true}})
 }
 ```
 
-### Пример поста
+### Post Example
 
 ```json
 {

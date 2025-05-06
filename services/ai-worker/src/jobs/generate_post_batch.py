@@ -5,6 +5,8 @@ from datetime import datetime
 from ..core.base_job import BaseJob
 from ..constants import TaskType, GenerationStage, GenerationStatus
 from ..utils.logger import logger
+from ..utils.format_world import format_world_description
+from ..utils.model_to_template import model_to_template
 from ..db.models import Task
 from ..prompts import load_prompt, POST_BATCH_PROMPT
 from ..schemas import PostBatchResponse
@@ -13,11 +15,11 @@ class GeneratePostBatchJob(BaseJob):
     """
     Задание для генерации пакета постов для персонажа
     """
-    
+
     async def execute(self) -> Dict[str, Any]:
         """
         Выполняет задание по генерации пакета постов
-        
+
         Returns:
             Результат выполнения задания
         """
@@ -29,46 +31,48 @@ class GeneratePostBatchJob(BaseJob):
         username = character_description.get("username", "")
         character_id = self.task.parameters.get("character_id", "")
         character_index = character_description.get("character_index", 0)
-        
+
         if not character_id:
             raise ValueError("Character ID is required to generate posts")
-        
+
         # Получаем параметры мира
         world_params = await self.get_world_parameters(world_id)
         if not world_params:
             raise ValueError(f"Cannot find world parameters for world {world_id}")
-        
+
         # Загружаем промпт из файла
         prompt_template = load_prompt(POST_BATCH_PROMPT)
-        
+
         # Преобразуем списки в строки для промпта
         interests = character_description.get("interests", [])
         interests_str = ", ".join(interests) if isinstance(interests, list) else interests
-        
+
         common_topics = character_description.get("common_topics", [])
         common_topics_str = ", ".join(common_topics) if isinstance(common_topics, list) else common_topics
-        
+
+        # Генерируем описание структуры ответа
+        structure_description = model_to_template(PostBatchResponse)
+
         # Форматируем промпт с параметрами
+        world_description = format_world_description(world_params)
         prompt = prompt_template.format(
-            world_name=world_params.name,
-            world_description=world_params.description,
-            world_theme=world_params.theme,
-            world_culture=world_params.culture,
+            world_description=world_description,
             character_name=character_name,
             character_description=f"{character_description.get('bio', '')} {character_description.get('personality', '')}",
             interests=interests_str,
             speaking_style=character_description.get("speaking_style", ""),
             common_topics=common_topics_str,
-            posts_count=posts_count
+            posts_count=posts_count,
+            structure_description=structure_description
         )
-        
+
         # Генерируем пакет постов с помощью LLM
         if self.progress_manager:
             await self.progress_manager.increment_task_counter(
                 world_id=world_id,
                 field="api_calls_made_LLM"
             )
-        
+
         try:
             # Генерация структурированного контента
             post_batch = await self.llm_client.generate_structured_content(
@@ -79,13 +83,13 @@ class GeneratePostBatchJob(BaseJob):
                 task_id=self.task.id,
                 world_id=world_id
             )
-            
+
             logger.info(f"Generated post batch for character {character_name} in world {world_id} with {len(post_batch.posts)} posts")
-            
+
             # Создаем задачи для генерации каждого поста
             tasks_to_create = []
             now = datetime.utcnow()
-            
+
             for i, post in enumerate(post_batch.posts):
                 post_task_id = str(uuid.uuid4())
                 post_task = Task(
@@ -112,9 +116,9 @@ class GeneratePostBatchJob(BaseJob):
                     attempt_count=0
                 )
                 tasks_to_create.append({"task": post_task})
-            
+
             created_task_ids = await self.create_next_tasks(tasks_to_create)
-            
+
             # Передаем информацию о пакете постов в результат
             return {
                 "character_id": character_id,
@@ -126,15 +130,15 @@ class GeneratePostBatchJob(BaseJob):
                 "recurring_themes": post_batch.recurring_themes,
                 "next_tasks": created_task_ids
             }
-            
+
         except Exception as e:
             logger.error(f"Error generating post batch for character {character_name} in world {world_id}: {str(e)}")
             raise
-    
+
     async def on_success(self, result: Dict[str, Any]) -> None:
         """
         Выполняется при успешном завершении задания
-        
+
         Args:
             result: Результат выполнения задания
         """
@@ -143,11 +147,11 @@ class GeneratePostBatchJob(BaseJob):
             f"(@{result.get('username')}) in world {self.task.world_id} "
             f"with {result.get('posts_count')} posts"
         )
-    
+
     async def on_failure(self, error: Exception) -> None:
         """
         Выполняется при ошибке во время выполнения задания
-        
+
         Args:
             error: Возникшая ошибка
         """

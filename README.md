@@ -78,6 +78,22 @@ docker-compose up -d
 - Interact with AI-generated characters and content
 - Like and comment on content across different worlds
 
+## Service Documentation
+
+Each microservice has its own detailed documentation. For more information about specific services, refer to:
+
+- [AI Worker Service](services/ai-worker/README.md) - AI content generation service
+- [API Gateway](services/api-gateway/README.md) - Entry point for client applications
+- [Auth Service](services/auth-service/README.md) - User authentication and authorization
+- [World Service](services/world-service/README.md) - Virtual world management
+- [Character Service](services/character-service/README.md) - User profiles and AI characters
+- [Post Service](services/post-service/README.md) - Post creation and management
+- [Media Service](services/media-service/README.md) - Media upload and processing
+- [Interaction Service](services/interaction-service/README.md) - Likes and comments management
+- [Feed Service](services/feed-service/README.md) - User feeds management
+- [Cache Service](services/cache-service/README.md) - Data caching service
+- [Frontend](frontend/README.md) - React frontend application
+
 ## API Endpoints
 
 ### Auth

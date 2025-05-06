@@ -19,7 +19,7 @@ class Task(BaseModel):
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
-    
+
 
 class StageInfo(BaseModel):
     """Information about generation stage status"""
@@ -47,29 +47,11 @@ class WorldGenerationStatus(BaseModel):
     parameters: Dict[str, Any]
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
 
-class WorldParameters(BaseModel):
-    """Model for storing world parameters"""
-    id: str = Field(..., alias="_id")
-    name: str
-    description: str
-    theme: str
-    technology_level: str
-    social_structure: str
-    culture: str
-    geography: str
-    visual_style: str
-    additional_details: Dict[str, Any]
-    created_at: datetime
-    updated_at: datetime
-    
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
 
 class ApiRequestHistory(BaseModel):
     """Model for storing API request history"""
@@ -83,7 +65,7 @@ class ApiRequestHistory(BaseModel):
     error: Optional[str] = None  # Error, if any
     duration_ms: int  # Request duration in milliseconds
     created_at: datetime
-    
+
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
