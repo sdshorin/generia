@@ -4,7 +4,7 @@ from typing import Dict, Any, List, Optional
 class PostConcept(BaseModel):
     """Концепция поста для пакетной генерации"""
     topic: str = Field(..., description="Тема поста")
-    content_brief: str = Field(..., description="Краткое описание содержания (2-3 предложения)")
+    content_brief: str = Field(..., description="Краткое описание содержания (1-3 предложения)")
     emotional_tone: str = Field(..., description="Эмоциональный тон поста")
     post_type: str = Field(..., description="Тип поста (личное, новость, вопрос и т.д.)")
     relevance_to_character: str = Field(..., description="Как пост отражает личность персонажа")

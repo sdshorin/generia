@@ -1,5 +1,6 @@
 import uuid
-from typing import Dict, Any, List
+import math
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from ..core.base_job import BaseJob
@@ -8,8 +9,14 @@ from ..utils.logger import logger
 from ..utils.format_world import format_world_description
 from ..utils.model_to_template import model_to_template
 from ..db.models import Task, WorldParameters
-from ..prompts import load_prompt, CHARACTER_BATCH_PROMPT
+from ..prompts import load_prompt, CHARACTER_BATCH_PROMPT, PREVIOUS_CHARACTERS_PROMPT, FIRST_BATCH_CHARACTERS_PROMPT
 from ..schemas import CharacterBatchResponse
+
+# Максимальное количество персонажей, генерируемых за один раз
+MAX_CHARACTERS_PER_BATCH = 10
+
+# Максимальная глубина рекурсии для генерации персонажей
+MAX_CHARACTER_RECURSION_DEPTH = 50
 
 class GenerateCharacterBatchJob(BaseJob):
     """
@@ -28,6 +35,41 @@ class GenerateCharacterBatchJob(BaseJob):
         users_count = int(self.task.parameters.get("users_count", 10))
         posts_count = int(self.task.parameters.get("posts_count", 50))
 
+        remaining_posts_count = int(self.task.parameters.get("remaining_posts_count", posts_count))
+
+        total_users_count = int(self.task.parameters.get("total_users_count", users_count))
+
+        # Получаем информацию о ранее сгенерированных персонажах
+        generated_characters_description = self.task.parameters.get("generated_characters_description", "")
+        generated_count = int(self.task.parameters.get("generated_count", 0))
+        count_run = int(self.task.parameters.get("count_run", 0))
+
+        recursion_depth = int(self.task.parameters.get("recursion_depth", 0))
+
+        # Вычисляем максимально допустимую глубину рекурсии для данного количества персонажей
+        max_allowed_depth = min(math.ceil(total_users_count / 8) + 1, MAX_CHARACTER_RECURSION_DEPTH)
+
+        # Логируем входные параметры для отладки
+        logger.debug(f"Character batch task parameters: users_count={users_count}, "
+                    f"total_users_count={total_users_count}, generated_count={generated_count}, "
+                    f"count_run={count_run}, recursion_depth={recursion_depth}, "
+                    f"remaining_posts_count={remaining_posts_count}")
+
+        # Проверяем, не превышена ли глубина рекурсии
+        if recursion_depth >= max_allowed_depth:
+            logger.warning(f"Maximum recursion depth reached ({recursion_depth}/{max_allowed_depth}) for world {world_id}. Stopping character generation.")
+            return {
+                "characters_count": 0,
+                "total_characters_count": generated_count,
+                "remaining_characters": users_count,
+                "recursion_depth": recursion_depth,
+                "max_allowed_depth": max_allowed_depth,
+                "error": f"Maximum recursion depth reached ({recursion_depth}/{max_allowed_depth})"
+            }
+
+        # Ограничиваем количество персонажей для текущей генерации
+        current_batch_size = min(users_count, MAX_CHARACTERS_PER_BATCH)
+
         # Получаем параметры мира
         world_params: WorldParameters = await self.get_world_parameters(world_id)
         if not world_params:
@@ -36,16 +78,43 @@ class GenerateCharacterBatchJob(BaseJob):
         # Загружаем промпт из файла
         prompt_template = load_prompt(CHARACTER_BATCH_PROMPT)
 
+        # Формируем информацию о персонажах
+        previous_characters_info = ""
+
+        # Вычисляем количество персонажей, которые будут сгенерированы в будущих запусках
+        future_users_count = users_count - current_batch_size
+
+        if generated_count > 0:
+            # Если уже есть сгенерированные персонажи, используем промпт для последующих генераций
+            previous_characters_template = load_prompt(PREVIOUS_CHARACTERS_PROMPT)
+            previous_characters_info = previous_characters_template.format(
+                count_run=count_run,
+                count=generated_count,
+                total_users_count=total_users_count,
+                current_batch_size=current_batch_size,
+                future_users_count=future_users_count,
+                description=generated_characters_description
+            )
+        elif users_count > current_batch_size:
+            # Если это первая генерация, но будут еще генерации, используем промпт для первой генерации
+            first_batch_template = load_prompt(FIRST_BATCH_CHARACTERS_PROMPT)
+            previous_characters_info = first_batch_template.format(
+                total_users_count=total_users_count,
+                current_batch_size=current_batch_size,
+                future_users_count=future_users_count
+            )
+
         # Генерируем описание структуры ответа
         structure_description = model_to_template(CharacterBatchResponse)
 
         # Форматируем промпт с параметрами
         world_description = format_world_description(world_params)
         prompt = prompt_template.format(
-            users_count=users_count,
+            users_count=current_batch_size,
             posts_count=posts_count,
             world_description=world_description,
-            structure_description=structure_description
+            structure_description=structure_description,
+            previous_characters_info=previous_characters_info
         )
 
         # Генерируем пакет персонажей с помощью LLM
@@ -66,15 +135,50 @@ class GenerateCharacterBatchJob(BaseJob):
                 world_id=world_id
             )
 
-            logger.info(f"Generated character batch for world {world_id} with {len(character_batch.characters)} characters")
+            actual_characters_count = len(character_batch.characters)
+            logger.info(f"Generated character batch for world {world_id} with {actual_characters_count} characters (requested {current_batch_size})")
+
+            # Проверяем, что LLM вернула хотя бы одного персонажа
+            if actual_characters_count == 0:
+                logger.warning(f"LLM returned 0 characters for world {world_id} (requested {current_batch_size})")
+                return {
+                    "characters_count": 0,
+                    "total_characters_count": generated_count,
+                    "remaining_characters": users_count,
+                    "error": "LLM returned 0 characters",
+                    "recursion_depth": recursion_depth,
+                    "max_allowed_depth": max_allowed_depth
+                }
+
+            # Если LLM вернула меньше персонажей, чем запрошено, корректируем remaining_users
+            if actual_characters_count < current_batch_size:
+                logger.warning(f"LLM returned fewer characters than requested: {actual_characters_count} < {current_batch_size}")
 
             # Проверяем и корректируем posts_count
             self._adjust_posts_count(character_batch, posts_count)
 
             # Создаем задачи для генерации каждого персонажа
             tasks_to_create = []
-            now = datetime.utcnow()
+            now = datetime.now(datetime.timezone.utc)
 
+            # Обновляем счетчики сгенерированных персонажей
+            new_generated_count = generated_count + len(character_batch.characters)
+            new_count_run = count_run + 1
+
+            # Создаем краткое описание сгенерированных персонажей
+            character_descriptions = []
+            for character in character_batch.characters:
+                desc = f"{character.concept_short} Роль: {character.role_in_world}. Черты: {', '.join(character.personality_traits)}."
+                character_descriptions.append(desc)
+
+            # Объединяем с предыдущим описанием
+            new_description = generated_characters_description
+            if character_descriptions:
+                if new_description:
+                    new_description += "\n\n"
+                new_description += "\n".join(character_descriptions)
+
+            # Создаем задачи для генерации каждого персонажа
             for i, character in enumerate(character_batch.characters):
                 character_task_id = str(uuid.uuid4())
                 character_task = Task(
@@ -89,7 +193,7 @@ class GenerateCharacterBatchJob(BaseJob):
                         "posts_count": character.posts_count,
                         "personality_traits": character.personality_traits,
                         "interests": character.interests,
-                        "character_index": i,  # Добавляем индекс для отслеживания
+                        "character_index": i + generated_count,
                     },
                     created_at=now,
                     updated_at=now,
@@ -97,22 +201,62 @@ class GenerateCharacterBatchJob(BaseJob):
                 )
                 tasks_to_create.append({"task": character_task})
 
+            remaining_users = users_count - actual_characters_count
+
+            if remaining_users > 0:
+                posts_allocated = sum(character.posts_count for character in character_batch.characters)
+                new_remaining_posts = remaining_posts_count - posts_allocated
+
+                new_recursion_depth = recursion_depth + 1
+
+                if new_recursion_depth >= max_allowed_depth:
+                    logger.warning(f"Would exceed maximum recursion depth ({new_recursion_depth}/{max_allowed_depth}) for world {world_id}. Stopping further character generation.")
+                else:
+                    next_batch_task_id = str(uuid.uuid4())
+                    next_batch_task = Task(
+                        _id=next_batch_task_id,
+                        type=TaskType.GENERATE_CHARACTER_BATCH,
+                        world_id=world_id,
+                        status="pending",
+                        worker_id=None,
+                        parameters={
+                            "users_count": remaining_users,
+                            "posts_count": posts_count,
+                            "remaining_posts_count": new_remaining_posts,
+                            "generated_characters_description": new_description,
+                            "generated_count": new_generated_count,
+                            "count_run": new_count_run,
+                            "recursion_depth": new_recursion_depth,
+                            "total_users_count": total_users_count
+                        },
+                        created_at=now,
+                        updated_at=now,
+                        attempt_count=0
+                    )
+
+                    logger.debug(f"Next character batch task parameters: users_count={remaining_users}, "
+                                f"total_users_count={total_users_count}, generated_count={new_generated_count}, "
+                                f"count_run={new_count_run}, recursion_depth={new_recursion_depth}, "
+                                f"remaining_posts_count={new_remaining_posts}")
+                    tasks_to_create.append({"task": next_batch_task})
+
+                    logger.info(f"Creating recursive task to generate {remaining_users} more characters for world {world_id} (recursion depth: {new_recursion_depth}/{max_allowed_depth})")
+
             created_task_ids = await self.create_next_tasks(tasks_to_create)
 
-            # Обновляем информацию о прогрессе
-            if self.progress_manager:
-                # Обновляем предсказанное количество пользователей
-                await self.progress_manager.update_progress(
-                    world_id=world_id,
-                    updates={"users_predicted": len(character_batch.characters)}
-                )
 
             # Передаем структуру персонажей в результат
             return {
                 "characters_count": len(character_batch.characters),
+                "total_characters_count": new_generated_count,
+                "remaining_characters": remaining_users,
                 "world_interpretation": character_batch.world_interpretation,
                 "character_connections": [conn.model_dump() for conn in character_batch.character_connections],
                 "next_tasks": created_task_ids,
+                "recursion_depth": recursion_depth,
+                "max_allowed_depth": max_allowed_depth,
+                "posts_allocated": sum(character.posts_count for character in character_batch.characters),
+                "remaining_posts_count": remaining_posts_count - sum(character.posts_count for character in character_batch.characters)
             }
 
         except Exception as e:
@@ -122,7 +266,7 @@ class GenerateCharacterBatchJob(BaseJob):
     def _adjust_posts_count(self, character_batch: CharacterBatchResponse, target_posts_count: int) -> None:
         """
         Проверяет и корректирует количество постов для каждого персонажа,
-        чтобы сумма соответствовала целевому значению
+        чтобы сумма соответствовала целевому значению или оставшемуся количеству постов
 
         Args:
             character_batch: Пакет персонажей
@@ -131,56 +275,110 @@ class GenerateCharacterBatchJob(BaseJob):
         if not character_batch.characters:
             return
 
-        # Вычисляем текущую сумму постов
+        remaining_posts_count = int(self.task.parameters.get("remaining_posts_count", target_posts_count))
+
+        actual_target = min(remaining_posts_count, target_posts_count)
+
         current_sum = sum(character.posts_count for character in character_batch.characters)
 
-        # Если сумма уже равна целевому значению, ничего не делаем
-        if current_sum == target_posts_count:
+        if current_sum == actual_target:
             logger.info(f"Posts count already matches target: {current_sum}")
             return
 
-        logger.info(f"Adjusting posts count from {current_sum} to {target_posts_count}")
+        logger.info(f"Adjusting posts count from {current_sum} to {actual_target}")
 
-        # Если сумма меньше целевого, добавляем посты
-        if current_sum < target_posts_count:
-            diff = target_posts_count - current_sum
-            # Распределяем разницу между персонажами
-            posts_per_character = diff // len(character_batch.characters)
-            remainder = diff % len(character_batch.characters)
+        
+        for character in character_batch.characters:
+            if character.posts_count < 1:
+                character.posts_count = 1
 
-            for i, character in enumerate(character_batch.characters):
-                # Добавляем базовое количество постов
-                character.posts_count += posts_per_character
-                # Распределяем остаток
-                if i < remainder:
-                    character.posts_count += 1
+        current_sum = sum(character.posts_count for character in character_batch.characters)
 
-        # Если сумма больше целевого, убираем посты
-        else:
-            diff = current_sum - target_posts_count
-            # Сортируем персонажей по количеству постов (по убыванию)
+        if current_sum < actual_target:
+            diff = actual_target - current_sum
+
+            total_weight = sum(character.posts_count for character in character_batch.characters)
+
+            if len(set(character.posts_count for character in character_batch.characters)) <= 1:
+                posts_per_character = diff // len(character_batch.characters)
+                remainder = diff % len(character_batch.characters)
+
+                for i, character in enumerate(character_batch.characters):
+                    character.posts_count += posts_per_character
+                    if i < remainder:
+                        character.posts_count += 1
+            else:
+                remaining_to_add = diff
+
+                for character in character_batch.characters:
+                    weight = character.posts_count / total_weight
+                    posts_to_add = int(diff * weight)
+                    character.posts_count += posts_to_add
+                    remaining_to_add -= posts_to_add
+
+                if remaining_to_add > 0:
+                    sorted_characters = sorted(
+                        character_batch.characters,
+                        key=lambda c: c.posts_count / total_weight,
+                        reverse=True
+                    )
+
+                    for i in range(int(remaining_to_add)):
+                        sorted_characters[i % len(sorted_characters)].posts_count += 1
+
+        elif current_sum > actual_target:
+            diff = current_sum - actual_target
+
             sorted_characters = sorted(
                 character_batch.characters,
                 key=lambda c: c.posts_count,
                 reverse=True
             )
 
-            # Убираем посты, начиная с персонажей с наибольшим количеством
+            remaining_to_remove = diff
+            total_posts = current_sum
+
             for character in sorted_characters:
-                if diff <= 0:
+                if remaining_to_remove <= 0:
                     break
 
-                # Убираем посты, но не меньше 1
-                posts_to_remove = max(0, min(diff, character.posts_count - 1))
-                character.posts_count -= posts_to_remove
-                diff -= posts_to_remove
+                weight = character.posts_count / total_posts
+                posts_to_remove = min(int(diff * weight), character.posts_count - 1)
+
+                if posts_to_remove > 0:
+                    character.posts_count -= posts_to_remove
+                    remaining_to_remove -= posts_to_remove
+
+            if remaining_to_remove > 0:
+                sorted_characters = sorted(
+                    character_batch.characters,
+                    key=lambda c: c.posts_count,
+                    reverse=True
+                )
+
+                for character in sorted_characters:
+                    if remaining_to_remove <= 0:
+                        break
+
+                    if character.posts_count > 1:
+                        character.posts_count -= 1
+                        remaining_to_remove -= 1
 
         # Проверяем результат
         new_sum = sum(character.posts_count for character in character_batch.characters)
-        logger.info(f"Adjusted posts count: {new_sum} (target: {target_posts_count})")
+        logger.info(f"Adjusted posts count: {new_sum} (target: {actual_target})")
 
-        if new_sum != target_posts_count:
-            logger.warning(f"Failed to adjust posts count exactly: {new_sum} != {target_posts_count}")
+        if new_sum != actual_target:
+            logger.warning(f"Failed to adjust posts count exactly: {new_sum} != {actual_target}")
+
+        for character in character_batch.characters:
+            if character.posts_count < 1:
+                logger.warning(f"Character has less than 1 post after adjustment, setting to 1")
+                character.posts_count = 1
+
+        final_sum = sum(character.posts_count for character in character_batch.characters)
+        if final_sum != new_sum:
+            logger.info(f"Final adjustment changed posts count from {new_sum} to {final_sum}")
 
     async def on_success(self, result: Dict[str, Any]) -> None:
         """
@@ -189,10 +387,29 @@ class GenerateCharacterBatchJob(BaseJob):
         Args:
             result: Результат выполнения задания
         """
-        logger.info(
-            f"Successfully generated character batch for world {self.task.world_id} "
-            f"with {result.get('characters_count')} characters"
-        )
+        total_count = result.get('total_characters_count', result.get('characters_count', 0))
+        remaining = result.get('remaining_characters', 0)
+        recursion_depth = result.get('recursion_depth', 0)
+        max_allowed_depth = result.get('max_allowed_depth', 0)
+        posts_allocated = result.get('posts_allocated', 0)
+        remaining_posts = result.get('remaining_posts_count', 0)
+
+        if remaining > 0:
+            logger.info(
+                f"Successfully generated character batch for world {self.task.world_id} "
+                f"with {result.get('characters_count')} characters. "
+                f"Total generated: {total_count}. Remaining to generate: {remaining}. "
+                f"Recursion depth: {recursion_depth}/{max_allowed_depth}. "
+                f"Posts allocated: {posts_allocated}, remaining: {remaining_posts}"
+            )
+        else:
+            logger.info(
+                f"Successfully generated character batch for world {self.task.world_id} "
+                f"with {result.get('characters_count')} characters. "
+                f"Total generated: {total_count}. All characters generated. "
+                f"Recursion depth: {recursion_depth}/{max_allowed_depth}. "
+                f"Posts allocated: {posts_allocated}, remaining: {remaining_posts}"
+            )
 
     async def on_failure(self, error: Exception) -> None:
         """
