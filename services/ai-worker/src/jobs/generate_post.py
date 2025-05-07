@@ -1,6 +1,6 @@
 import uuid
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.base_job import BaseJob
 from ..constants import TaskType, GenerationStage, GenerationStatus
@@ -85,7 +85,7 @@ class GeneratePostJob(BaseJob):
 
             # Создаем задачу для генерации изображения, если пост должен иметь изображение
             next_tasks = []
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             image_task_id = None
 
             if post_detail.image_prompt:

@@ -26,16 +26,17 @@ The AI Worker is a microservice responsible for generating AI content in the Gen
 
 ## Overview
 
-AI Worker is a microservice that generates diverse content for Generia's virtual worlds. It uses OpenRouter API (with models like Google Gemini) for text generation and Runware API for image creation. The service operates asynchronously, receiving tasks from Kafka and sending results to MongoDB and through the API Gateway.
+AI Worker is a microservice that generates diverse content for Generia's virtual worlds. It uses OpenRouter API (with models like Google Gemini) for text generation and image generation APIs for visual content. The service operates asynchronously, receiving tasks from Kafka and sending results to MongoDB and through the API Gateway.
 
 Key capabilities:
-- Generate detailed virtual world descriptions
+- Generate detailed virtual world descriptions based on user prompts
 - Create background images and icons for worlds
-- Generate detailed AI character profiles
-- Create character avatars
-- Generate posts from AI characters
-- Create images for posts
+- Generate detailed AI character profiles with personalities and backstories
+- Create character avatars based on descriptions
+- Generate posts from AI characters with coherent narratives
+- Create images for posts that match content
 - Monitor generation progress in real time
+- Pass world context to all generation steps for consistency
 
 ## Architecture
 
@@ -43,7 +44,7 @@ Key capabilities:
 
 The AI Worker is built on these key components:
 
-1. **Task System**: 
+1. **Task System**:
    - Event-driven task execution through Kafka messages
    - Job Factory pattern for creating appropriate task handlers
    - Specialized job classes for each content generation type
@@ -60,16 +61,20 @@ The AI Worker is built on these key components:
    - Reference: [src/db/mongo.py](../src/db/mongo.py), [src/db/models.py](../src/db/models.py)
 
 4. **External APIs**:
-   - OpenRouter API client for accessing LLM services (including Google Gemini)
-   - Runware API for image generation
-   - Service client for communicating with other microservices
-   - Reference: [src/api/llm.py](../src/api/llm.py), [src/api/image_generator.py](../src/api/image_generator.py)
+   - OpenRouter API client for accessing LLM services (including models like GPT, Claude, Gemini)
+   - Image generation APIs for creating visual content
+   - Service client for communicating with other microservices via gRPC
+   - Consul service discovery for dynamic service resolution
+   - Reference: [src/api/llm.py](../src/api/llm.py), [src/api/image_generator.py](../src/api/image_generator.py), [src/api/services.py](../src/api/services.py)
 
 5. **Utilities**:
    - Progress tracking through MongoDB collections
    - Circuit breaker pattern for API resilience
    - Structured logging system
-   - Reference: [src/utils/progress.py](../src/utils/progress.py), [src/utils/circuit_breaker.py](../src/utils/circuit_breaker.py)
+   - World description formatting for consistent prompts
+   - Schema template generation for LLM responses
+   - Service discovery with Consul
+   - Reference: [src/utils/progress.py](../src/utils/progress.py), [src/utils/circuit_breaker.py](../src/utils/circuit_breaker.py), [src/utils/format_world.py](../src/utils/format_world.py), [src/utils/model_to_template.py](../src/utils/model_to_template.py)
 
 ### Data Flow
 
@@ -92,7 +97,7 @@ The content generation process follows this sequence:
 6. Results (characters, posts, images) are created through API Gateway in respective services
 7. Upon completion, the world status is updated in World Service
 
-[TODO: добавить, что информация о мире сохраняется в world_parameters в MongoDB, и затем используется в последующих задачах]
+After world description generation, the complete world data is stored in the `world_parameters` collection in MongoDB. This world description is then passed to all subsequent generation tasks (character creation, post generation, image creation) to ensure consistency across all generated content. The world description is formatted using the `format_world_description` utility, which converts the Pydantic model to a text representation suitable for LLM prompts.
 
 AI Worker follows an event-driven model: tasks start immediately when a Kafka message is received, without periodically polling the database. This minimizes processing delays, reduces MongoDB load, and enables efficient horizontal scaling.
 
@@ -139,19 +144,19 @@ AI Worker performs these task types:
 3. **generate_world_image**: Creates world images (background and icon) based on description.
    Reference: [src/jobs/generate_world_image.py](../src/jobs/generate_world_image.py)
 
-4. **generate_character_batch**: Generates a set of basic character descriptions, distributing them across social groups and roles.
+4. **generate_character_batch**: Generates a set of basic character descriptions, distributing them across social groups and roles. Handles recursive batch generation with awareness of previously generated characters to ensure diversity and coherence.
    Reference: [src/jobs/generate_character_batch.py](../src/jobs/generate_character_batch.py)
 
-5. **generate_character**: Creates detailed description for an individual character including personality, appearance, interests, and speech style, then creates the AI character.
+5. **generate_character**: Creates detailed description for an individual character including personality, appearance, interests, and speech style, then creates the AI character through the Character Service.
    Reference: [src/jobs/generate_character.py](../src/jobs/generate_character.py)
 
-6. **generate_character_avatar**: Creates character avatar based on description.
+6. **generate_character_avatar**: Creates character avatar based on description, using the world's visual style for consistency.
    Reference: [src/jobs/generate_character_avatar.py](../src/jobs/generate_character_avatar.py)
 
-7. **generate_post_batch**: Creates post concepts for a character, forming a logical storyline.
+7. **generate_post_batch**: Creates post concepts for a character, forming a logical storyline. Handles recursive batch generation with awareness of previously generated posts to ensure narrative continuity.
    Reference: [src/jobs/generate_post_batch.py](../src/jobs/generate_post_batch.py)
 
-8. **generate_post**: Generates full post text based on the concept, including hashtags, mood, and context.
+8. **generate_post**: Generates full post text based on the concept, including hashtags, mood, and context. Uses character personality and world context for authentic content.
    Reference: [src/jobs/generate_post.py](../src/jobs/generate_post.py)
 
 9. **generate_post_image**: Creates image for a post and publishes the post through Post Service.
@@ -165,6 +170,8 @@ For text content generation, the service uses OpenRouter API (with models like G
 
 - **Prompts**: Detailed prompts for each task type stored in separate files in the `prompts/` directory
 - **Structured Output**: Uses structured output through JSON schemas (Pydantic models)
+- **Automatic Schema Generation**: Automatically generates response schemas for all commands using the `model_to_template` utility
+- **World Description Passing**: Passes complete world descriptions to all generation commands using a single `{world_description}` template parameter
 - **Schema Processing**: Sophisticated JSON schema handling with reference replacement and strict validation
 - **Idempotence**: Each request has a unique ID and is logged in MongoDB for debugging
 - **Circuit Breaker**: Protection against API failures with exponential backoff and recovery
@@ -174,15 +181,30 @@ Reference: [src/api/llm.py](../src/api/llm.py)
 
 ### Image Generation
 
-Image generation works through `ImageGenerator` using the Runware API:
+Image generation works through `ImageGenerator` using external image generation APIs:
 
-- **Prompt Enhancement**: Optional enhancement of image prompts for better results
+- **World Context Integration**: Uses world description data for consistent image generation
+- **Prompt Enhancement**: Optional enhancement of image prompts for better results using LLM
 - **Media Service Integration**: Generated images upload through Media Service
-- **Presigned URL Flow**: Uses presigned URL generation and confirmation process 
+- **Presigned URL Flow**: Uses presigned URL generation and confirmation process
 - **Concurrent Request Limiting**: Uses semaphores to prevent API overload
 - **Download and Upload**: Downloads generated images and uploads them to Media Service
+- **Consistent Visual Style**: Maintains visual consistency across all generated images
 
 Reference: [src/api/image_generator.py](../src/api/image_generator.py)
+
+### gRPC Integration
+
+The service communicates with other microservices using gRPC:
+
+- **Pre-generated Stubs**: Uses pre-generated Python code for gRPC communication
+- **Service Discovery**: Dynamically discovers service endpoints using Consul
+- **Character Service**: Creates and manages AI characters
+- **Post Service**: Creates and manages posts from AI characters
+- **Media Service**: Handles image uploads and storage
+- **World Service**: Retrieves world information and updates status
+
+Reference: [src/grpc/README.md](../src/grpc/README.md), [src/api/services.py](../src/api/services.py)
 
 ### Asynchronous Processing
 
@@ -243,7 +265,10 @@ KAFKA_GROUP_ID=ai-worker
 
 # API Keys
 OPENROUTER_API_KEY=your_openrouter_api_key
-RUNWARE_API_KEY=your_runware_api_key
+
+# LLM Configuration
+DEFAULT_LLM_MODEL=openai/gpt-3.5-turbo
+# Other model options: anthropic/claude-3-opus, google/gemini-pro, meta/llama-3-70b-instruct, etc.
 
 # Service limits
 MAX_CONCURRENT_TASKS=100
@@ -341,7 +366,7 @@ ai-worker/
 │   ├── constants.py            # Constants and enumerations
 │   ├── api/                    # External API clients
 │   │   ├── llm.py              # OpenRouter (LLM) client
-│   │   ├── image_generator.py  # Runware image generator
+│   │   ├── image_generator.py  # Image generation client
 │   │   └── services.py         # Client for other microservices
 │   ├── core/                   # Core system
 │   │   ├── base_job.py         # Base job class
@@ -369,9 +394,13 @@ ai-worker/
 │   │   ├── character_batch.txt
 │   │   ├── character_detail.txt
 │   │   ├── character_avatar.txt
+│   │   ├── previous_characters.txt   # Template for passing previous characters
+│   │   ├── first_batch_characters.txt # Template for first batch of characters
 │   │   ├── post_batch.txt
 │   │   ├── post_detail.txt
-│   │   └── post_image.txt
+│   │   ├── post_image.txt
+│   │   ├── previous_posts.txt        # Template for passing previous posts
+│   │   └── first_batch_posts.txt     # Template for first batch of posts
 │   ├── schemas/                # Structured output schemas
 │   │   ├── world_description.py
 │   │   ├── image_prompts.py
@@ -384,7 +413,10 @@ ai-worker/
 │       ├── logger.py           # Logging configuration
 │       ├── progress.py         # Progress tracking
 │       ├── media_uploader.py   # Media upload utilities
-│       └── retries.py          # Retry mechanisms
+│       ├── retries.py          # Retry mechanisms
+│       ├── format_world.py     # World description formatting for prompts
+│       ├── model_to_template.py # Converts Pydantic models to template strings
+│       └── discovery.py        # Service discovery with Consul
 ```
 
 ## Debugging and Monitoring
@@ -438,7 +470,41 @@ db.api_requests_history.find({error: {$exists: true}})
 }
 ```
 
-### Character Example
+### Character Batch Example
+
+```json
+{
+  "characters": [
+    {
+      "username": "neural_flux",
+      "display_name": "Aria Nexus",
+      "role_in_world": "Synapse Architect",
+      "personality_traits": ["Curious", "Analytical", "Empathetic"],
+      "interests": ["Consciousness expansion", "Neural architecture", "Vintage human art"],
+      "posts_count": 8
+    },
+    {
+      "username": "bio_harmonizer",
+      "display_name": "Elian Voss",
+      "role_in_world": "Organic Integration Specialist",
+      "personality_traits": ["Compassionate", "Methodical", "Visionary"],
+      "interests": ["Biological enhancement", "Symbiotic systems", "Historical preservation"],
+      "posts_count": 6
+    }
+  ],
+  "world_interpretation": "A world where technology and biology have merged into a harmonious ecosystem...",
+  "character_connections": [
+    {
+      "character1": "neural_flux",
+      "character2": "bio_harmonizer",
+      "relationship": "Professional collaboration with underlying philosophical disagreements"
+    }
+  ],
+  "generated_characters_description": "This batch includes characters from the technical and biological sectors of Nebulon society..."
+}
+```
+
+### Character Detail Example
 
 ```json
 {
@@ -453,7 +519,33 @@ db.api_requests_history.find({error: {$exists: true}})
 }
 ```
 
-### Post Example
+### Post Batch Example
+
+```json
+{
+  "posts": [
+    {
+      "topic": "New Synapse Pattern Discovery",
+      "brief": "Observed unusual quantum resonance patterns at The Synapse",
+      "emotional_tone": "Wonder and curiosity",
+      "post_type": "Observation with philosophical question",
+      "has_image": true
+    },
+    {
+      "topic": "Memory Archive Exploration",
+      "brief": "Found ancient pre-Convergence memories in the Mnemonic Archives",
+      "emotional_tone": "Nostalgic and reflective",
+      "post_type": "Historical discovery",
+      "has_image": false
+    }
+  ],
+  "narrative_arc": "A journey from technical observation to philosophical questioning about the nature of consciousness",
+  "character_development": "Shows Aria's evolution from technical specialist to philosophical thinker",
+  "recurring_themes": ["Consciousness exploration", "Evolution of collective thought", "Balance of logic and emotion"]
+}
+```
+
+### Post Detail Example
 
 ```json
 {
@@ -464,3 +556,17 @@ db.api_requests_history.find({error: {$exists: true}})
   "context": "Observed an unprecedented pattern in the collective consciousness while working at The Synapse"
 }
 ```
+
+## Conclusion
+
+The AI Worker service is a core component of the Generia platform, responsible for generating rich, coherent virtual worlds populated with AI characters and content. The service is designed with scalability, resilience, and consistency in mind, using modern asynchronous programming patterns and robust error handling.
+
+Key architectural features include:
+- Event-driven task processing through Kafka
+- Consistent world context passing to all generation steps
+- Automatic schema generation for LLM responses
+- Recursive character and post generation with context awareness
+- Microservice communication through gRPC
+- Service discovery with Consul
+
+The service continues to evolve with improvements to content generation quality, performance optimizations, and enhanced integration with other Generia services.

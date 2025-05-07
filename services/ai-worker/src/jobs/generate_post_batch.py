@@ -1,7 +1,7 @@
 import uuid
 import math
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.base_job import BaseJob
 from ..constants import TaskType
@@ -39,7 +39,7 @@ class GeneratePostBatchJob(BaseJob):
         character_id = self.task.parameters.get("character_id", "")
         character_index = character_description.get("character_index", 0)
 
-       
+
         generated_posts_count = int(self.task.parameters.get("generated_posts_count", 0))
 
         recursion_depth = int(self.task.parameters.get("recursion_depth", 0))
@@ -169,7 +169,7 @@ class GeneratePostBatchJob(BaseJob):
 
             # Создаем задачи для генерации каждого поста
             tasks_to_create = []
-            now = datetime.now(datetime.timezone.utc)
+            now = datetime.now(timezone.utc)
 
             # Обновляем счетчик сгенерированных постов
             new_generated_posts_count = generated_posts_count + actual_posts_count
@@ -206,7 +206,7 @@ class GeneratePostBatchJob(BaseJob):
                         "character_id": character_id,
                         "username": username,
                         "character_index": character_index,
-                        "post_index": i + generated_posts_count 
+                        "post_index": i + generated_posts_count
                     },
                     created_at=now,
                     updated_at=now,
@@ -214,7 +214,7 @@ class GeneratePostBatchJob(BaseJob):
                 )
                 tasks_to_create.append({"task": post_task})
 
-            
+
             remaining_posts = posts_count - new_generated_posts_count
 
             if remaining_posts > 0:

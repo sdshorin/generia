@@ -12,9 +12,9 @@ class Location(BaseModel):
     visual_style: str = Field(..., description="Визуальный стиль места")
 
 class CharacterType(BaseModel):
-    """Схема для описания типа персонажа"""
-    type: str = Field(..., description="Тип персонажа")
-    description: str = Field(..., description="Описание типа персонажа")
+    """Схема для описания социальной группы"""
+    type: str = Field(..., description="Тип персонажей")
+    description: str = Field(..., description="Описание типа персонажей")
     role: str = Field(..., description="Роль в обществе")
     characteristics: List[str] = Field(..., description="Список характерных черт")
 
@@ -33,10 +33,19 @@ class AdditionalDetails(BaseModel):
         description="Дополнительные уникальные детали мира, которые не вписываются в основную структуру (не ограниченное количество)"
     )
 
+
+class UserPreferences(BaseModel):
+    """Схема для описания предпочтений пользователя"""
+    language: str = Field(..., description="Язык, который предпочитает пользователь (на каком языке должен быть сгенерирован мир - английский, русский, итальянский, французский, и т.д.)")
+    other_preferences: List[str] = Field(
+        default_factory=list,
+        description="Дополнительные предпочтения пользователя, которые не вписываются в основную структуру (Взяты из промпта пользователя, если есть)"
+    )
+
 class WorldDescriptionResponse(BaseModel):
     """Схема для структурированного ответа от LLM при генерации описания мира"""
     name: str = Field(..., description="Название мира (уникальное, запоминающееся, отражающее его суть)")
-    language: str = Field(..., description="Язык постов, на котором пользователь пишет или который пользователь указывает")
+    user_preferences: UserPreferences = Field(..., description="Предпочтения пользователя")
     description_short: str = Field(..., description="Краткое описание мира (2-3 предложения)")
     description: str = Field(..., description="Подробное описание мира (1-5 абзацев)")
     theme: str = Field(..., description="Основная тема мира")
@@ -46,10 +55,10 @@ class WorldDescriptionResponse(BaseModel):
     geography: str = Field(..., description="Географические особенности мира")
     visual_style: str = Field(..., description="Визуальный стиль мира (цветовая палитра, художественный стиль)")
     history: str = Field(..., description="История мира")
-    notable_locations: List[Location] = Field(..., description="Список примечательных мест. Каждое место должно содержать: название, описание, значимость и визуальный стиль")
-    typical_characters: List[CharacterType] = Field(..., description="Список из типов персонажей. Каждый тип должен быть объектом со следующими полями: тип, описание, роль и список характерных черт")
-    common_activities: List[str] = Field(..., description="Список распространенных занятий и активностей в этом мире")
-    typical_stories: List[str] = Field(..., description="Типичные истории и сюжеты, которые происходят в этом мире")
+    # notable_locations: List[Location] = Field(..., description="Список примечательных мест. Содержит как конкретные места, так и примеры типичных мест/ареалов. 3-10 или более мест")
+    # typical_characters: List[CharacterType] = Field(..., description="Список из типов персонажей. Это описание должно содержать описание социальных групп и ролей в мире, 3-10 или более типов")
+    common_activities: List[str] = Field(..., description="Список распространенных занятий и активностей в этом мире, 5-20 или более активностей")
+    typical_stories: List[str] = Field(..., description="Типичные истории и сюжеты, которые происходят в этом мире. 5-20 или более историй")
     additional_details: AdditionalDetails = Field(
         ..., description="Дополнительные детали и особенности мира, включающие: климат, ресурсы, конфликты, традиции, технологии, систему магии, временной период, язык и дополнительные детали"
     )
@@ -84,17 +93,17 @@ class WorldDescription(WorldDescriptionResponse):
             return None
 
         # Преобразуем вложенные объекты из словарей в объекты Pydantic
-        if "notable_locations" in data and isinstance(data["notable_locations"], list):
-            data["notable_locations"] = [
-                Location(**loc) if isinstance(loc, dict) else loc
-                for loc in data["notable_locations"]
-            ]
+        # if "notable_locations" in data and isinstance(data["notable_locations"], list):
+        #     data["notable_locations"] = [
+        #         Location(**loc) if isinstance(loc, dict) else loc
+        #         for loc in data["notable_locations"]
+        #     ]
 
-        if "typical_characters" in data and isinstance(data["typical_characters"], list):
-            data["typical_characters"] = [
-                CharacterType(**char) if isinstance(char, dict) else char
-                for char in data["typical_characters"]
-            ]
+        # if "typical_characters" in data and isinstance(data["typical_characters"], list):
+        #     data["typical_characters"] = [
+        #         CharacterType(**char) if isinstance(char, dict) else char
+        #         for char in data["typical_characters"]
+        #     ]
 
         if "additional_details" in data and isinstance(data["additional_details"], dict):
             data["additional_details"] = AdditionalDetails(**data["additional_details"])
@@ -122,8 +131,8 @@ class WorldDescription(WorldDescriptionResponse):
         data["updated_at"] = now
 
         # Преобразуем вложенные объекты в словари
-        data["notable_locations"] = [loc.model_dump() for loc in self.notable_locations]
-        data["typical_characters"] = [char.model_dump() for char in self.typical_characters]
+        # data["notable_locations"] = [loc.model_dump() for loc in self.notable_locations]
+        # data["typical_characters"] = [char.model_dump() for char in self.typical_characters]
         data["additional_details"] = self.additional_details.model_dump()
 
         return data

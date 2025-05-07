@@ -1,6 +1,6 @@
 import uuid
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.base_job import BaseJob
 from ..constants import TaskType, GenerationStage, GenerationStatus
@@ -53,7 +53,7 @@ class GenerateWorldDescriptionJob(BaseJob):
             )
 
             # Сохраняем параметры мира в БД
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
 
             world_description = WorldDescription(
                 **world_description_response.model_dump(),

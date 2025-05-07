@@ -1,6 +1,6 @@
 import asyncio
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import DuplicateKeyError
@@ -130,7 +130,7 @@ class MongoDBManager:
         Returns:
             True if the task was updated, otherwise False
         """
-        updates["updated_at"] = datetime.now(datetime.timezone.utc)
+        updates["updated_at"] = datetime.now(timezone.utc)
 
         result = await self.tasks_collection.update_one(
             {"_id": task_id},
@@ -160,7 +160,7 @@ class MongoDBManager:
         Returns:
             True if the task was updated, otherwise False
         """
-        updates = {"status": status, "updated_at": datetime.now(datetime.timezone.utc)}
+        updates = {"status": status, "updated_at": datetime.now(timezone.utc)}
 
         if result is not None:
             updates["result"] = result
@@ -222,7 +222,7 @@ class MongoDBManager:
                     "$set": {
                         "status": "in_progress",
                         "worker_id": worker_id,
-                        "updated_at": datetime.now(datetime.timezone.utc)
+                        "updated_at": datetime.now(timezone.utc)
                     },
                     "$inc": {"attempt_count": 1}
                 }
@@ -275,7 +275,7 @@ class MongoDBManager:
 
         if existing:
             # Update existing parameters
-            now = datetime.now(datetime.timezone.utc)
+            now = datetime.now(timezone.utc)
             await self.world_parameters_collection.update_one(
                 {"_id": params.id},
                 {"$set": {**params_dict, "updated_at": now}}
@@ -347,7 +347,7 @@ class MongoDBManager:
         Raises:
             DuplicateKeyError: If a status with this ID already exists
         """
-        now = datetime.now(datetime.timezone.utc)
+        now = datetime.now(timezone.utc)
         status = WorldGenerationStatus(
             _id=world_id,
             status=GenerationStatus.IN_PROGRESS,
@@ -453,7 +453,7 @@ class MongoDBManager:
             overall_status = GenerationStatus.IN_PROGRESS
 
         current_status["status"] = overall_status
-        current_status["updated_at"] = datetime.now(datetime.timezone.utc)
+        current_status["updated_at"] = datetime.now(timezone.utc)
 
         try:
             # Save updated document
@@ -506,7 +506,7 @@ class MongoDBManager:
             {"_id": world_id},
             {
                 "$inc": {field: increment},
-                "$set": {"updated_at": datetime.now(datetime.timezone.utc)}
+                "$set": {"updated_at": datetime.now(timezone.utc)}
             }
         )
 
@@ -537,7 +537,7 @@ class MongoDBManager:
             return None
 
         # Add update time
-        updates["updated_at"] = datetime.now(datetime.timezone.utc)
+        updates["updated_at"] = datetime.now(timezone.utc)
 
         result = await self.world_generation_status_collection.update_one(
             {"_id": world_id},
