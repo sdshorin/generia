@@ -141,6 +141,7 @@ type PostResponse struct {
 	DisplayName   string    `json:"display_name"`
 	Caption       string    `json:"caption"`
 	MediaURL      string    `json:"media_url"`
+	AvatarURL     string    `json:"avatar_url"`
 	CreatedAt     time.Time `json:"created_at"`
 	LikesCount    int       `json:"likes_count"`
 	CommentsCount int       `json:"comments_count"`
@@ -208,6 +209,7 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 		DisplayName:   resp.DisplayName,
 		Caption:       resp.Caption,
 		MediaURL:      resp.MediaUrl,
+		AvatarURL:     resp.AvatarUrl,
 		CreatedAt:     createdAt,
 		LikesCount:    int(resp.LikesCount),
 		CommentsCount: int(resp.CommentsCount),
@@ -312,6 +314,7 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 			DisplayName:   post.DisplayName,
 			Caption:       post.Caption,
 			MediaURL:      post.MediaUrl,
+			AvatarURL:     post.AvatarUrl,
 			CreatedAt:     createdAt,
 			LikesCount:    int(post.LikesCount),
 			CommentsCount: int(post.CommentsCount),
@@ -384,6 +387,7 @@ func (h *PostHandler) GetCharacterPosts(w http.ResponseWriter, r *http.Request) 
 			DisplayName:   post.DisplayName,
 			Caption:       post.Caption,
 			MediaURL:      post.MediaUrl,
+			AvatarURL:     post.AvatarUrl,
 			CreatedAt:     time.Unix(0, 0), // TODO: Parse created_at from string
 			LikesCount:    int(post.LikesCount),
 			CommentsCount: int(post.CommentsCount),
@@ -397,4 +401,95 @@ func (h *PostHandler) GetCharacterPosts(w http.ResponseWriter, r *http.Request) 
 		Posts: posts,
 		Total: len(posts),
 	})
+}
+
+// GetGlobalPosts handles requests to get the global feed directly from post service
+func (h *PostHandler) GetGlobalPosts(w http.ResponseWriter, r *http.Request) {
+	ctx, span := h.tracer.Start(r.Context(), "PostHandler.GetGlobalPosts")
+	defer span.End()
+
+	// Get user ID from context (if authenticated)
+	userID, _ := ctx.Value(middleware.UserIDKey).(string)
+
+	// Parse pagination parameters
+	limit := 10 // Default
+	if limitParam := r.URL.Query().Get("limit"); limitParam != "" {
+		if parsedLimit, err := strconv.Atoi(limitParam); err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	cursor := r.URL.Query().Get("cursor")
+
+	// Get world_id from URL parameters
+	vars := mux.Vars(r)
+	worldID := vars["world_id"]
+	if worldID == "" {
+		http.Error(w, "world_id is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Missing world_id parameter")
+		return
+	}
+
+	// Get posts directly from post service
+	resp, err := h.postClient.GetGlobalFeed(ctx, &postpb.GetGlobalFeedRequest{
+		Limit:   int32(limit),
+		Cursor:  cursor,
+		WorldId: worldID,
+	})
+	if err != nil {
+		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
+		span.SetAttributes(attribute.Bool("error", true))
+		logger.Logger.Error("Failed to get posts", zap.Error(err))
+		return
+	}
+
+	// Prepare response
+	posts := make([]PostResponse, 0, len(resp.Posts))
+	for _, post := range resp.Posts {
+		// Check if current user has liked this post
+		userLiked := false
+		if userID != "" {
+			likeResp, err := h.interactionClient.CheckUserLiked(ctx, &interactionpb.CheckUserLikedRequest{
+				PostId: post.PostId,
+				UserId: userID,
+			})
+			if err == nil {
+				userLiked = likeResp.Liked
+			}
+		}
+
+		// Parse created time
+		createdAt, err := time.Parse(time.RFC3339, post.CreatedAt)
+		if err != nil {
+			createdAt = time.Now() // Fallback
+		}
+
+		posts = append(posts, PostResponse{
+			ID:            post.PostId,
+			CharacterID:   post.CharacterId,
+			DisplayName:   post.DisplayName,
+			Caption:       post.Caption,
+			MediaURL:      post.MediaUrl,
+			AvatarURL:     post.AvatarUrl,
+			CreatedAt:     createdAt,
+			LikesCount:    int(post.LikesCount),
+			CommentsCount: int(post.CommentsCount),
+			UserLiked:     userLiked,
+			IsAI:          post.IsAi,
+		})
+	}
+
+	// Send response
+	response := FeedResponse{
+		Posts:      posts,
+		Total:      len(posts),
+		NextCursor: resp.NextCursor,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		logger.Logger.Error("Failed to encode response", zap.Error(err))
+	}
 }

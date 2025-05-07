@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "github.com/sdshorin/generia/api/grpc/character"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/services/character-service/internal/models"
 	"github.com/sdshorin/generia/services/character-service/internal/repository"
@@ -18,12 +19,14 @@ import (
 
 type CharacterService struct {
 	pb.UnimplementedCharacterServiceServer
-	repo repository.CharacterRepository
+	repo        repository.CharacterRepository
+	mediaClient mediapb.MediaServiceClient
 }
 
-func NewCharacterService(repo repository.CharacterRepository) *CharacterService {
+func NewCharacterService(repo repository.CharacterRepository, mediaClient mediapb.MediaServiceClient) *CharacterService {
 	return &CharacterService{
-		repo: repo,
+		repo:        repo,
+		mediaClient: mediaClient,
 	}
 }
 
@@ -73,7 +76,93 @@ func (s *CharacterService) GetCharacter(ctx context.Context, req *pb.GetCharacte
 		return nil, status.Error(codes.NotFound, "Character not found")
 	}
 
-	return characterModelToProto(character), nil
+	// Convert character model to proto
+	protoCharacter := characterModelToProto(character)
+
+	// Get avatar URL if avatar media ID exists
+	if character.AvatarMediaID.Valid && character.AvatarMediaID.String != "" {
+		// Get media URL for avatar
+		mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+			MediaId:   character.AvatarMediaID.String,
+			Variant:   "small", // Use small variant for avatars
+			ExpiresIn: 3600,    // 1 hour
+		})
+		if err == nil && mediaResp != nil {
+			avatarURL := mediaResp.Url
+			protoCharacter.AvatarUrl = avatarURL
+			logger.Logger.Debug("Got avatar URL for character",
+				zap.String("character_id", character.ID),
+				zap.String("avatar_url", avatarURL))
+		} else {
+			logger.Logger.Warn("Failed to get avatar URL for character",
+				zap.String("character_id", character.ID),
+				zap.Error(err))
+		}
+	}
+
+	return protoCharacter, nil
+}
+
+func (s *CharacterService) UpdateCharacter(ctx context.Context, req *pb.UpdateCharacterRequest) (*pb.Character, error) {
+	logger.Logger.Info("Updating character",
+		zap.String("id", req.CharacterId),
+		zap.Any("display_name", req.DisplayName),
+		zap.Any("avatar_media_id", req.AvatarMediaId))
+
+	// Prepare update parameters
+	params := models.UpdateCharacterParams{
+		ID: req.CharacterId,
+	}
+
+	// Set display name if provided
+	if req.DisplayName != nil {
+		params.DisplayName = req.DisplayName
+	}
+
+	// Set avatar media ID if provided
+	if req.AvatarMediaId != nil {
+		avatarMediaID := sql.NullString{String: *req.AvatarMediaId, Valid: true}
+		params.AvatarMediaID = &avatarMediaID
+	}
+
+	// Set meta if provided
+	if req.Meta != nil {
+		meta := json.RawMessage(*req.Meta)
+		params.Meta = &meta
+	}
+
+	// Update character
+	character, err := s.repo.UpdateCharacter(ctx, params)
+	if err != nil {
+		logger.Logger.Error("Failed to update character", zap.Error(err))
+		return nil, status.Error(codes.Internal, "Failed to update character")
+	}
+
+	// Convert character model to proto
+	protoCharacter := characterModelToProto(character)
+
+	// Get avatar URL if avatar media ID exists
+	if character.AvatarMediaID.Valid && character.AvatarMediaID.String != "" {
+		// Get media URL for avatar
+		mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+			MediaId:   character.AvatarMediaID.String,
+			Variant:   "small", // Use small variant for avatars
+			ExpiresIn: 3600,    // 1 hour
+		})
+		if err == nil && mediaResp != nil {
+			avatarURL := mediaResp.Url
+			protoCharacter.AvatarUrl = avatarURL
+			logger.Logger.Debug("Got avatar URL for updated character",
+				zap.String("character_id", character.ID),
+				zap.String("avatar_url", avatarURL))
+		} else {
+			logger.Logger.Warn("Failed to get avatar URL for updated character",
+				zap.String("character_id", character.ID),
+				zap.Error(err))
+		}
+	}
+
+	return protoCharacter, nil
 }
 
 func (s *CharacterService) GetUserCharactersInWorld(ctx context.Context, req *pb.GetUserCharactersInWorldRequest) (*pb.CharacterList, error) {
@@ -89,7 +178,31 @@ func (s *CharacterService) GetUserCharactersInWorld(ctx context.Context, req *pb
 
 	protoCharacters := make([]*pb.Character, 0, len(characters))
 	for _, character := range characters {
-		protoCharacters = append(protoCharacters, characterModelToProto(character))
+		// Convert character model to proto
+		protoCharacter := characterModelToProto(character)
+
+		// Get avatar URL if avatar media ID exists
+		if character.AvatarMediaID.Valid && character.AvatarMediaID.String != "" {
+			// Get media URL for avatar
+			mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+				MediaId:   character.AvatarMediaID.String,
+				Variant:   "small", // Use small variant for avatars
+				ExpiresIn: 3600,    // 1 hour
+			})
+			if err == nil && mediaResp != nil {
+				avatarURL := mediaResp.Url
+				protoCharacter.AvatarUrl = avatarURL
+				logger.Logger.Debug("Got avatar URL for character in list",
+					zap.String("character_id", character.ID),
+					zap.String("avatar_url", avatarURL))
+			} else {
+				logger.Logger.Warn("Failed to get avatar URL for character in list",
+					zap.String("character_id", character.ID),
+					zap.Error(err))
+			}
+		}
+
+		protoCharacters = append(protoCharacters, protoCharacter)
 	}
 
 	return &pb.CharacterList{Characters: protoCharacters}, nil

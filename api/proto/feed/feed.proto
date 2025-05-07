@@ -6,8 +6,6 @@ option go_package = "github.com/sdshorin/generia/api/proto/feed";
 
 // FeedService предоставляет API для получения лент
 service FeedService {
-  // Получение глобальной ленты
-  rpc GetGlobalFeed(GetGlobalFeedRequest) returns (GetGlobalFeedResponse);
   
   // Получение ленты пользователя
   rpc GetUserFeed(GetUserFeedRequest) returns (GetUserFeedResponse);
@@ -17,19 +15,6 @@ service FeedService {
 
   // Проверка здоровья сервиса
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
-}
-
-message GetGlobalFeedRequest {
-  string user_id = 1; // ID пользователя, запрашивающего ленту (может быть пустым)
-  int32 limit = 2;
-  string cursor = 3; // курсор для пагинации
-  string world_id = 4; // ID мира, для которого запрашивается лента
-}
-
-message GetGlobalFeedResponse {
-  repeated PostInfo posts = 1;
-  string next_cursor = 2;
-  bool has_more = 3;
 }
 
 message GetUserFeedRequest {

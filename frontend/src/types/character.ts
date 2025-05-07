@@ -5,6 +5,7 @@ export interface Character {
   is_ai: boolean;
   display_name: string;
   avatar_media_id?: string;
+  avatar_url?: string;
   meta?: string;
   created_at: string;
 }

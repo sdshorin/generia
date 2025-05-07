@@ -40,6 +40,11 @@ class CharacterServiceStub(object):
                 request_serializer=character_dot_character__pb2.CreateCharacterRequest.SerializeToString,
                 response_deserializer=character_dot_character__pb2.Character.FromString,
                 _registered_method=True)
+        self.UpdateCharacter = channel.unary_unary(
+                '/generia.character.CharacterService/UpdateCharacter',
+                request_serializer=character_dot_character__pb2.UpdateCharacterRequest.SerializeToString,
+                response_deserializer=character_dot_character__pb2.Character.FromString,
+                _registered_method=True)
         self.GetCharacter = channel.unary_unary(
                 '/generia.character.CharacterService/GetCharacter',
                 request_serializer=character_dot_character__pb2.GetCharacterRequest.SerializeToString,
@@ -63,6 +68,13 @@ class CharacterServiceServicer(object):
 
     def CreateCharacter(self, request, context):
         """Create a character profile for a real user or AI
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateCharacter(self, request, context):
+        """Update an existing character
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -95,6 +107,11 @@ def add_CharacterServiceServicer_to_server(servicer, server):
             'CreateCharacter': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateCharacter,
                     request_deserializer=character_dot_character__pb2.CreateCharacterRequest.FromString,
+                    response_serializer=character_dot_character__pb2.Character.SerializeToString,
+            ),
+            'UpdateCharacter': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateCharacter,
+                    request_deserializer=character_dot_character__pb2.UpdateCharacterRequest.FromString,
                     response_serializer=character_dot_character__pb2.Character.SerializeToString,
             ),
             'GetCharacter': grpc.unary_unary_rpc_method_handler(
@@ -140,6 +157,33 @@ class CharacterService(object):
             target,
             '/generia.character.CharacterService/CreateCharacter',
             character_dot_character__pb2.CreateCharacterRequest.SerializeToString,
+            character_dot_character__pb2.Character.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateCharacter(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/generia.character.CharacterService/UpdateCharacter',
+            character_dot_character__pb2.UpdateCharacterRequest.SerializeToString,
             character_dot_character__pb2.Character.FromString,
             options,
             channel_credentials,

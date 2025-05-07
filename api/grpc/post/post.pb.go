@@ -593,8 +593,9 @@ type Post struct {
 	LikesCount    int32                  `protobuf:"varint,7,opt,name=likes_count,json=likesCount,proto3" json:"likes_count,omitempty"`          // Количество лайков
 	CommentsCount int32                  `protobuf:"varint,8,opt,name=comments_count,json=commentsCount,proto3" json:"comments_count,omitempty"` // Количество комментариев
 	WorldId       string                 `protobuf:"bytes,9,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`                    // ID мира, к которому относится пост
-	IsAi          bool                   `protobuf:"varint,10,opt,name=is_ai,json=isAi,proto3" json:"is_ai,omitempty"`                           // Был ли пост создан через AI
-	Tags          []string               `protobuf:"bytes,11,rep,name=tags,proto3" json:"tags,omitempty"`                                        // Опционально, для будущего расширения
+	AvatarUrl     string                 `protobuf:"bytes,10,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`             // URL аватара персонажа
+	IsAi          bool                   `protobuf:"varint,11,opt,name=is_ai,json=isAi,proto3" json:"is_ai,omitempty"`                           // Был ли пост создан через AI
+	Tags          []string               `protobuf:"bytes,12,rep,name=tags,proto3" json:"tags,omitempty"`                                        // Опционально, для будущего расширения
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -688,6 +689,13 @@ func (x *Post) GetCommentsCount() int32 {
 func (x *Post) GetWorldId() string {
 	if x != nil {
 		return x.WorldId
+	}
+	return ""
+}
+
+func (x *Post) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
 	}
 	return ""
 }
@@ -887,7 +895,7 @@ const file_post_post_proto_rawDesc = "" +
 	"\x14GetGlobalFeedRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x19\n" +
-	"\bworld_id\x18\x03 \x01(\tR\aworldId\"\xc7\x02\n" +
+	"\bworld_id\x18\x03 \x01(\tR\aworldId\"\xe6\x02\n" +
 	"\x04Post\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12!\n" +
 	"\fcharacter_id\x18\x02 \x01(\tR\vcharacterId\x12!\n" +
@@ -899,10 +907,12 @@ const file_post_post_proto_rawDesc = "" +
 	"\vlikes_count\x18\a \x01(\x05R\n" +
 	"likesCount\x12%\n" +
 	"\x0ecomments_count\x18\b \x01(\x05R\rcommentsCount\x12\x19\n" +
-	"\bworld_id\x18\t \x01(\tR\aworldId\x12\x13\n" +
-	"\x05is_ai\x18\n" +
-	" \x01(\bR\x04isAi\x12\x12\n" +
-	"\x04tags\x18\v \x03(\tR\x04tags\"c\n" +
+	"\bworld_id\x18\t \x01(\tR\aworldId\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\n" +
+	" \x01(\tR\tavatarUrl\x12\x13\n" +
+	"\x05is_ai\x18\v \x01(\bR\x04isAi\x12\x12\n" +
+	"\x04tags\x18\f \x03(\tR\x04tags\"c\n" +
 	"\bPostList\x12 \n" +
 	"\x05posts\x18\x01 \x03(\v2\n" +
 	".post.PostR\x05posts\x12\x14\n" +

@@ -119,6 +119,7 @@ export const CharacterPage: React.FC = () => {
         transition={{ duration: 0.3 }}
       >
         <Avatar
+          src={character.avatar_url}
           name={character.display_name}
           isAi={character.is_ai}
           size="xl"
@@ -149,4 +150,4 @@ export const CharacterPage: React.FC = () => {
       </PostsContainer>
     </PageContainer>
   );
-}; 
+};

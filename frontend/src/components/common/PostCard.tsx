@@ -21,7 +21,7 @@ const Card = styled(motion.div)<HTMLMotionProps<'div'>>`
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-6);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
@@ -45,11 +45,11 @@ const Username = styled(Link)`
   align-items: center;
   text-decoration: none;
   color: var(--color-text);
-  
+
   &:hover {
     color: var(--color-accent);
   }
-  
+
   .ai-badge {
     margin-left: var(--space-2);
     font-size: var(--font-xs);
@@ -101,11 +101,11 @@ const LikeButton = styled.button<{ $isLiked: boolean }>`
   cursor: pointer;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
-  
+
   &:hover {
     background-color: rgba(239, 118, 122, 0.1);
   }
-  
+
   svg {
     margin-right: var(--space-2);
   }
@@ -123,12 +123,12 @@ const CommentButton = styled(Link)`
   border-radius: var(--radius-md);
   margin-left: var(--space-4);
   text-decoration: none;
-  
+
   &:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: var(--color-text);
   }
-  
+
   svg {
     margin-right: var(--space-2);
   }
@@ -154,10 +154,10 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [isLiking, setIsLiking] = useState(false);
   const [isLiked, setIsLiked] = useState(post.user_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count);
-  
+
   const handleLike = async () => {
     if (isLiking) return;
-    
+
     setIsLiking(true);
     try {
       if (isLiked) {
@@ -169,7 +169,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         setIsLiked(true);
         setLikesCount(prev => prev + 1);
       }
-      
+
       if (onLike) {
         onLike(post.id, !isLiked);
       }
@@ -179,7 +179,7 @@ export const PostCard: React.FC<PostCardProps> = ({
       setIsLiking(false);
     }
   };
-  
+
   // Format timestamp to relative time (e.g., "2 hours ago")
   const formattedTime = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
   console.log(post);
@@ -190,13 +190,14 @@ export const PostCard: React.FC<PostCardProps> = ({
       transition={{ duration: 0.3 }}
     >
       <CardHeader>
-        <Avatar 
-          name={post.display_name || ''} 
-          isAi={post.is_ai} 
-          size="md" 
+        <Avatar
+          src={post.avatar_url}
+          name={post.display_name || ''}
+          isAi={post.is_ai}
+          size="md"
         />
         <UserInfo>
-          <Username 
+          <Username
             to={`/characters/${post.character_id}`}
             state={{ worldId: currentWorldId }}
           >
@@ -206,19 +207,19 @@ export const PostCard: React.FC<PostCardProps> = ({
           <Timestamp>{formattedTime}</Timestamp>
         </UserInfo>
       </CardHeader>
-      
+
       {post.caption && (
         <PostContent>{post.caption}</PostContent>
       )}
-      
+
       {(post.media_url || post.image_url) && (
         <PostImage src={post.media_url || post.image_url} alt="Post image" loading="lazy" />
       )}
-      
+
       <CardFooter>
         <AnimatePresence initial={false}>
-          <LikeButton 
-            $isLiked={isLiked} 
+          <LikeButton
+            $isLiked={isLiked}
             onClick={handleLike}
             disabled={isLiking}
           >
@@ -234,7 +235,7 @@ export const PostCard: React.FC<PostCardProps> = ({
             {likesCount}
           </LikeButton>
         </AnimatePresence>
-        
+
         <CommentButton to={`/worlds/${currentWorldId}/posts/${post.id}`}>
           <CommentIcon />
           {post.comments_count}

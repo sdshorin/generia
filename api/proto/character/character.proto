@@ -8,13 +8,16 @@ option go_package = "github.com/generia/api/grpc/character";
 service CharacterService {
   // Create a character profile for a real user or AI
   rpc CreateCharacter(CreateCharacterRequest) returns (Character);
-  
+
+  // Update an existing character
+  rpc UpdateCharacter(UpdateCharacterRequest) returns (Character);
+
   // Get a character by ID
   rpc GetCharacter(GetCharacterRequest) returns (Character);
-  
+
   // Get a user's characters in a specific world
   rpc GetUserCharactersInWorld(GetUserCharactersInWorldRequest) returns (CharacterList);
-  
+
   // Health check
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
 }
@@ -39,6 +42,15 @@ message GetUserCharactersInWorldRequest {
   string world_id = 2;
 }
 
+// Request to update an existing character
+message UpdateCharacterRequest {
+  string character_id = 1;
+  optional string display_name = 2;
+  optional string avatar_media_id = 3;
+  optional string avatar_url = 4;
+  optional string meta = 5; // JSON string with additional character data
+}
+
 // Character representation
 message Character {
   string id = 1;
@@ -47,8 +59,9 @@ message Character {
   bool is_ai = 4;
   string display_name = 5;
   optional string avatar_media_id = 6;
-  optional string meta = 7; // JSON string
-  string created_at = 8;
+  string avatar_url = 7; // Signed URL to avatar image
+  optional string meta = 8; // JSON string
+  string created_at = 9;
 }
 
 // List of characters

@@ -7,13 +7,17 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/sdshorin/generia/api/grpc/character"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	"github.com/sdshorin/generia/pkg/config"
 	"github.com/sdshorin/generia/pkg/database"
 	"github.com/sdshorin/generia/pkg/discovery"
@@ -21,6 +25,33 @@ import (
 	"github.com/sdshorin/generia/services/character-service/internal/repository"
 	"github.com/sdshorin/generia/services/character-service/internal/service"
 )
+
+func createMediaClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, mediapb.MediaServiceClient, error) {
+	// Get service address from Consul
+	serviceAddress, err := discoveryClient.ResolveService("media-service")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to resolve media service: %w", err)
+	}
+
+	// Create gRPC connection
+	conn, err := grpc.Dial(
+		serviceAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             time.Second,
+			PermitWithoutStream: true,
+		}),
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to connect to media service: %w", err)
+	}
+
+	// Create client
+	client := mediapb.NewMediaServiceClient(conn)
+
+	return conn, client, nil
+}
 
 func main() {
 	// Initialize logger
@@ -53,13 +84,26 @@ func main() {
 	// Initialize repository
 	characterRepo := repository.NewCharacterRepository(db.DB)
 
+	// Initialize service discovery client
+	discoveryClient, err := discovery.NewConsulClient(cfg.Consul.Address)
+	if err != nil {
+		logger.Logger.Fatal("Failed to create service discovery client", zap.Error(err))
+	}
+
+	// Connect to media service using service discovery
+	mediaConn, mediaClient, err := createMediaClient(discoveryClient)
+	if err != nil {
+		logger.Logger.Fatal("Failed to connect to media service", zap.Error(err))
+	}
+	defer mediaConn.Close()
+
 	// Initialize service
-	characterService := service.NewCharacterService(characterRepo)
+	characterService := service.NewCharacterService(characterRepo, mediaClient)
 
 	// Get port from config or environment
 	// Using port 8089 as specified in docker-compose.yml
 	port := 8089
-	
+
 	// Initialize gRPC server
 	list, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -67,20 +111,15 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	
+
 	// Register services
 	pb.RegisterCharacterServiceServer(grpcServer, characterService)
 	grpc_health_v1.RegisterHealthServer(grpcServer, characterService)
 	reflection.Register(grpcServer)
 
 	// Register with service discovery
-	consul, err := discovery.NewConsulClient(cfg.Consul.Address)
-	if err != nil {
-		logger.Logger.Fatal("Failed to connect to Consul", zap.Error(err))
-	}
-
 	serviceID := "character-service-1"
-	err = consul.Register(serviceID, "character-service", "character-service", port, []string{"character", "service"})
+	err = discoveryClient.Register(serviceID, "character-service", "character-service", port, []string{"character", "service"})
 	if err != nil {
 		logger.Logger.Fatal("Failed to register service", zap.Error(err))
 	}
@@ -101,7 +140,7 @@ func main() {
 	logger.Logger.Info("Shutting down...")
 
 	// Deregister from service discovery
-	if err := consul.Deregister(serviceID); err != nil {
+	if err := discoveryClient.Deregister(serviceID); err != nil {
 		logger.Logger.Error("Failed to deregister from Consul", zap.Error(err))
 	}
 

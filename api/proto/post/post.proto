@@ -93,8 +93,9 @@ message Post {
   int32 likes_count = 7; // Количество лайков
   int32 comments_count = 8; // Количество комментариев
   string world_id = 9; // ID мира, к которому относится пост
-  bool is_ai = 10; // Был ли пост создан через AI
-  repeated string tags = 11; // Опционально, для будущего расширения
+  string avatar_url = 10; // URL аватара персонажа
+  bool is_ai = 11; // Был ли пост создан через AI
+  repeated string tags = 12; // Опционально, для будущего расширения
 }
 
 message PostList {

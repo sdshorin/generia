@@ -55,6 +55,11 @@ class GeneratePostJob(BaseJob):
             character_name=character_name,
             character_description=character_description.get("personality", ""),
             speaking_style=character_description.get("speaking_style", ""),
+            appearance=character_description.get("appearance", ""),
+            secret=character_description.get("secret", ""),
+            daily_routine=character_description.get("daily_routine", ""),
+            avatar_description=character_description.get("avatar_description", ""),
+            avatar_style=character_description.get("avatar_style", ""),
             post_topic=post_topic,
             post_brief=post_brief,
             emotional_tone=emotional_tone,
@@ -105,16 +110,27 @@ class GeneratePostJob(BaseJob):
                         "character_id": character_id,
                         "character_index": character_index,
                         "post_index": post_index,
-                        "tags": post_detail.hashtags
+                        "tags": post_detail.hashtags,
+                        "character_description": {
+                            "username": username,
+                            "bio": character_description.get("bio", ""),
+                            "personality": character_description.get("personality", ""),
+                            "interests": character_description.get("interests", []),
+                            "speaking_style": character_description.get("speaking_style", ""),
+                            "common_topics": character_description.get("common_topics", []),
+                            "appearance": character_description.get("appearance", ""),
+                            "secret": character_description.get("secret", ""),
+                            "daily_routine": character_description.get("daily_routine", ""),
+                            "avatar_description": character_description.get("avatar_description", ""),
+                            "avatar_style": character_description.get("avatar_style", ""),
+                            "character_index": character_index
+                        }
                     },
                     created_at=now,
                     updated_at=now,
                     attempt_count=0
                 )
                 next_tasks.append({"task": image_task})
-
-
-
 
             # Создаем следующие задачи, если есть
             created_task_ids = []

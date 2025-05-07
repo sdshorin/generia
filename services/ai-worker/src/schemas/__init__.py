@@ -20,5 +20,7 @@ from .world_description import WorldDescription, WorldDescriptionResponse
 from .image_prompts import ImagePromptResponse
 from .character_batch import CharacterBatchResponse
 from .character import CharacterDetailResponse
+from .character_avatar import CharacterAvatarPromptResponse
 from .post_batch import PostBatchResponse
 from .post import PostDetailResponse
+from .post_image import PostImagePromptResponse

@@ -139,11 +139,11 @@ class ImageGenerator:
     async def generate_image(
         self,
         prompt: str,
+        world_id: str,
+        character_id: str,
         width: int = 512,
         height: int = 512,
         task_id: Optional[str] = None,
-        world_id: Optional[str] = None,
-        character_id: Optional[str] = None,
         media_type: str = "image/png",
         filename: Optional[str] = None,
         enhance_prompt: bool = False,
@@ -155,11 +155,11 @@ class ImageGenerator:
         
         Args:
             prompt: Prompt for generation
+            world_id: World ID for logging
+            character_id: Character ID for media association
             width: Image width
             height: Image height
             task_id: Task ID for logging
-            world_id: World ID for logging
-            character_id: Character ID for media association
             media_type: MIME type of the image
             filename: Filename (if not specified, will be generated)
             enhance_prompt: Whether to enhance the prompt automatically
@@ -222,8 +222,8 @@ class ImageGenerator:
                 logger.info("Getting presigned URL for upload")
                 # Get presigned URL for upload
                 media_id, upload_url, expires_at = await self.service_client.get_presigned_upload_url(
-                    character_id=character_id or "unknown",
-                    world_id=world_id or "unknown",
+                    character_id=character_id,
+                    world_id=world_id,
                     filename=filename,
                     content_type=media_type,
                     size=0,  # Мы не знаем размер заранее, поэтому передаем 0
@@ -254,7 +254,7 @@ class ImageGenerator:
                 # Confirm upload
                 success = await self.service_client.confirm_upload(
                     media_id=media_id,
-                    character_id=character_id or "unknown",
+                    character_id=character_id,
                     task_id=task_id
                 )
                 
@@ -283,7 +283,7 @@ class ImageGenerator:
                         id=request_id,
                         api_type="image_generation",
                         task_id=task_id or "manual",
-                        world_id=world_id or "unknown",
+                        world_id=world_id,
                         request_type="generate_image",
                         request_data=request_data,
                         response_data=result,
@@ -308,7 +308,7 @@ class ImageGenerator:
                         id=request_id,
                         api_type="image_generation",
                         task_id=task_id or "manual",
-                        world_id=world_id or "unknown",
+                        world_id=world_id,
                         request_type="generate_image",
                         request_data=request_data,
                         error=str(e),

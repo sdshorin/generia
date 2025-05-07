@@ -72,7 +72,7 @@ export const worldsAPI = {
 // Posts API
 export const postsAPI = {
   getFeed: async (worldId: string, limit = 10, cursor = '') => {
-    const response = await axiosInstance.get(`/worlds/${worldId}/feed?limit=${limit}&cursor=${cursor}`);
+    const response = await axiosInstance.get(`/worlds/${worldId}/posts?limit=${limit}&cursor=${cursor}`);
     return response.data;
   },
   
@@ -87,7 +87,7 @@ export const postsAPI = {
   },
   
   createPost: async (worldId: string, caption: string, mediaId: string, characterId: string): Promise<Post> => {
-    const response = await axiosInstance.post<Post>(`/worlds/${worldId}/posts`, {
+    const response = await axiosInstance.post<Post>(`/worlds/${worldId}/post`, {
       caption,
       media_id: mediaId,
       character_id: characterId

@@ -196,6 +196,83 @@ func (x *GetUserCharactersInWorldRequest) GetWorldId() string {
 	return ""
 }
 
+// Request to update an existing character
+type UpdateCharacterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharacterId   string                 `protobuf:"bytes,1,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	DisplayName   *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
+	AvatarMediaId *string                `protobuf:"bytes,3,opt,name=avatar_media_id,json=avatarMediaId,proto3,oneof" json:"avatar_media_id,omitempty"`
+	AvatarUrl     *string                `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"`
+	Meta          *string                `protobuf:"bytes,5,opt,name=meta,proto3,oneof" json:"meta,omitempty"` // JSON string with additional character data
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCharacterRequest) Reset() {
+	*x = UpdateCharacterRequest{}
+	mi := &file_character_character_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCharacterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCharacterRequest) ProtoMessage() {}
+
+func (x *UpdateCharacterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_character_character_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCharacterRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCharacterRequest) Descriptor() ([]byte, []int) {
+	return file_character_character_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpdateCharacterRequest) GetCharacterId() string {
+	if x != nil {
+		return x.CharacterId
+	}
+	return ""
+}
+
+func (x *UpdateCharacterRequest) GetDisplayName() string {
+	if x != nil && x.DisplayName != nil {
+		return *x.DisplayName
+	}
+	return ""
+}
+
+func (x *UpdateCharacterRequest) GetAvatarMediaId() string {
+	if x != nil && x.AvatarMediaId != nil {
+		return *x.AvatarMediaId
+	}
+	return ""
+}
+
+func (x *UpdateCharacterRequest) GetAvatarUrl() string {
+	if x != nil && x.AvatarUrl != nil {
+		return *x.AvatarUrl
+	}
+	return ""
+}
+
+func (x *UpdateCharacterRequest) GetMeta() string {
+	if x != nil && x.Meta != nil {
+		return *x.Meta
+	}
+	return ""
+}
+
 // Character representation
 type Character struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -205,15 +282,16 @@ type Character struct {
 	IsAi          bool                   `protobuf:"varint,4,opt,name=is_ai,json=isAi,proto3" json:"is_ai,omitempty"`
 	DisplayName   string                 `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	AvatarMediaId *string                `protobuf:"bytes,6,opt,name=avatar_media_id,json=avatarMediaId,proto3,oneof" json:"avatar_media_id,omitempty"`
-	Meta          *string                `protobuf:"bytes,7,opt,name=meta,proto3,oneof" json:"meta,omitempty"` // JSON string
-	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	AvatarUrl     string                 `protobuf:"bytes,7,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` // Signed URL to avatar image
+	Meta          *string                `protobuf:"bytes,8,opt,name=meta,proto3,oneof" json:"meta,omitempty"`                      // JSON string
+	CreatedAt     string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Character) Reset() {
 	*x = Character{}
-	mi := &file_character_character_proto_msgTypes[3]
+	mi := &file_character_character_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -225,7 +303,7 @@ func (x *Character) String() string {
 func (*Character) ProtoMessage() {}
 
 func (x *Character) ProtoReflect() protoreflect.Message {
-	mi := &file_character_character_proto_msgTypes[3]
+	mi := &file_character_character_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -238,7 +316,7 @@ func (x *Character) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Character.ProtoReflect.Descriptor instead.
 func (*Character) Descriptor() ([]byte, []int) {
-	return file_character_character_proto_rawDescGZIP(), []int{3}
+	return file_character_character_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Character) GetId() string {
@@ -283,6 +361,13 @@ func (x *Character) GetAvatarMediaId() string {
 	return ""
 }
 
+func (x *Character) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
+}
+
 func (x *Character) GetMeta() string {
 	if x != nil && x.Meta != nil {
 		return *x.Meta
@@ -307,7 +392,7 @@ type CharacterList struct {
 
 func (x *CharacterList) Reset() {
 	*x = CharacterList{}
-	mi := &file_character_character_proto_msgTypes[4]
+	mi := &file_character_character_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -319,7 +404,7 @@ func (x *CharacterList) String() string {
 func (*CharacterList) ProtoMessage() {}
 
 func (x *CharacterList) ProtoReflect() protoreflect.Message {
-	mi := &file_character_character_proto_msgTypes[4]
+	mi := &file_character_character_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -332,7 +417,7 @@ func (x *CharacterList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CharacterList.ProtoReflect.Descriptor instead.
 func (*CharacterList) Descriptor() ([]byte, []int) {
-	return file_character_character_proto_rawDescGZIP(), []int{4}
+	return file_character_character_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CharacterList) GetCharacters() []*Character {
@@ -351,7 +436,7 @@ type HealthCheckRequest struct {
 
 func (x *HealthCheckRequest) Reset() {
 	*x = HealthCheckRequest{}
-	mi := &file_character_character_proto_msgTypes[5]
+	mi := &file_character_character_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -363,7 +448,7 @@ func (x *HealthCheckRequest) String() string {
 func (*HealthCheckRequest) ProtoMessage() {}
 
 func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_character_character_proto_msgTypes[5]
+	mi := &file_character_character_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -376,7 +461,7 @@ func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
 func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_character_character_proto_rawDescGZIP(), []int{5}
+	return file_character_character_proto_rawDescGZIP(), []int{6}
 }
 
 // Health check response
@@ -389,7 +474,7 @@ type HealthCheckResponse struct {
 
 func (x *HealthCheckResponse) Reset() {
 	*x = HealthCheckResponse{}
-	mi := &file_character_character_proto_msgTypes[6]
+	mi := &file_character_character_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -401,7 +486,7 @@ func (x *HealthCheckResponse) String() string {
 func (*HealthCheckResponse) ProtoMessage() {}
 
 func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_character_character_proto_msgTypes[6]
+	mi := &file_character_character_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -414,7 +499,7 @@ func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
 func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_character_character_proto_rawDescGZIP(), []int{6}
+	return file_character_character_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *HealthCheckResponse) GetStatus() string {
@@ -443,7 +528,18 @@ const file_character_character_proto_rawDesc = "" +
 	"\fcharacter_id\x18\x01 \x01(\tR\vcharacterId\"U\n" +
 	"\x1fGetUserCharactersInWorldRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x19\n" +
-	"\bworld_id\x18\x02 \x01(\tR\aworldId\"\xa8\x02\n" +
+	"\bworld_id\x18\x02 \x01(\tR\aworldId\"\x8a\x02\n" +
+	"\x16UpdateCharacterRequest\x12!\n" +
+	"\fcharacter_id\x18\x01 \x01(\tR\vcharacterId\x12&\n" +
+	"\fdisplay_name\x18\x02 \x01(\tH\x00R\vdisplayName\x88\x01\x01\x12+\n" +
+	"\x0favatar_media_id\x18\x03 \x01(\tH\x01R\ravatarMediaId\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"avatar_url\x18\x04 \x01(\tH\x02R\tavatarUrl\x88\x01\x01\x12\x17\n" +
+	"\x04meta\x18\x05 \x01(\tH\x03R\x04meta\x88\x01\x01B\x0f\n" +
+	"\r_display_nameB\x12\n" +
+	"\x10_avatar_media_idB\r\n" +
+	"\v_avatar_urlB\a\n" +
+	"\x05_meta\"\xc7\x02\n" +
 	"\tCharacter\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bworld_id\x18\x02 \x01(\tR\aworldId\x12%\n" +
@@ -451,10 +547,12 @@ const file_character_character_proto_rawDesc = "" +
 	"realUserId\x88\x01\x01\x12\x13\n" +
 	"\x05is_ai\x18\x04 \x01(\bR\x04isAi\x12!\n" +
 	"\fdisplay_name\x18\x05 \x01(\tR\vdisplayName\x12+\n" +
-	"\x0favatar_media_id\x18\x06 \x01(\tH\x01R\ravatarMediaId\x88\x01\x01\x12\x17\n" +
-	"\x04meta\x18\a \x01(\tH\x02R\x04meta\x88\x01\x01\x12\x1d\n" +
+	"\x0favatar_media_id\x18\x06 \x01(\tH\x01R\ravatarMediaId\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAtB\x0f\n" +
+	"avatar_url\x18\a \x01(\tR\tavatarUrl\x12\x17\n" +
+	"\x04meta\x18\b \x01(\tH\x02R\x04meta\x88\x01\x01\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAtB\x0f\n" +
 	"\r_real_user_idB\x12\n" +
 	"\x10_avatar_media_idB\a\n" +
 	"\x05_meta\"M\n" +
@@ -464,9 +562,10 @@ const file_character_character_proto_rawDesc = "" +
 	"characters\"\x14\n" +
 	"\x12HealthCheckRequest\"-\n" +
 	"\x13HealthCheckResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status2\x94\x03\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status2\xf0\x03\n" +
 	"\x10CharacterService\x12Z\n" +
-	"\x0fCreateCharacter\x12).generia.character.CreateCharacterRequest\x1a\x1c.generia.character.Character\x12T\n" +
+	"\x0fCreateCharacter\x12).generia.character.CreateCharacterRequest\x1a\x1c.generia.character.Character\x12Z\n" +
+	"\x0fUpdateCharacter\x12).generia.character.UpdateCharacterRequest\x1a\x1c.generia.character.Character\x12T\n" +
 	"\fGetCharacter\x12&.generia.character.GetCharacterRequest\x1a\x1c.generia.character.Character\x12p\n" +
 	"\x18GetUserCharactersInWorld\x122.generia.character.GetUserCharactersInWorldRequest\x1a .generia.character.CharacterList\x12\\\n" +
 	"\vHealthCheck\x12%.generia.character.HealthCheckRequest\x1a&.generia.character.HealthCheckResponseB'Z%github.com/generia/api/grpc/characterb\x06proto3"
@@ -483,28 +582,31 @@ func file_character_character_proto_rawDescGZIP() []byte {
 	return file_character_character_proto_rawDescData
 }
 
-var file_character_character_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_character_character_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_character_character_proto_goTypes = []any{
 	(*CreateCharacterRequest)(nil),          // 0: generia.character.CreateCharacterRequest
 	(*GetCharacterRequest)(nil),             // 1: generia.character.GetCharacterRequest
 	(*GetUserCharactersInWorldRequest)(nil), // 2: generia.character.GetUserCharactersInWorldRequest
-	(*Character)(nil),                       // 3: generia.character.Character
-	(*CharacterList)(nil),                   // 4: generia.character.CharacterList
-	(*HealthCheckRequest)(nil),              // 5: generia.character.HealthCheckRequest
-	(*HealthCheckResponse)(nil),             // 6: generia.character.HealthCheckResponse
+	(*UpdateCharacterRequest)(nil),          // 3: generia.character.UpdateCharacterRequest
+	(*Character)(nil),                       // 4: generia.character.Character
+	(*CharacterList)(nil),                   // 5: generia.character.CharacterList
+	(*HealthCheckRequest)(nil),              // 6: generia.character.HealthCheckRequest
+	(*HealthCheckResponse)(nil),             // 7: generia.character.HealthCheckResponse
 }
 var file_character_character_proto_depIdxs = []int32{
-	3, // 0: generia.character.CharacterList.characters:type_name -> generia.character.Character
+	4, // 0: generia.character.CharacterList.characters:type_name -> generia.character.Character
 	0, // 1: generia.character.CharacterService.CreateCharacter:input_type -> generia.character.CreateCharacterRequest
-	1, // 2: generia.character.CharacterService.GetCharacter:input_type -> generia.character.GetCharacterRequest
-	2, // 3: generia.character.CharacterService.GetUserCharactersInWorld:input_type -> generia.character.GetUserCharactersInWorldRequest
-	5, // 4: generia.character.CharacterService.HealthCheck:input_type -> generia.character.HealthCheckRequest
-	3, // 5: generia.character.CharacterService.CreateCharacter:output_type -> generia.character.Character
-	3, // 6: generia.character.CharacterService.GetCharacter:output_type -> generia.character.Character
-	4, // 7: generia.character.CharacterService.GetUserCharactersInWorld:output_type -> generia.character.CharacterList
-	6, // 8: generia.character.CharacterService.HealthCheck:output_type -> generia.character.HealthCheckResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
+	3, // 2: generia.character.CharacterService.UpdateCharacter:input_type -> generia.character.UpdateCharacterRequest
+	1, // 3: generia.character.CharacterService.GetCharacter:input_type -> generia.character.GetCharacterRequest
+	2, // 4: generia.character.CharacterService.GetUserCharactersInWorld:input_type -> generia.character.GetUserCharactersInWorldRequest
+	6, // 5: generia.character.CharacterService.HealthCheck:input_type -> generia.character.HealthCheckRequest
+	4, // 6: generia.character.CharacterService.CreateCharacter:output_type -> generia.character.Character
+	4, // 7: generia.character.CharacterService.UpdateCharacter:output_type -> generia.character.Character
+	4, // 8: generia.character.CharacterService.GetCharacter:output_type -> generia.character.Character
+	5, // 9: generia.character.CharacterService.GetUserCharactersInWorld:output_type -> generia.character.CharacterList
+	7, // 10: generia.character.CharacterService.HealthCheck:output_type -> generia.character.HealthCheckResponse
+	6, // [6:11] is the sub-list for method output_type
+	1, // [1:6] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -517,13 +619,14 @@ func file_character_character_proto_init() {
 	}
 	file_character_character_proto_msgTypes[0].OneofWrappers = []any{}
 	file_character_character_proto_msgTypes[3].OneofWrappers = []any{}
+	file_character_character_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_character_character_proto_rawDesc), len(file_character_character_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

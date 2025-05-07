@@ -24,3 +24,10 @@ type CreateCharacterParams struct {
 	AvatarMediaID sql.NullString
 	Meta          json.RawMessage
 }
+
+type UpdateCharacterParams struct {
+	ID            string
+	DisplayName   *string
+	AvatarMediaID *sql.NullString
+	Meta          *json.RawMessage
+}

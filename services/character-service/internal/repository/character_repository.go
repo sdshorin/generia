@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/services/character-service/internal/models"
@@ -12,6 +14,7 @@ import (
 
 type CharacterRepository interface {
 	CreateCharacter(ctx context.Context, params models.CreateCharacterParams) (*models.Character, error)
+	UpdateCharacter(ctx context.Context, params models.UpdateCharacterParams) (*models.Character, error)
 	GetCharacter(ctx context.Context, id string) (*models.Character, error)
 	GetUserCharactersInWorld(ctx context.Context, userID, worldID string) ([]*models.Character, error)
 }
@@ -85,6 +88,67 @@ func (r *characterRepository) GetCharacter(ctx context.Context, id string) (*mod
 			return nil, errors.New("character not found")
 		}
 		logger.Logger.Error("Failed to get character", zap.Error(err))
+		return nil, err
+	}
+
+	return &character, nil
+}
+
+func (r *characterRepository) UpdateCharacter(ctx context.Context, params models.UpdateCharacterParams) (*models.Character, error) {
+	// Start building the query
+	queryParts := []string{"UPDATE world_user_characters SET"}
+	queryValues := []interface{}{params.ID} // First parameter is always the ID
+	paramCount := 1
+
+	// Add display_name if provided
+	if params.DisplayName != nil {
+		queryParts = append(queryParts, fmt.Sprintf("display_name = $%d", paramCount+1))
+		queryValues = append(queryValues, *params.DisplayName)
+		paramCount++
+	}
+
+	// Add avatar_media_id if provided
+	if params.AvatarMediaID != nil {
+		queryParts = append(queryParts, fmt.Sprintf("avatar_media_id = $%d", paramCount+1))
+		queryValues = append(queryValues, *params.AvatarMediaID)
+		paramCount++
+	}
+
+	// Add meta if provided
+	if params.Meta != nil {
+		queryParts = append(queryParts, fmt.Sprintf("meta = $%d", paramCount+1))
+		queryValues = append(queryValues, *params.Meta)
+		paramCount++
+	}
+
+	// If no fields to update, return error
+	if paramCount == 1 {
+		return nil, errors.New("no fields to update")
+	}
+
+	// Complete the query
+	query := fmt.Sprintf("%s %s WHERE id = $1 RETURNING id, world_id, real_user_id, is_ai, display_name, avatar_media_id, meta, created_at",
+		queryParts[0],
+		strings.Join(queryParts[1:], ", "))
+
+	// Execute the query
+	var character models.Character
+	err := r.db.QueryRowContext(ctx, query, queryValues...).Scan(
+		&character.ID,
+		&character.WorldID,
+		&character.RealUserID,
+		&character.IsAI,
+		&character.DisplayName,
+		&character.AvatarMediaID,
+		&character.Meta,
+		&character.CreatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("character not found")
+		}
+		logger.Logger.Error("Failed to update character", zap.Error(err))
 		return nil, err
 	}
 

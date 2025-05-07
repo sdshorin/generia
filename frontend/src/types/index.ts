@@ -37,6 +37,7 @@ export interface Post {
   caption: string;
   image_url?: string;
   media_url?: string;
+  avatar_url?: string;
   likes_count: number;
   comments_count: number;
   created_at: string;

@@ -6,7 +6,9 @@ from ..core.base_job import BaseJob
 from ..constants import GenerationStage, GenerationStatus, MediaType
 from ..utils.logger import logger
 from ..utils.format_world import format_world_description
+from ..utils.model_to_template import model_to_template
 from ..prompts import load_prompt, POST_IMAGE_PROMPT
+from ..schemas.post_image import PostImagePromptResponse
 
 class GeneratePostImageJob(BaseJob):
     """
@@ -31,6 +33,7 @@ class GeneratePostImageJob(BaseJob):
         character_index = self.task.parameters.get("character_index", 0)
         post_index = self.task.parameters.get("post_index", 0)
         tags = self.task.parameters.get("tags", [])
+        character_description = self.task.parameters.get("character_description", {})
 
         if not character_id:
             raise ValueError("Character ID is required to generate post image and publish post")
@@ -43,14 +46,21 @@ class GeneratePostImageJob(BaseJob):
         # Загружаем промпт из файла
         prompt_template = load_prompt(POST_IMAGE_PROMPT)
 
+        # Создаем описание структуры ответа из модели pydantic
+        structure_description = model_to_template(PostImagePromptResponse)
+
         # Форматируем промпт с параметрами
         world_description = format_world_description(world_params)
         prompt = prompt_template.format(
             world_description=world_description,
             character_name=character_name,
+            appearance=character_description.get("appearance", ""),
+            avatar_description=character_description.get("avatar_description", ""),
+            avatar_style=character_description.get("avatar_style", ""),
             image_prompt=image_prompt,
             image_style=image_style,
-            post_content=post_content
+            post_content=post_content,
+            structure_description=structure_description
         )
 
         try:
@@ -61,14 +71,16 @@ class GeneratePostImageJob(BaseJob):
                     field="api_calls_made_LLM"
                 )
 
-            optimized_prompt_result = await self.llm_client.generate_content(
+            # Генерация структурированного ответа для промпта изображения
+            image_prompt_response = await self.llm_client.generate_structured_content(
                 prompt=prompt,
+                response_schema=PostImagePromptResponse,
                 temperature=0.7,
                 task_id=self.task.id,
                 world_id=world_id
             )
 
-            optimized_image_prompt = optimized_prompt_result["text"]
+            optimized_image_prompt = image_prompt_response.prompt
 
             logger.info(f"Generated optimized image prompt for post by {character_name} (char_id: {character_id}) in world {world_id}")
 

@@ -515,6 +515,12 @@ services:
         condition: service_started
       consul:
         condition: service_started
+      character-service:
+        condition: service_started
+      post-service:
+        condition: service_started
+      media-service:
+        condition: service_started
     environment:
       - SERVICE_NAME=ai-worker
       - SERVICE_HOST=0.0.0.0

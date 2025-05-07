@@ -166,6 +166,7 @@ func (s *PostService) GetPost(ctx context.Context, req *postpb.GetPostRequest) (
 		CommentsCount: statsResp.CommentsCount,
 		WorldId:       post.WorldID,
 		IsAi:          post.IsAI,
+		AvatarUrl:     characterResp.AvatarUrl,
 	}, nil
 }
 
@@ -289,6 +290,7 @@ func (s *PostService) GetUserPosts(ctx context.Context, req *postpb.GetUserPosts
 			CommentsCount: commentsCount,
 			WorldId:       post.WorldID,
 			IsAi:          post.IsAI,
+			AvatarUrl:     characterInfoMap[post.CharacterID].AvatarUrl,
 		}
 	}
 
@@ -402,6 +404,7 @@ func (s *PostService) GetCharacterPosts(ctx context.Context, req *postpb.GetChar
 			CommentsCount: commentsCount,
 			WorldId:       post.WorldID,
 			IsAi:          post.IsAI,
+			AvatarUrl:     characterResp.AvatarUrl,
 		}
 	}
 
@@ -513,6 +516,7 @@ func (s *PostService) GetPostsByIds(ctx context.Context, req *postpb.GetPostsByI
 			CommentsCount: commentsCount,
 			WorldId:       post.WorldID,
 			IsAi:          post.IsAI,
+			AvatarUrl:     characterInfoMap[post.CharacterID].AvatarUrl,
 		}
 	}
 
@@ -595,8 +599,10 @@ func (s *PostService) GetGlobalFeed(ctx context.Context, req *postpb.GetGlobalFe
 	for i, post := range posts {
 		// Get character info
 		var displayName string
+		var avatarURL string
 		if characterInfo, ok := characterInfoMap[post.CharacterID]; ok {
 			displayName = characterInfo.DisplayName
+			avatarURL = characterInfo.AvatarUrl
 		}
 
 		// Get media URL
@@ -631,6 +637,7 @@ func (s *PostService) GetGlobalFeed(ctx context.Context, req *postpb.GetGlobalFe
 			CommentsCount: commentsCount,
 			WorldId:       post.WorldID,
 			IsAi:          post.IsAI,
+			AvatarUrl:     avatarURL,
 		}
 	}
 

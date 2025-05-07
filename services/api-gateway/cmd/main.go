@@ -32,7 +32,6 @@ import (
 	cachepb "github.com/sdshorin/generia/api/grpc/cache"
 	cdnpb "github.com/sdshorin/generia/api/grpc/cdn"
 	characterpb "github.com/sdshorin/generia/api/grpc/character"
-	feedpb "github.com/sdshorin/generia/api/grpc/feed"
 	interactionpb "github.com/sdshorin/generia/api/grpc/interaction"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
@@ -45,7 +44,6 @@ type grpcClients struct {
 	postClient        postpb.PostServiceClient
 	mediaClient       mediapb.MediaServiceClient
 	interactionClient interactionpb.InteractionServiceClient
-	feedClient        feedpb.FeedServiceClient
 	cacheClient       cachepb.CacheServiceClient
 	cdnClient         cdnpb.CDNServiceClient
 	worldClient       worldpb.WorldServiceClient
@@ -116,7 +114,7 @@ func main() {
 	postHandler := handlers.NewPostHandler(clients.postClient, clients.mediaClient, clients.interactionClient, tracer)
 	mediaHandler := handlers.NewMediaHandler(clients.mediaClient, clients.cdnClient, tracer)
 	interactionHandler := handlers.NewInteractionHandler(clients.interactionClient, tracer)
-	feedHandler := handlers.NewFeedHandler(clients.feedClient, tracer)
+
 	worldHandler := handlers.NewWorldHandler(clients.worldClient, 30*time.Second)
 	characterHandler := handlers.NewCharacterHandler(clients.characterClient, 30*time.Second)
 
@@ -141,9 +139,9 @@ func main() {
 	router.HandleFunc("/api/v1/auth/refresh", authHandler.RefreshToken).Methods("POST")
 
 	// Post routes
-	router.Handle("/api/v1/worlds/{world_id}/posts", jwtMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/post", jwtMiddleware.RequireAuth(http.HandlerFunc(postHandler.CreatePost))).Methods("POST")
+	router.Handle("/api/v1/worlds/{world_id}/posts", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetGlobalPosts))).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}/posts/{id}", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetPost))).Methods("GET")
-	router.Handle("/api/v1/worlds/{world_id}/feed", jwtMiddleware.Optional(http.HandlerFunc(feedHandler.GetGlobalFeed))).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}/users/{user_id}/posts", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetUserPosts))).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}/character/{character_id}/posts", jwtMiddleware.Optional(http.HandlerFunc(postHandler.GetCharacterPosts))).Methods("GET")
 
@@ -248,11 +246,6 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		return nil, fmt.Errorf("failed to resolve interaction service: %w", err)
 	}
 
-	feedAddr, err := discoveryClient.ResolveService("feed-service")
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve feed service: %w", err)
-	}
-
 	cacheAddr, err := discoveryClient.ResolveService("cache-service")
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve cache service: %w", err)
@@ -294,11 +287,6 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		return nil, fmt.Errorf("failed to connect to interaction service: %w", err)
 	}
 
-	feedConn, err := grpc.Dial(feedAddr, opts...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to feed service: %w", err)
-	}
-
 	cacheConn, err := grpc.Dial(cacheAddr, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to cache service: %w", err)
@@ -325,7 +313,6 @@ func initGrpcClients(discoveryClient discovery.ServiceDiscovery) (*grpcClients, 
 		postClient:        postpb.NewPostServiceClient(postConn),
 		mediaClient:       mediapb.NewMediaServiceClient(mediaConn),
 		interactionClient: interactionpb.NewInteractionServiceClient(interactionConn),
-		feedClient:        feedpb.NewFeedServiceClient(feedConn),
 		cacheClient:       cachepb.NewCacheServiceClient(cacheConn),
 		cdnClient:         cdnpb.NewCDNServiceClient(cdnConn),
 		worldClient:       worldpb.NewWorldServiceClient(worldConn),

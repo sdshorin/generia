@@ -40,14 +40,14 @@ type CreateCharacterRequest struct {
 
 // CreateCharacterResponse represents a response after creating a character
 type CreateCharacterResponse struct {
-	ID           string `json:"id"`
-	WorldID      string `json:"world_id"`
-	RealUserID   string `json:"real_user_id,omitempty"`
-	IsAI         bool   `json:"is_ai"`
-	DisplayName  string `json:"display_name"`
+	ID            string `json:"id"`
+	WorldID       string `json:"world_id"`
+	RealUserID    string `json:"real_user_id,omitempty"`
+	IsAI          bool   `json:"is_ai"`
+	DisplayName   string `json:"display_name"`
 	AvatarMediaID string `json:"avatar_media_id,omitempty"`
-	Meta         string `json:"meta,omitempty"`
-	CreatedAt    string `json:"created_at"`
+	Meta          string `json:"meta,omitempty"`
+	CreatedAt     string `json:"created_at"`
 }
 
 // CreateCharacter handles character creation requests
@@ -102,11 +102,11 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 
 	// Prepare response
 	response := CreateCharacterResponse{
-		ID:           resp.Id,
-		WorldID:      resp.WorldId,
-		IsAI:         resp.IsAi,
-		DisplayName:  resp.DisplayName,
-		CreatedAt:    resp.CreatedAt,
+		ID:          resp.Id,
+		WorldID:     resp.WorldId,
+		IsAI:        resp.IsAi,
+		DisplayName: resp.DisplayName,
+		CreatedAt:   resp.CreatedAt,
 	}
 
 	// Add optional fields
@@ -130,14 +130,15 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 
 // GetCharacterResponse represents a response for a character
 type GetCharacterResponse struct {
-	ID           string `json:"id"`
-	WorldID      string `json:"world_id"`
-	RealUserID   string `json:"real_user_id,omitempty"`
-	IsAI         bool   `json:"is_ai"`
-	DisplayName  string `json:"display_name"`
+	ID            string `json:"id"`
+	WorldID       string `json:"world_id"`
+	RealUserID    string `json:"real_user_id,omitempty"`
+	IsAI          bool   `json:"is_ai"`
+	DisplayName   string `json:"display_name"`
 	AvatarMediaID string `json:"avatar_media_id,omitempty"`
-	Meta         string `json:"meta,omitempty"`
-	CreatedAt    string `json:"created_at"`
+	AvatarURL     string `json:"avatar_url,omitempty"`
+	Meta          string `json:"meta,omitempty"`
+	CreatedAt     string `json:"created_at"`
 }
 
 // GetCharacter handles character retrieval requests
@@ -166,11 +167,12 @@ func (h *CharacterHandler) GetCharacter(w http.ResponseWriter, r *http.Request) 
 
 	// Prepare response
 	response := GetCharacterResponse{
-		ID:           resp.Id,
-		WorldID:      resp.WorldId,
-		IsAI:         resp.IsAi,
-		DisplayName:  resp.DisplayName,
-		CreatedAt:    resp.CreatedAt,
+		ID:          resp.Id,
+		WorldID:     resp.WorldId,
+		IsAI:        resp.IsAi,
+		DisplayName: resp.DisplayName,
+		CreatedAt:   resp.CreatedAt,
+		AvatarURL:   resp.AvatarUrl,
 	}
 
 	// Add optional fields
@@ -233,11 +235,11 @@ func (h *CharacterHandler) GetUserCharactersInWorld(w http.ResponseWriter, r *ht
 	characters := make([]GetCharacterResponse, 0, len(resp.Characters))
 	for _, character := range resp.Characters {
 		char := GetCharacterResponse{
-			ID:           character.Id,
-			WorldID:      character.WorldId,
-			IsAI:         character.IsAi,
-			DisplayName:  character.DisplayName,
-			CreatedAt:    character.CreatedAt,
+			ID:          character.Id,
+			WorldID:     character.WorldId,
+			IsAI:        character.IsAi,
+			DisplayName: character.DisplayName,
+			CreatedAt:   character.CreatedAt,
 		}
 
 		// Add optional fields

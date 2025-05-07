@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	CharacterService_CreateCharacter_FullMethodName          = "/generia.character.CharacterService/CreateCharacter"
+	CharacterService_UpdateCharacter_FullMethodName          = "/generia.character.CharacterService/UpdateCharacter"
 	CharacterService_GetCharacter_FullMethodName             = "/generia.character.CharacterService/GetCharacter"
 	CharacterService_GetUserCharactersInWorld_FullMethodName = "/generia.character.CharacterService/GetUserCharactersInWorld"
 	CharacterService_HealthCheck_FullMethodName              = "/generia.character.CharacterService/HealthCheck"
@@ -33,6 +34,8 @@ const (
 type CharacterServiceClient interface {
 	// Create a character profile for a real user or AI
 	CreateCharacter(ctx context.Context, in *CreateCharacterRequest, opts ...grpc.CallOption) (*Character, error)
+	// Update an existing character
+	UpdateCharacter(ctx context.Context, in *UpdateCharacterRequest, opts ...grpc.CallOption) (*Character, error)
 	// Get a character by ID
 	GetCharacter(ctx context.Context, in *GetCharacterRequest, opts ...grpc.CallOption) (*Character, error)
 	// Get a user's characters in a specific world
@@ -53,6 +56,16 @@ func (c *characterServiceClient) CreateCharacter(ctx context.Context, in *Create
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Character)
 	err := c.cc.Invoke(ctx, CharacterService_CreateCharacter_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *characterServiceClient) UpdateCharacter(ctx context.Context, in *UpdateCharacterRequest, opts ...grpc.CallOption) (*Character, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Character)
+	err := c.cc.Invoke(ctx, CharacterService_UpdateCharacter_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +110,8 @@ func (c *characterServiceClient) HealthCheck(ctx context.Context, in *HealthChec
 type CharacterServiceServer interface {
 	// Create a character profile for a real user or AI
 	CreateCharacter(context.Context, *CreateCharacterRequest) (*Character, error)
+	// Update an existing character
+	UpdateCharacter(context.Context, *UpdateCharacterRequest) (*Character, error)
 	// Get a character by ID
 	GetCharacter(context.Context, *GetCharacterRequest) (*Character, error)
 	// Get a user's characters in a specific world
@@ -115,6 +130,9 @@ type UnimplementedCharacterServiceServer struct{}
 
 func (UnimplementedCharacterServiceServer) CreateCharacter(context.Context, *CreateCharacterRequest) (*Character, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCharacter not implemented")
+}
+func (UnimplementedCharacterServiceServer) UpdateCharacter(context.Context, *UpdateCharacterRequest) (*Character, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCharacter not implemented")
 }
 func (UnimplementedCharacterServiceServer) GetCharacter(context.Context, *GetCharacterRequest) (*Character, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCharacter not implemented")
@@ -160,6 +178,24 @@ func _CharacterService_CreateCharacter_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CharacterServiceServer).CreateCharacter(ctx, req.(*CreateCharacterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CharacterService_UpdateCharacter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCharacterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CharacterServiceServer).UpdateCharacter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CharacterService_UpdateCharacter_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CharacterServiceServer).UpdateCharacter(ctx, req.(*UpdateCharacterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -228,6 +264,10 @@ var CharacterService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateCharacter",
 			Handler:    _CharacterService_CreateCharacter_Handler,
+		},
+		{
+			MethodName: "UpdateCharacter",
+			Handler:    _CharacterService_UpdateCharacter_Handler,
 		},
 		{
 			MethodName: "GetCharacter",

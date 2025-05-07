@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19\x63haracter/character.proto\x12\x11generia.character\"\xba\x01\n\x16\x43reateCharacterRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\x12\x19\n\x0creal_user_id\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x14\n\x0c\x64isplay_name\x18\x03 \x01(\t\x12\x1c\n\x0f\x61vatar_media_id\x18\x04 \x01(\tH\x01\x88\x01\x01\x12\x11\n\x04meta\x18\x05 \x01(\tH\x02\x88\x01\x01\x42\x0f\n\r_real_user_idB\x12\n\x10_avatar_media_idB\x07\n\x05_meta\"+\n\x13GetCharacterRequest\x12\x14\n\x0c\x63haracter_id\x18\x01 \x01(\t\"D\n\x1fGetUserCharactersInWorldRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\"\xdc\x01\n\tCharacter\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\x12\x19\n\x0creal_user_id\x18\x03 \x01(\tH\x00\x88\x01\x01\x12\r\n\x05is_ai\x18\x04 \x01(\x08\x12\x14\n\x0c\x64isplay_name\x18\x05 \x01(\t\x12\x1c\n\x0f\x61vatar_media_id\x18\x06 \x01(\tH\x01\x88\x01\x01\x12\x11\n\x04meta\x18\x07 \x01(\tH\x02\x88\x01\x01\x12\x12\n\ncreated_at\x18\x08 \x01(\tB\x0f\n\r_real_user_idB\x12\n\x10_avatar_media_idB\x07\n\x05_meta\"A\n\rCharacterList\x12\x30\n\ncharacters\x18\x01 \x03(\x0b\x32\x1c.generia.character.Character\"\x14\n\x12HealthCheckRequest\"%\n\x13HealthCheckResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\x94\x03\n\x10\x43haracterService\x12Z\n\x0f\x43reateCharacter\x12).generia.character.CreateCharacterRequest\x1a\x1c.generia.character.Character\x12T\n\x0cGetCharacter\x12&.generia.character.GetCharacterRequest\x1a\x1c.generia.character.Character\x12p\n\x18GetUserCharactersInWorld\x12\x32.generia.character.GetUserCharactersInWorldRequest\x1a .generia.character.CharacterList\x12\\\n\x0bHealthCheck\x12%.generia.character.HealthCheckRequest\x1a&.generia.character.HealthCheckResponseB\'Z%github.com/generia/api/grpc/characterb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x19\x63haracter/character.proto\x12\x11generia.character\"\xba\x01\n\x16\x43reateCharacterRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\x12\x19\n\x0creal_user_id\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x14\n\x0c\x64isplay_name\x18\x03 \x01(\t\x12\x1c\n\x0f\x61vatar_media_id\x18\x04 \x01(\tH\x01\x88\x01\x01\x12\x11\n\x04meta\x18\x05 \x01(\tH\x02\x88\x01\x01\x42\x0f\n\r_real_user_idB\x12\n\x10_avatar_media_idB\x07\n\x05_meta\"+\n\x13GetCharacterRequest\x12\x14\n\x0c\x63haracter_id\x18\x01 \x01(\t\"D\n\x1fGetUserCharactersInWorldRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\"\xd0\x01\n\x16UpdateCharacterRequest\x12\x14\n\x0c\x63haracter_id\x18\x01 \x01(\t\x12\x19\n\x0c\x64isplay_name\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x1c\n\x0f\x61vatar_media_id\x18\x03 \x01(\tH\x01\x88\x01\x01\x12\x17\n\navatar_url\x18\x04 \x01(\tH\x02\x88\x01\x01\x12\x11\n\x04meta\x18\x05 \x01(\tH\x03\x88\x01\x01\x42\x0f\n\r_display_nameB\x12\n\x10_avatar_media_idB\r\n\x0b_avatar_urlB\x07\n\x05_meta\"\x84\x02\n\tCharacter\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\x12\x19\n\x0creal_user_id\x18\x03 \x01(\tH\x00\x88\x01\x01\x12\r\n\x05is_ai\x18\x04 \x01(\x08\x12\x14\n\x0c\x64isplay_name\x18\x05 \x01(\t\x12\x1c\n\x0f\x61vatar_media_id\x18\x06 \x01(\tH\x01\x88\x01\x01\x12\x17\n\navatar_url\x18\x07 \x01(\tH\x02\x88\x01\x01\x12\x11\n\x04meta\x18\x08 \x01(\tH\x03\x88\x01\x01\x12\x12\n\ncreated_at\x18\t \x01(\tB\x0f\n\r_real_user_idB\x12\n\x10_avatar_media_idB\r\n\x0b_avatar_urlB\x07\n\x05_meta\"A\n\rCharacterList\x12\x30\n\ncharacters\x18\x01 \x03(\x0b\x32\x1c.generia.character.Character\"\x14\n\x12HealthCheckRequest\"%\n\x13HealthCheckResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2\xf0\x03\n\x10\x43haracterService\x12Z\n\x0f\x43reateCharacter\x12).generia.character.CreateCharacterRequest\x1a\x1c.generia.character.Character\x12Z\n\x0fUpdateCharacter\x12).generia.character.UpdateCharacterRequest\x1a\x1c.generia.character.Character\x12T\n\x0cGetCharacter\x12&.generia.character.GetCharacterRequest\x1a\x1c.generia.character.Character\x12p\n\x18GetUserCharactersInWorld\x12\x32.generia.character.GetUserCharactersInWorldRequest\x1a .generia.character.CharacterList\x12\\\n\x0bHealthCheck\x12%.generia.character.HealthCheckRequest\x1a&.generia.character.HealthCheckResponseB\'Z%github.com/generia/api/grpc/characterb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -38,14 +38,16 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETCHARACTERREQUEST']._serialized_end=280
   _globals['_GETUSERCHARACTERSINWORLDREQUEST']._serialized_start=282
   _globals['_GETUSERCHARACTERSINWORLDREQUEST']._serialized_end=350
-  _globals['_CHARACTER']._serialized_start=353
-  _globals['_CHARACTER']._serialized_end=573
-  _globals['_CHARACTERLIST']._serialized_start=575
-  _globals['_CHARACTERLIST']._serialized_end=640
-  _globals['_HEALTHCHECKREQUEST']._serialized_start=642
-  _globals['_HEALTHCHECKREQUEST']._serialized_end=662
-  _globals['_HEALTHCHECKRESPONSE']._serialized_start=664
-  _globals['_HEALTHCHECKRESPONSE']._serialized_end=701
-  _globals['_CHARACTERSERVICE']._serialized_start=704
-  _globals['_CHARACTERSERVICE']._serialized_end=1108
+  _globals['_UPDATECHARACTERREQUEST']._serialized_start=353
+  _globals['_UPDATECHARACTERREQUEST']._serialized_end=561
+  _globals['_CHARACTER']._serialized_start=564
+  _globals['_CHARACTER']._serialized_end=824
+  _globals['_CHARACTERLIST']._serialized_start=826
+  _globals['_CHARACTERLIST']._serialized_end=891
+  _globals['_HEALTHCHECKREQUEST']._serialized_start=893
+  _globals['_HEALTHCHECKREQUEST']._serialized_end=913
+  _globals['_HEALTHCHECKRESPONSE']._serialized_start=915
+  _globals['_HEALTHCHECKRESPONSE']._serialized_end=952
+  _globals['_CHARACTERSERVICE']._serialized_start=955
+  _globals['_CHARACTERSERVICE']._serialized_end=1451
 # @@protoc_insertion_point(module_scope)

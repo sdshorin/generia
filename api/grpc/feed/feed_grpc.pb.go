@@ -19,7 +19,6 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FeedService_GetGlobalFeed_FullMethodName       = "/feed.FeedService/GetGlobalFeed"
 	FeedService_GetUserFeed_FullMethodName         = "/feed.FeedService/GetUserFeed"
 	FeedService_InvalidateFeedCache_FullMethodName = "/feed.FeedService/InvalidateFeedCache"
 	FeedService_HealthCheck_FullMethodName         = "/feed.FeedService/HealthCheck"
@@ -31,8 +30,6 @@ const (
 //
 // FeedService предоставляет API для получения лент
 type FeedServiceClient interface {
-	// Получение глобальной ленты
-	GetGlobalFeed(ctx context.Context, in *GetGlobalFeedRequest, opts ...grpc.CallOption) (*GetGlobalFeedResponse, error)
 	// Получение ленты пользователя
 	GetUserFeed(ctx context.Context, in *GetUserFeedRequest, opts ...grpc.CallOption) (*GetUserFeedResponse, error)
 	// Инвалидация кеша ленты
@@ -47,16 +44,6 @@ type feedServiceClient struct {
 
 func NewFeedServiceClient(cc grpc.ClientConnInterface) FeedServiceClient {
 	return &feedServiceClient{cc}
-}
-
-func (c *feedServiceClient) GetGlobalFeed(ctx context.Context, in *GetGlobalFeedRequest, opts ...grpc.CallOption) (*GetGlobalFeedResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetGlobalFeedResponse)
-	err := c.cc.Invoke(ctx, FeedService_GetGlobalFeed_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *feedServiceClient) GetUserFeed(ctx context.Context, in *GetUserFeedRequest, opts ...grpc.CallOption) (*GetUserFeedResponse, error) {
@@ -95,8 +82,6 @@ func (c *feedServiceClient) HealthCheck(ctx context.Context, in *HealthCheckRequ
 //
 // FeedService предоставляет API для получения лент
 type FeedServiceServer interface {
-	// Получение глобальной ленты
-	GetGlobalFeed(context.Context, *GetGlobalFeedRequest) (*GetGlobalFeedResponse, error)
 	// Получение ленты пользователя
 	GetUserFeed(context.Context, *GetUserFeedRequest) (*GetUserFeedResponse, error)
 	// Инвалидация кеша ленты
@@ -113,9 +98,6 @@ type FeedServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedFeedServiceServer struct{}
 
-func (UnimplementedFeedServiceServer) GetGlobalFeed(context.Context, *GetGlobalFeedRequest) (*GetGlobalFeedResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGlobalFeed not implemented")
-}
 func (UnimplementedFeedServiceServer) GetUserFeed(context.Context, *GetUserFeedRequest) (*GetUserFeedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserFeed not implemented")
 }
@@ -144,24 +126,6 @@ func RegisterFeedServiceServer(s grpc.ServiceRegistrar, srv FeedServiceServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&FeedService_ServiceDesc, srv)
-}
-
-func _FeedService_GetGlobalFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetGlobalFeedRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FeedServiceServer).GetGlobalFeed(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: FeedService_GetGlobalFeed_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FeedServiceServer).GetGlobalFeed(ctx, req.(*GetGlobalFeedRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _FeedService_GetUserFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -225,10 +189,6 @@ var FeedService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "feed.FeedService",
 	HandlerType: (*FeedServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetGlobalFeed",
-			Handler:    _FeedService_GetGlobalFeed_Handler,
-		},
 		{
 			MethodName: "GetUserFeed",
 			Handler:    _FeedService_GetUserFeed_Handler,
