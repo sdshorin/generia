@@ -15,7 +15,7 @@ const PageHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-6);
-  
+
   @media (max-width: 640px) {
     flex-direction: column;
     align-items: flex-start;
@@ -44,7 +44,7 @@ const FilterButton = styled.button<{ $isActive: boolean }>`
   font-size: var(--font-sm);
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: ${props => props.$isActive ? 'var(--color-primary-hover)' : 'var(--color-border)'};
   }
@@ -61,33 +61,48 @@ const WorldCard = styled(motion(Card))`
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
-  
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
   }
 `;
 
-const WorldImage = styled.div<{ $index: number }>`
+const WorldImage = styled.div<{ $index: number; $backgroundImage?: string }>`
   height: 140px;
-  background: linear-gradient(135deg, 
-    ${props => {
-      const colors = [
-        'var(--color-primary), #FF9900',
-        '#A78BFA, var(--color-secondary)',
-        'var(--color-accent), #FB7185',
-        '#6EE7B7, #34D399',
-        '#60A5FA, #3B82F6'
-      ];
-      return colors[props.$index % colors.length];
-    }}
-  );
+  background: ${props => props.$backgroundImage
+    ? `url(${props.$backgroundImage}) center/cover no-repeat`
+    : `linear-gradient(135deg,
+        ${(() => {
+          const colors = [
+            'var(--color-primary), #FF9900',
+            '#A78BFA, var(--color-secondary)',
+            'var(--color-accent), #FB7185',
+            '#6EE7B7, #34D399',
+            '#60A5FA, #3B82F6'
+          ];
+          return colors[props.$index % colors.length];
+        })()}
+      )`
+  };
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 48px;
   font-weight: bold;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    opacity: ${props => props.$backgroundImage ? 0.4 : 0};
+  }
 `;
 
 const WorldContent = styled.div`
@@ -108,7 +123,7 @@ const WorldDescription = styled.p`
   margin-bottom: var(--space-3);
   line-height: 1.5;
   flex: 1;
-  
+
   /* Limit to 3 lines with ellipsis */
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -125,7 +140,7 @@ const WorldStats = styled.div`
 
 const StatItem = styled.div`
   color: var(--color-text);
-  
+
   span {
     font-weight: 600;
     color: var(--color-text);
@@ -136,12 +151,12 @@ const StatItem = styled.div`
 const EmptyState = styled.div`
   text-align: center;
   padding: var(--space-16) var(--space-4);
-  
+
   h3 {
     font-size: var(--font-xl);
     margin-bottom: var(--space-4);
   }
-  
+
   p {
     color: var(--color-text);
     margin-bottom: var(--space-6);
@@ -173,7 +188,7 @@ export const WorldsListPage: React.FC = () => {
   const [filteredWorlds, setFilteredWorlds] = useState(worlds);
   const [isJoining, setIsJoining] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
-  
+
   const {
     items: infiniteWorlds,
     isLoading,
@@ -192,22 +207,22 @@ export const WorldsListPage: React.FC = () => {
     },
     limit: 12
   });
-  
+
   // Use a ref to track if we've already applied the filter for this world state
   const worldsFilteredRef = useRef(false);
-  
+
   useEffect(() => {
     // Skip filter application if the world state hasn't changed
     // This prevents continuous re-renders
     if (worldsFilteredRef.current && filter === 'all') return;
     worldsFilteredRef.current = true;
-    
+
     applyFilter(filter);
   }, [worlds, filter]);
-  
+
   const applyFilter = (filterType: FilterType) => {
     let result = [...worlds];
-    
+
     switch (filterType) {
       case 'joined':
         result = result.filter(world => world.is_joined);
@@ -220,7 +235,7 @@ export const WorldsListPage: React.FC = () => {
         result = result.sort((a, b) => b.users_count - a.users_count);
         break;
       case 'new':
-        result = result.sort((a, b) => 
+        result = result.sort((a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         break;
@@ -228,18 +243,18 @@ export const WorldsListPage: React.FC = () => {
         // 'all' filter, no change needed
         break;
     }
-    
+
     setFilteredWorlds(result);
   };
-  
+
   const handleFilterChange = (newFilter: FilterType) => {
     setFilter(newFilter);
     reset();
   };
-  
+
   const handleJoinWorld = async (worldId: string) => {
     setIsJoining(prev => ({ ...prev, [worldId]: true }));
-    
+
     try {
       await joinWorld(worldId);
     } catch (error) {
@@ -248,11 +263,11 @@ export const WorldsListPage: React.FC = () => {
       setIsJoining(prev => ({ ...prev, [worldId]: false }));
     }
   };
-  
+
   const handleSwitchWorld = (worldId: string) => {
     loadCurrentWorld(worldId);
   };
-  
+
   const worldCardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
@@ -265,7 +280,7 @@ export const WorldsListPage: React.FC = () => {
       }
     })
   };
-  
+
   return (
     <Layout>
       <PageHeader>
@@ -274,7 +289,7 @@ export const WorldsListPage: React.FC = () => {
           <Button variant="primary">Create World</Button>
         </Link>
       </PageHeader>
-      
+
       <FiltersBar>
         <FilterButton
           $isActive={filter === 'all'}
@@ -301,13 +316,13 @@ export const WorldsListPage: React.FC = () => {
           Newest
         </FilterButton>
       </FiltersBar>
-      
+
       {error && (
         <ErrorMessage>
           {error}
         </ErrorMessage>
       )}
-      
+
       <AnimatePresence>
         {filteredWorlds.length > 0 ? (
           <WorldsGrid>
@@ -320,8 +335,11 @@ export const WorldsListPage: React.FC = () => {
                 custom={index}
                 variant="elevated"
               >
-                <WorldImage $index={index}>
-                  {world.name.charAt(0)}
+                <WorldImage
+                  $index={index}
+                  $backgroundImage={world.image_url}
+                >
+                  {!world.image_url && world.name.charAt(0)}
                 </WorldImage>
                 <WorldContent>
                   <WorldName>{world.name}</WorldName>
@@ -362,7 +380,7 @@ export const WorldsListPage: React.FC = () => {
           <EmptyState>
             <h3>No worlds found</h3>
             <p>
-              {filter !== 'all' 
+              {filter !== 'all'
                 ? "Try changing your filter or create your own world!"
                 : "Be the first to create a synthetic world!"}
             </p>
@@ -374,7 +392,7 @@ export const WorldsListPage: React.FC = () => {
           </EmptyState>
         )}
       </AnimatePresence>
-      
+
       {/* Infinite scroll sentinel */}
       {filteredWorlds.length > 0 && (
         <div ref={sentinelRef}>

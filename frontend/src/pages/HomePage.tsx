@@ -24,7 +24,7 @@ const HeroSection = styled.section`
   padding: var(--space-16) var(--space-4);
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -61,7 +61,7 @@ const MainContent = styled.div`
   grid-template-columns: minmax(0, 1fr) 350px;
   gap: var(--space-6);
   margin-top: var(--space-10);
-  
+
   @media (max-width: 968px) {
     grid-template-columns: 1fr;
   }
@@ -69,7 +69,7 @@ const MainContent = styled.div`
 
 const WorldsPanel = styled.div`
   order: 2;
-  
+
   @media (max-width: 968px) {
     order: 2;
   }
@@ -77,7 +77,7 @@ const WorldsPanel = styled.div`
 
 const FeedPanel = styled.div`
   order: 1;
-  
+
   @media (max-width: 968px) {
     order: 1;
   }
@@ -103,7 +103,7 @@ const CreatePostButton = styled(Link)`
   display: inline-flex;
   align-items: center;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: var(--color-primary-hover);
     transform: translateY(-1px);
@@ -126,11 +126,11 @@ const WorldItem = styled(Card)<{ $isActive?: boolean }>`
   border-left: ${props => props.$isActive ? '4px solid var(--color-primary)' : '4px solid transparent'};
   background-color: ${props => props.$isActive ? 'rgba(213, 184, 152, 0.2)' : 'var(--color-card)'};
   position: relative;
-  
+
   &:hover {
     transform: translateY(-2px);
   }
-  
+
   &:after {
     content: '';
     position: absolute;
@@ -162,28 +162,44 @@ const WorldDescription = styled.p`
   max-width: 200px;
 `;
 
-const PortalCircle = styled.div<{ $index: number }>`
+const PortalCircle = styled.div<{ $index: number; $iconUrl?: string }>`
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, 
-    ${props => {
-      const colors = [
-        'var(--color-primary), #FF9900',
-        '#A78BFA, var(--color-secondary)',
-        'var(--color-accent), #FB7185',
-        '#6EE7B7, #34D399',
-        '#60A5FA, #3B82F6'
-      ];
-      return colors[props.$index % colors.length];
-    }}
-  );
+  background: ${props => props.$iconUrl
+    ? `url(${props.$iconUrl}) center/cover no-repeat`
+    : `linear-gradient(135deg,
+        ${(() => {
+          const colors = [
+            'var(--color-primary), #FF9900',
+            '#A78BFA, var(--color-secondary)',
+            'var(--color-accent), #FB7185',
+            '#6EE7B7, #34D399',
+            '#60A5FA, #3B82F6'
+          ];
+          return colors[props.$index % colors.length];
+        })()}
+      )`
+  };
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: bold;
   font-size: 20px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    opacity: ${props => props.$iconUrl ? 0.3 : 0};
+  }
 `;
 
 const PostsGrid = styled.div`
@@ -191,7 +207,7 @@ const PostsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-4);
   margin-bottom: var(--space-6);
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -201,11 +217,11 @@ const NoPostsMessage = styled.div`
   text-align: center;
   padding: var(--space-8) var(--space-4);
   color: var(--color-text);
-  
+
   h4 {
     margin-bottom: var(--space-2);
   }
-  
+
   p {
     margin-bottom: var(--space-6);
   }
@@ -231,16 +247,16 @@ export const HomePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchPopularWorlds = async () => {
       if (!isAuthenticated) return;
-      
+
       try {
         setIsLoading(true);
         const data = await worldsAPI.getWorlds(5, '');
         setPopularWorlds(data.worlds || []);
-        
+
         // If we have worlds but no current world, load the first one
         if (data.worlds?.length > 0 && !currentWorld) {
           loadCurrentWorld(data.worlds[0].id);
@@ -251,20 +267,20 @@ export const HomePage: React.FC = () => {
         setIsLoading(false);
       }
     };
-    
+
     fetchPopularWorlds();
   }, [isAuthenticated, loadCurrentWorld]);
-  
+
   const currentWorldRef = useRef<string | null>(null);
-  
+
   useEffect(() => {
     const fetchRecentPosts = async () => {
       if (!isAuthenticated || !currentWorld) return;
-      
+
       // Skip if we've already loaded posts for this world
       if (currentWorldRef.current === currentWorld.id) return;
       currentWorldRef.current = currentWorld.id;
-      
+
       try {
         setIsLoadingPosts(true);
         setRecentPosts([]); // Очистить прежние посты во время загрузки
@@ -276,18 +292,18 @@ export const HomePage: React.FC = () => {
         setIsLoadingPosts(false);
       }
     };
-    
+
     if (currentWorld) {
       fetchRecentPosts();
     }
   }, [isAuthenticated, currentWorld]); // Зависит от всего объекта currentWorld, чтобы реагировать на его изменения
-  
+
   // Navigate directly to world feed instead of switching
-  
+
   const handleCreateWorld = () => {
     navigate('/create-world');
   };
-  
+
   return (
     <Layout>
       <HeroSection>
@@ -312,24 +328,24 @@ export const HomePage: React.FC = () => {
           animate="visible"
           transition={{ delay: 0.4 }}
         >
-          <Button 
-            onClick={handleCreateWorld} 
+          <Button
+            onClick={handleCreateWorld}
             size="large"
           >
             Generate a World
           </Button>
         </motion.div>
       </HeroSection>
-      
+
       {isAuthenticated && (
         <MainContent>
           <WorldsPanel>
             <PanelTitle>Popular Worlds</PanelTitle>
             <WorldsList>
               {popularWorlds.map((world, index) => (
-                <WorldItem 
-                  key={world.id} 
-                  variant="elevated" 
+                <WorldItem
+                  key={world.id}
+                  variant="elevated"
                   animateHover
                   $isActive={currentWorld?.id === world.id}
                   onClick={() => {
@@ -337,15 +353,15 @@ export const HomePage: React.FC = () => {
                     currentWorldRef.current = null; // Сбросить для загрузки постов нового мира
                   }}
                 >
-                  <PortalCircle $index={index}>
-                    {world.name.charAt(0)}
+                  <PortalCircle $index={index} $iconUrl={world.icon_url}>
+                    {!world.icon_url && world.name.charAt(0)}
                   </PortalCircle>
                   <WorldInfo>
                     <WorldName>{world.name}</WorldName>
                     <WorldDescription>{world.description || 'No description'}</WorldDescription>
                   </WorldInfo>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
                     variant="primary"
                     onClick={(e) => {
                       e.stopPropagation(); // Предотвратить запуск клика родителя
@@ -363,7 +379,7 @@ export const HomePage: React.FC = () => {
               </Link>
             </WorldsList>
           </WorldsPanel>
-          
+
           <FeedPanel>
             <PanelTitle>
               {currentWorld ? `Posts from ${currentWorld.name}` : 'Select a World'}
@@ -383,10 +399,10 @@ export const HomePage: React.FC = () => {
                   <>
                     <PostsGrid>
                       {recentPosts.map(post => (
-                        <PostCard 
-                          key={post.id} 
-                          post={post} 
-                          currentWorldId={currentWorld.id} 
+                        <PostCard
+                          key={post.id}
+                          post={post}
+                          currentWorldId={currentWorld.id}
                         />
                       ))}
                     </PostsGrid>

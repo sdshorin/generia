@@ -12,15 +12,21 @@ import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { postsAPI } from '../../api/services';
 import { Post } from '../../types';
 
-const PageHeader = styled.div`
+const PageHeader = styled.div<{ $backgroundImage?: string }>`
   position: relative;
   padding: var(--space-6) var(--space-4);
   margin: -24px -16px 24px -16px;
-  background: linear-gradient(135deg, var(--color-primary), #FF9900);
+  background: ${props => props.$backgroundImage 
+    ? `url(${props.$backgroundImage}) center/cover no-repeat` 
+    : 'linear-gradient(135deg, var(--color-primary), #FF9900)'};
   border-radius: var(--radius-lg);
   color: white;
   text-align: center;
   overflow: hidden;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   
   &::before {
     content: '';
@@ -29,16 +35,31 @@ const PageHeader = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
-    opacity: 0.3;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: ${props => props.$backgroundImage ? 0.5 : 0.3};
+    z-index: 1;
   }
+  
+  ${props => !props.$backgroundImage && `
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.3;
+    }
+  `}
 `;
 
 const WorldTitle = styled.h1`
   font-size: var(--font-3xl);
   margin-bottom: var(--space-2);
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 `;
 
 const WorldDescription = styled.p`
@@ -47,7 +68,8 @@ const WorldDescription = styled.p`
   max-width: 600px;
   margin: 0 auto;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 `;
 
 const ContentContainer = styled.div`
@@ -228,7 +250,7 @@ export const FeedPage: React.FC = () => {
   
   return (
     <Layout>
-      <PageHeader>
+      <PageHeader $backgroundImage={currentWorld.image_url}>
         <WorldTitle>{currentWorld.name}</WorldTitle>
         {currentWorld.description && (
           <WorldDescription>{currentWorld.description}</WorldDescription>

@@ -35,15 +35,15 @@ func NewMediaService(repo repository.MediaRepository, minioClient *minio.Client,
 }
 
 // CreateMedia creates a new media record
-func (s *MediaService) CreateMedia(ctx context.Context, characterID, filename, contentType string, size int64, data []byte) (*models.Media, error) {
+func (s *MediaService) CreateMedia(ctx context.Context, worldID, characterID, filename, contentType string, size int64, mediaType int32, data []byte) (*models.Media, error) {
 	// Generate a unique ID
 	id, err := GenerateID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate ID: %w", err)
 	}
 
-	// Generate object name for MinIO
-	objectName := fmt.Sprintf("%s/%s%s", characterID, id, filepath.Ext(filename))
+	// Generate object name for MinIO using new path structure
+	objectName := models.GenerateObjectName(worldID, characterID, id, filename, mediaType)
 
 	// Upload to MinIO
 	reader := bytes.NewReader(data)
@@ -57,12 +57,14 @@ func (s *MediaService) CreateMedia(ctx context.Context, characterID, filename, c
 	// Create media record
 	media := &models.Media{
 		ID:          id,
-		CharacterId: characterID,
+		CharacterId: models.StringPtr(characterID),
+		WorldId:     worldID,
 		Filename:    filename,
 		ContentType: contentType,
 		Size:        size,
 		BucketName:  s.bucket,
 		ObjectName:  objectName,
+		MediaType:   mediaType,
 	}
 
 	// Store in database
@@ -75,15 +77,15 @@ func (s *MediaService) CreateMedia(ctx context.Context, characterID, filename, c
 }
 
 // GeneratePresignedPutURL generates a presigned URL for client-side uploading
-func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, characterID, filename, contentType string, size int64) (*models.Media, string, time.Time, error) {
+func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, worldID, characterID, filename, contentType string, size int64, mediaType int32) (*models.Media, string, time.Time, error) {
 	// Generate a unique ID
 	id, err := GenerateID()
 	if err != nil {
 		return nil, "", time.Time{}, fmt.Errorf("failed to generate ID: %w", err)
 	}
 
-	// Generate object name for MinIO
-	objectName := fmt.Sprintf("%s/%s%s", characterID, id, filepath.Ext(filename))
+	// Generate object name for MinIO using new path structure
+	objectName := models.GenerateObjectName(worldID, characterID, id, filename, mediaType)
 
 	// Generate presigned PUT URL
 	expiry := time.Minute * 10 // 10 minutes expiry for upload
@@ -95,12 +97,14 @@ func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, characterID,
 	// Create media record (status pending until confirmed after upload)
 	media := &models.Media{
 		ID:          id,
-		CharacterId: characterID,
+		CharacterId: models.StringPtr(characterID),
+		WorldId:     worldID,
 		Filename:    filename,
 		ContentType: contentType,
 		Size:        size,
 		BucketName:  s.bucket,
 		ObjectName:  objectName,
+		MediaType:   mediaType,
 	}
 
 	// Store in database
@@ -114,16 +118,14 @@ func (s *MediaService) GeneratePresignedPutURL(ctx context.Context, characterID,
 }
 
 // ConfirmMediaUpload confirms that a media file has been uploaded via presigned URL
-func (s *MediaService) ConfirmMediaUpload(ctx context.Context, mediaID, characterID string) error {
+func (s *MediaService) ConfirmMediaUpload(ctx context.Context, mediaID string) error {
 	// Get media from database
 	media, err := s.repo.GetMediaByID(ctx, mediaID)
 	if err != nil {
 		return fmt.Errorf("failed to get media from database: %w", err)
 	}
 
-	if media.CharacterId != characterID {
-		return fmt.Errorf("character ID mismatch")
-	}
+	// Character ID check removed as it's no longer required
 
 	// Check if object exists in MinIO
 	_, err = s.minioClient.StatObject(ctx, media.BucketName, media.ObjectName, minio.StatObjectOptions{})
@@ -161,7 +163,7 @@ func (s *MediaService) GetPresignedURL(ctx context.Context, media *models.Media,
 	if variant == "original" {
 		objectName = media.ObjectName
 	} else {
-		objectName = fmt.Sprintf("%s/%s_%s%s", media.CharacterId, media.ID, variant, filepath.Ext(media.Filename))
+		objectName = fmt.Sprintf("%s/%s_%s%s", models.StringValue(media.CharacterId), media.ID, variant, filepath.Ext(media.Filename))
 	}
 
 	// If no variants exist yet but original is requested, use the object name

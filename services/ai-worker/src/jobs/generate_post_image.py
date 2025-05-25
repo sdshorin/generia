@@ -94,10 +94,11 @@ class GeneratePostImageJob(BaseJob):
             # Генерируем изображение
             image_result = await self.image_generator.generate_image(
                 prompt=optimized_image_prompt,
+                world_id=world_id,
+                media_type_enum=MediaType.POST_IMAGE,
+                character_id=character_id,
                 width=512,
                 height=512,
-                character_id=character_id,
-                world_id=world_id,
                 task_id=self.task.id,
                 filename=f"post_{world_id}_{character_id}_{post_index}.png",
                 media_type="image/png",

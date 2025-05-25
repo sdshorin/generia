@@ -22,6 +22,7 @@ import (
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/pkg/telemetry"
+	"github.com/sdshorin/generia/services/media-service/internal/models"
 	"github.com/sdshorin/generia/services/media-service/internal/repository"
 	"github.com/sdshorin/generia/services/media-service/internal/service"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -62,10 +63,12 @@ func (s *MediaService) GetPresignedUploadURL(ctx context.Context, req *mediapb.G
 	// Generate presigned URL
 	media, presignedURL, expiresAt, err := mediaService.GeneratePresignedPutURL(
 		ctx,
+		req.WorldId,
 		req.CharacterId,
 		req.Filename,
 		req.ContentType,
 		req.Size,
+		int32(req.MediaType),
 	)
 	if err != nil {
 		s.logger.Error("Failed to generate presigned URL", zap.Error(err))
@@ -82,8 +85,7 @@ func (s *MediaService) GetPresignedUploadURL(ctx context.Context, req *mediapb.G
 // ConfirmUpload confirms that a media file has been uploaded via presigned URL
 func (s *MediaService) ConfirmUpload(ctx context.Context, req *mediapb.ConfirmUploadRequest) (*mediapb.ConfirmUploadResponse, error) {
 	s.logger.Info("ConfirmUpload called",
-		zap.String("media_id", req.MediaId),
-		zap.String("character_id", req.CharacterId))
+		zap.String("media_id", req.MediaId))
 
 	// Create media service instance
 	mediaRepo := repository.NewPostgresMediaRepository(s.db, s.minioClient)
@@ -97,7 +99,7 @@ func (s *MediaService) ConfirmUpload(ctx context.Context, req *mediapb.ConfirmUp
 	}
 
 	// Confirm upload
-	err = mediaService.ConfirmMediaUpload(ctx, req.MediaId, req.CharacterId)
+	err = mediaService.ConfirmMediaUpload(ctx, req.MediaId)
 	if err != nil {
 		s.logger.Error("Failed to confirm upload", zap.Error(err))
 		return nil, err
@@ -185,12 +187,14 @@ func (s *MediaService) GetMedia(ctx context.Context, req *mediapb.GetMediaReques
 
 	return &mediapb.Media{
 		MediaId:     media.ID,
-		CharacterId: media.CharacterId,
+		CharacterId: models.StringValue(media.CharacterId),
+		WorldId:     media.WorldId,
 		Filename:    media.Filename,
 		ContentType: media.ContentType,
 		Size:        media.Size,
 		Variants:    variantsProto,
 		CreatedAt:   media.CreatedAt.Format(time.RFC3339),
+		MediaType:   mediapb.MediaType(media.MediaType),
 	}, nil
 }
 

@@ -40,8 +40,8 @@ func (r *PostgresMediaRepository) CreateMedia(ctx context.Context, media *models
 
 	// Insert media record
 	query := `
-		INSERT INTO media (id, character_id, filename, content_type, size, bucket, object_name, created_at, updated_at)
-		VALUES (:id, :character_id, :filename, :content_type, :size, :bucket, :object_name, :created_at, :updated_at)
+		INSERT INTO media (id, character_id, world_id, filename, content_type, size, bucket, object_name, media_type, created_at, updated_at)
+		VALUES (:id, :character_id, :world_id, :filename, :content_type, :size, :bucket, :object_name, :media_type, :created_at, :updated_at)
 	`
 	_, err := r.db.NamedExecContext(ctx, query, media)
 	return err
@@ -51,7 +51,7 @@ func (r *PostgresMediaRepository) CreateMedia(ctx context.Context, media *models
 func (r *PostgresMediaRepository) GetMediaByID(ctx context.Context, id string) (*models.Media, error) {
 	var media models.Media
 	query := `
-		SELECT id, character_id, filename, content_type, size, bucket, object_name, created_at, updated_at
+		SELECT id, character_id, world_id, filename, content_type, size, bucket, object_name, media_type, created_at, updated_at
 		FROM media
 		WHERE id = $1
 	`

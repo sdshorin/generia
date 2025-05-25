@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS worlds (
     creator_id UUID,
     generation_status VARCHAR(20) NOT NULL DEFAULT 'pending', -- pending, in_progress, completed, failed
     status VARCHAR(20) NOT NULL DEFAULT 'active', -- active, archived
+    image_uuid UUID, -- UUID of the background image
+    icon_uuid UUID, -- UUID of the world icon image
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -77,13 +79,14 @@ CREATE TABLE IF NOT EXISTS posts (
 -- Media table (used by media-service)
 CREATE TABLE IF NOT EXISTS media (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    character_id UUID NOT NULL,
-    world_id UUID REFERENCES worlds(id) ON DELETE CASCADE,
+    character_id UUID, -- Nullable for world-level media
+    world_id UUID NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
     filename TEXT NOT NULL,
     content_type TEXT NOT NULL,
     size BIGINT NOT NULL,
     bucket TEXT NOT NULL,
     object_name TEXT NOT NULL,
+    media_type INTEGER NOT NULL DEFAULT 0, -- 0=unknown, 1=world_header, 2=world_icon, 3=character_avatar, 4=post_image
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

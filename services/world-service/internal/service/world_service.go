@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
 	worldpb "github.com/sdshorin/generia/api/grpc/world"
 )
@@ -29,6 +31,7 @@ type WorldService struct {
 	worldRepo     repository.WorldRepository
 	authClient    authpb.AuthServiceClient
 	postClient    postpb.PostServiceClient
+	mediaClient   mediapb.MediaServiceClient
 	kafkaProducer *kafka.Producer
 }
 
@@ -37,12 +40,14 @@ func NewWorldService(
 	worldRepo repository.WorldRepository,
 	authClient authpb.AuthServiceClient,
 	postClient postpb.PostServiceClient,
+	mediaClient mediapb.MediaServiceClient,
 	kafkaBrokers []string,
 ) worldpb.WorldServiceServer {
 	return &WorldService{
 		worldRepo:     worldRepo,
 		authClient:    authClient,
 		postClient:    postClient,
+		mediaClient:   mediaClient,
 		kafkaProducer: kafka.NewProducer(kafkaBrokers),
 	}
 }
@@ -52,6 +57,24 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 	// Validate input
 	if req.UserId == "" || req.Name == "" || req.Prompt == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "user_id, name, and prompt are required")
+	}
+
+	// Set default values if not provided
+	charactersCount := req.CharactersCount
+	if charactersCount <= 0 {
+		charactersCount = 25
+	}
+	postsCount := req.PostsCount
+	if postsCount <= 0 {
+		postsCount = 150
+	}
+
+	// Validate ranges
+	if charactersCount < 1 || charactersCount > 40 {
+		return nil, status.Errorf(codes.InvalidArgument, "characters_count must be between 1 and 40")
+	}
+	if postsCount < 1 || postsCount > 250 {
+		return nil, status.Errorf(codes.InvalidArgument, "posts_count must be between 1 and 250")
 	}
 
 	// Validate user exists
@@ -89,16 +112,16 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 	}
 
 	// Get world stats
-	usersCount, postsCount, err := s.worldRepo.GetWorldStats(ctx, world.ID)
+	usersCount, postsCountStats, err := s.worldRepo.GetWorldStats(ctx, world.ID)
 	if err != nil {
 		logger.Logger.Error("Failed to get world stats", zap.Error(err), zap.String("world_id", world.ID))
 		// Not a critical error, continue with zeros
 		usersCount = 0
-		postsCount = 0
+		postsCountStats = 0
 	}
 
-	// Create and enqueue content generation tasks
-	s.createInitialGenerationTasks(ctx, world.ID)
+	// Create and enqueue content generation tasks with specified parameters
+	s.createInitialGenerationTasks(ctx, world.ID, int(charactersCount), int(postsCount))
 
 	// Build response
 	return &worldpb.WorldResponse{
@@ -110,7 +133,7 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		GenerationStatus: "", // world.GenerationStatus,
 		Status:           world.Status,
 		UsersCount:       int32(usersCount),
-		PostsCount:       int32(postsCount),
+		PostsCount:       int32(postsCountStats),
 		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 		IsJoined:         true,
@@ -159,6 +182,49 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		}
 	}
 
+	// Get image URLs if UUIDs exist
+	var imageUrl, iconUrl string
+
+	// Get background image URL
+	if world.ImageUUID.Valid && world.ImageUUID.String != "" {
+		// Get media URL for world background image
+		mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+			MediaId:   world.ImageUUID.String,
+			Variant:   "original", // Use original variant for world background image
+			ExpiresIn: 3600,       // 1 hour
+		})
+		if err == nil && mediaResp != nil {
+			imageUrl = mediaResp.Url
+			logger.Logger.Debug("Got image URL for world",
+				zap.String("world_id", world.ID),
+				zap.String("image_url", imageUrl))
+		} else {
+			logger.Logger.Warn("Failed to get image URL for world",
+				zap.String("world_id", world.ID),
+				zap.Error(err))
+		}
+	}
+
+	// Get icon image URL
+	if world.IconUUID.Valid && world.IconUUID.String != "" {
+		// Get media URL for world icon image
+		mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+			MediaId:   world.IconUUID.String,
+			Variant:   "original", // Use original variant for world icon image
+			ExpiresIn: 3600,       // 1 hour
+		})
+		if err == nil && mediaResp != nil {
+			iconUrl = mediaResp.Url
+			logger.Logger.Debug("Got icon URL for world",
+				zap.String("world_id", world.ID),
+				zap.String("icon_url", iconUrl))
+		} else {
+			logger.Logger.Warn("Failed to get icon URL for world",
+				zap.String("world_id", world.ID),
+				zap.Error(err))
+		}
+	}
+
 	// Build response
 	return &worldpb.WorldResponse{
 		Id:               world.ID,
@@ -173,6 +239,8 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 		IsJoined:         isJoined,
+		ImageUrl:         imageUrl,
+		IconUrl:          iconUrl,
 	}, nil
 }
 
@@ -217,6 +285,48 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			postsCount = 0
 		}
 
+		// Get image URL if image UUID exists
+		var imageUrl string
+		if world.ImageUUID.Valid && world.ImageUUID.String != "" {
+			// Get media URL for world image
+			mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+				MediaId:   world.ImageUUID.String,
+				Variant:   "original", // Use original variant for world background image
+				ExpiresIn: 3600,       // 1 hour
+			})
+			if err == nil && mediaResp != nil {
+				imageUrl = mediaResp.Url
+				logger.Logger.Debug("Got image URL for world in list",
+					zap.String("world_id", world.ID),
+					zap.String("image_url", imageUrl))
+			} else {
+				logger.Logger.Warn("Failed to get image URL for world in list",
+					zap.String("world_id", world.ID),
+					zap.Error(err))
+			}
+		}
+
+		// Get icon URL if icon UUID exists
+		var iconUrl string
+		if world.IconUUID.Valid && world.IconUUID.String != "" {
+			// Get media URL for world icon
+			mediaResp, err := s.mediaClient.GetMediaURL(ctx, &mediapb.GetMediaURLRequest{
+				MediaId:   world.IconUUID.String,
+				Variant:   "original", // Use original variant for world icon image
+				ExpiresIn: 3600,       // 1 hour
+			})
+			if err == nil && mediaResp != nil {
+				iconUrl = mediaResp.Url
+				logger.Logger.Debug("Got icon URL for world in list",
+					zap.String("world_id", world.ID),
+					zap.String("icon_url", iconUrl))
+			} else {
+				logger.Logger.Warn("Failed to get icon URL for world in list",
+					zap.String("world_id", world.ID),
+					zap.Error(err))
+			}
+		}
+
 		worldResponses[i] = &worldpb.WorldResponse{
 			Id:               world.ID,
 			Name:             world.Name,
@@ -230,6 +340,8 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 			IsJoined:         true, // User has access since this is from user-specific query
+			ImageUrl:         imageUrl,
+			IconUrl:          iconUrl,
 		}
 	}
 
@@ -299,6 +411,55 @@ func (s *WorldService) JoinWorld(ctx context.Context, req *worldpb.JoinWorldRequ
 	}, nil
 }
 
+// UpdateWorldImage handles updating the world's background image and icon
+func (s *WorldService) UpdateWorldImage(ctx context.Context, req *worldpb.UpdateWorldImageRequest) (*worldpb.UpdateWorldImageResponse, error) {
+	// Validate input
+	if req.WorldId == "" || req.ImageUuid == "" || req.IconUuid == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "world_id, image_uuid, and icon_uuid are required")
+	}
+
+	// Get world
+	world, err := s.worldRepo.GetByID(ctx, req.WorldId)
+	if err != nil {
+		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to get world")
+	}
+
+	if world == nil {
+		return nil, status.Errorf(codes.NotFound, "world not found")
+	}
+	logger.Logger.Info("Updating world with images",
+		zap.String("world_id", req.WorldId),
+		zap.String("image_uuid", req.ImageUuid),
+		zap.String("icon_uuid", req.IconUuid))
+
+	// Update world with image and icon UUIDs
+	world.ImageUUID = sql.NullString{String: req.ImageUuid, Valid: req.ImageUuid != ""}
+	world.IconUUID = sql.NullString{String: req.IconUuid, Valid: req.IconUuid != ""}
+	world.UpdatedAt = time.Now()
+
+	// Save updated world
+	err = s.worldRepo.Update(ctx, world)
+	if err != nil {
+		logger.Logger.Error("Failed to update world with images",
+			zap.Error(err),
+			zap.String("world_id", req.WorldId),
+			zap.String("image_uuid", req.ImageUuid),
+			zap.String("icon_uuid", req.IconUuid))
+		return nil, status.Errorf(codes.Internal, "failed to update world with images")
+	}
+
+	logger.Logger.Info("Updated world with images",
+		zap.String("world_id", req.WorldId),
+		zap.String("image_uuid", req.ImageUuid),
+		zap.String("icon_uuid", req.IconUuid))
+
+	return &worldpb.UpdateWorldImageResponse{
+		Success: true,
+		Message: "Successfully updated world images",
+	}, nil
+}
+
 // // GetGenerationStatus handles getting the generation status of a world
 // func (s *WorldService) GetGenerationStatus(ctx context.Context, req *worldpb.GetGenerationStatusRequest) (*worldpb.GetGenerationStatusResponse, error) {
 // 	// Validate input
@@ -338,7 +499,7 @@ func (s *WorldService) HealthCheck(ctx context.Context, req *worldpb.HealthCheck
 // Helper methods
 
 // createInitialGenerationTasks creates the initial task for world generation in Kafka and MongoDB
-func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID string) {
+func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID string, charactersCount, postsCount int) {
 	// Get world details
 	world, err := s.worldRepo.GetByID(ctx, worldID)
 	if err != nil {
@@ -357,11 +518,11 @@ func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID
 	// Create task ID
 	taskID := uuid.New().String()
 
-	// Parameters for initialization task
+	// Parameters for initialization task with dynamic values
 	parameters := map[string]interface{}{
 		"user_prompt": world.Prompt,
-		"users_count": 20,  // Default value
-		"posts_count": 100, // Default value
+		"users_count": charactersCount,
+		"posts_count": postsCount,
 		"created_at":  time.Now().Format(time.RFC3339),
 	}
 
@@ -395,8 +556,8 @@ func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID
 			zap.String("task_id", taskID),
 			zap.String("world_id", worldID),
 			zap.String("prompt", world.Prompt),
-			zap.Int("users_count", parameters["users_count"].(int)),
-			zap.Int("posts_count", parameters["posts_count"].(int)))
+			zap.Int("users_count", charactersCount),
+			zap.Int("posts_count", postsCount))
 	}
 }
 

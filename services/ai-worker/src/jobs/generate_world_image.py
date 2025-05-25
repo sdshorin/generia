@@ -73,10 +73,12 @@ class GenerateWorldImageJob(BaseJob):
             # Генерируем фоновое изображение
             header_image = await self.image_generator.generate_image(
                 prompt=image_prompts.header_prompt,
-                width=512,
+                world_id=world_id,
+                media_type_enum=MediaType.WORLD_HEADER,
+                character_id=None,  # No character for world-level images
+                width=1024,
                 height=512,
                 task_id=self.task.id,
-                world_id=world_id,
                 filename=f"world_{world_id}_header.png",
                 media_type="image/png"
             )
@@ -86,10 +88,12 @@ class GenerateWorldImageJob(BaseJob):
             # Генерируем иконку
             icon_image = await self.image_generator.generate_image(
                 prompt=image_prompts.icon_prompt,
+                world_id=world_id,
+                media_type_enum=MediaType.WORLD_ICON,
+                character_id=None,  # No character for world-level images
                 width=512,
                 height=512,
                 task_id=self.task.id,
-                world_id=world_id,
                 filename=f"world_{world_id}_icon.png",
                 media_type="image/png"
             )
@@ -112,14 +116,14 @@ class GenerateWorldImageJob(BaseJob):
 
             # Обновляем информацию о мире в World Service
             if self.service_client:
-                await self.service_client.update_world_images(
+                await self.service_client.update_world_image(
                     world_id=world_id,
-                    header_url=header_url,
-                    icon_url=icon_url,
+                    image_uuid=header_id,
+                    icon_uuid=icon_id,
                     task_id=self.task.id
                 )
 
-                logger.info(f"Updated world images in World Service for world {world_id}")
+                logger.info(f"Updated world images in World Service for world {world_id}, header_id: {header_id}, icon_id: {icon_id}")
 
             return {
                 "header_prompt": image_prompts.header_prompt,

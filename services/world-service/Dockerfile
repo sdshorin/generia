@@ -6,8 +6,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
-COPY . .
+# Copy only necessary files
+COPY api/ ./api/
+COPY pkg/ ./pkg/
+COPY configs/ ./configs/
+COPY services/world-service/ ./services/world-service/
+COPY .env* ./
 
 # Build the service
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/world-service ./services/world-service/cmd/main.go

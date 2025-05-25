@@ -27,6 +27,8 @@ export interface World {
   updated_at: string;
   is_joined?: boolean;
   is_active?: boolean;
+  image_url?: string;
+  icon_url?: string;
 }
 
 export interface Post {

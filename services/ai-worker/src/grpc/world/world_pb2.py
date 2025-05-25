@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11world/world.proto\x12\x05world\"X\n\x12\x43reateWorldRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06prompt\x18\x04 \x01(\t\"\xf2\x01\n\rWorldResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06prompt\x18\x04 \x01(\t\x12\x12\n\ncreator_id\x18\x05 \x01(\t\x12\x19\n\x11generation_status\x18\x06 \x01(\t\x12\x0e\n\x06status\x18\x07 \x01(\t\x12\x13\n\x0busers_count\x18\x08 \x01(\x05\x12\x13\n\x0bposts_count\x18\t \x01(\x05\x12\x12\n\ncreated_at\x18\n \x01(\t\x12\x12\n\nupdated_at\x18\x0b \x01(\t\x12\x11\n\tis_joined\x18\x0c \x01(\x08\"4\n\x0fGetWorldRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\x12\x0f\n\x07user_id\x18\x02 \x01(\t\"R\n\x10GetWorldsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\r\n\x05limit\x18\x02 \x01(\x05\x12\x0e\n\x06offset\x18\x03 \x01(\x05\x12\x0e\n\x06status\x18\x04 \x01(\t\"E\n\x0eWorldsResponse\x12$\n\x06worlds\x18\x01 \x03(\x0b\x32\x14.world.WorldResponse\x12\r\n\x05total\x18\x02 \x01(\x05\"5\n\x10JoinWorldRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\"5\n\x11JoinWorldResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\".\n\x1aGetGenerationStatusRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\"\x14\n\x12HealthCheckRequest\"\x8b\x01\n\x13HealthCheckResponse\x12\x38\n\x06status\x18\x01 \x01(\x0e\x32(.world.HealthCheckResponse.ServingStatus\":\n\rServingStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SERVING\x10\x01\x12\x0f\n\x0bNOT_SERVING\x10\x02\x32\xd5\x02\n\x0cWorldService\x12@\n\x0b\x43reateWorld\x12\x19.world.CreateWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12:\n\x08GetWorld\x12\x16.world.GetWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12=\n\tGetWorlds\x12\x17.world.GetWorldsRequest\x1a\x15.world.WorldsResponse\"\x00\x12@\n\tJoinWorld\x12\x17.world.JoinWorldRequest\x1a\x18.world.JoinWorldResponse\"\x00\x12\x46\n\x0bHealthCheck\x12\x19.world.HealthCheckRequest\x1a\x1a.world.HealthCheckResponse\"\x00\x42,Z*github.com/sdshorin/generia/api/grpc/worldb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11world/world.proto\x12\x05world\"X\n\x12\x43reateWorldRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06prompt\x18\x04 \x01(\t\"\x97\x02\n\rWorldResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x0e\n\x06prompt\x18\x04 \x01(\t\x12\x12\n\ncreator_id\x18\x05 \x01(\t\x12\x19\n\x11generation_status\x18\x06 \x01(\t\x12\x0e\n\x06status\x18\x07 \x01(\t\x12\x13\n\x0busers_count\x18\x08 \x01(\x05\x12\x13\n\x0bposts_count\x18\t \x01(\x05\x12\x12\n\ncreated_at\x18\n \x01(\t\x12\x12\n\nupdated_at\x18\x0b \x01(\t\x12\x11\n\tis_joined\x18\x0c \x01(\x08\x12\x11\n\timage_url\x18\r \x01(\t\x12\x10\n\x08icon_url\x18\x0e \x01(\t\"4\n\x0fGetWorldRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\x12\x0f\n\x07user_id\x18\x02 \x01(\t\"R\n\x10GetWorldsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\r\n\x05limit\x18\x02 \x01(\x05\x12\x0e\n\x06offset\x18\x03 \x01(\x05\x12\x0e\n\x06status\x18\x04 \x01(\t\"E\n\x0eWorldsResponse\x12$\n\x06worlds\x18\x01 \x03(\x0b\x32\x14.world.WorldResponse\x12\r\n\x05total\x18\x02 \x01(\x05\"5\n\x10JoinWorldRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\"5\n\x11JoinWorldResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\".\n\x1aGetGenerationStatusRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\"R\n\x17UpdateWorldImageRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\x12\x12\n\nimage_uuid\x18\x02 \x01(\t\x12\x11\n\ticon_uuid\x18\x03 \x01(\t\"<\n\x18UpdateWorldImageResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x14\n\x12HealthCheckRequest\"\x8b\x01\n\x13HealthCheckResponse\x12\x38\n\x06status\x18\x01 \x01(\x0e\x32(.world.HealthCheckResponse.ServingStatus\":\n\rServingStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SERVING\x10\x01\x12\x0f\n\x0bNOT_SERVING\x10\x02\x32\xac\x03\n\x0cWorldService\x12@\n\x0b\x43reateWorld\x12\x19.world.CreateWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12:\n\x08GetWorld\x12\x16.world.GetWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12=\n\tGetWorlds\x12\x17.world.GetWorldsRequest\x1a\x15.world.WorldsResponse\"\x00\x12@\n\tJoinWorld\x12\x17.world.JoinWorldRequest\x1a\x18.world.JoinWorldResponse\"\x00\x12U\n\x10UpdateWorldImage\x12\x1e.world.UpdateWorldImageRequest\x1a\x1f.world.UpdateWorldImageResponse\"\x00\x12\x46\n\x0bHealthCheck\x12\x19.world.HealthCheckRequest\x1a\x1a.world.HealthCheckResponse\"\x00\x42,Z*github.com/sdshorin/generia/api/grpc/worldb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,25 +35,29 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CREATEWORLDREQUEST']._serialized_start=28
   _globals['_CREATEWORLDREQUEST']._serialized_end=116
   _globals['_WORLDRESPONSE']._serialized_start=119
-  _globals['_WORLDRESPONSE']._serialized_end=361
-  _globals['_GETWORLDREQUEST']._serialized_start=363
-  _globals['_GETWORLDREQUEST']._serialized_end=415
-  _globals['_GETWORLDSREQUEST']._serialized_start=417
-  _globals['_GETWORLDSREQUEST']._serialized_end=499
-  _globals['_WORLDSRESPONSE']._serialized_start=501
-  _globals['_WORLDSRESPONSE']._serialized_end=570
-  _globals['_JOINWORLDREQUEST']._serialized_start=572
-  _globals['_JOINWORLDREQUEST']._serialized_end=625
-  _globals['_JOINWORLDRESPONSE']._serialized_start=627
-  _globals['_JOINWORLDRESPONSE']._serialized_end=680
-  _globals['_GETGENERATIONSTATUSREQUEST']._serialized_start=682
-  _globals['_GETGENERATIONSTATUSREQUEST']._serialized_end=728
-  _globals['_HEALTHCHECKREQUEST']._serialized_start=730
-  _globals['_HEALTHCHECKREQUEST']._serialized_end=750
-  _globals['_HEALTHCHECKRESPONSE']._serialized_start=753
-  _globals['_HEALTHCHECKRESPONSE']._serialized_end=892
-  _globals['_HEALTHCHECKRESPONSE_SERVINGSTATUS']._serialized_start=834
-  _globals['_HEALTHCHECKRESPONSE_SERVINGSTATUS']._serialized_end=892
-  _globals['_WORLDSERVICE']._serialized_start=895
-  _globals['_WORLDSERVICE']._serialized_end=1236
+  _globals['_WORLDRESPONSE']._serialized_end=398
+  _globals['_GETWORLDREQUEST']._serialized_start=400
+  _globals['_GETWORLDREQUEST']._serialized_end=452
+  _globals['_GETWORLDSREQUEST']._serialized_start=454
+  _globals['_GETWORLDSREQUEST']._serialized_end=536
+  _globals['_WORLDSRESPONSE']._serialized_start=538
+  _globals['_WORLDSRESPONSE']._serialized_end=607
+  _globals['_JOINWORLDREQUEST']._serialized_start=609
+  _globals['_JOINWORLDREQUEST']._serialized_end=662
+  _globals['_JOINWORLDRESPONSE']._serialized_start=664
+  _globals['_JOINWORLDRESPONSE']._serialized_end=717
+  _globals['_GETGENERATIONSTATUSREQUEST']._serialized_start=719
+  _globals['_GETGENERATIONSTATUSREQUEST']._serialized_end=765
+  _globals['_UPDATEWORLDIMAGEREQUEST']._serialized_start=767
+  _globals['_UPDATEWORLDIMAGEREQUEST']._serialized_end=849
+  _globals['_UPDATEWORLDIMAGERESPONSE']._serialized_start=851
+  _globals['_UPDATEWORLDIMAGERESPONSE']._serialized_end=911
+  _globals['_HEALTHCHECKREQUEST']._serialized_start=913
+  _globals['_HEALTHCHECKREQUEST']._serialized_end=933
+  _globals['_HEALTHCHECKRESPONSE']._serialized_start=936
+  _globals['_HEALTHCHECKRESPONSE']._serialized_end=1075
+  _globals['_HEALTHCHECKRESPONSE_SERVINGSTATUS']._serialized_start=1017
+  _globals['_HEALTHCHECKRESPONSE_SERVINGSTATUS']._serialized_end=1075
+  _globals['_WORLDSERVICE']._serialized_start=1078
+  _globals['_WORLDSERVICE']._serialized_end=1506
 # @@protoc_insertion_point(module_scope)

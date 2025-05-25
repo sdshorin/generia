@@ -17,6 +17,9 @@ service WorldService {
   // Join a world (add to user's available worlds)
   rpc JoinWorld(JoinWorldRequest) returns (JoinWorldResponse) {}
   
+  // Update world image
+  rpc UpdateWorldImage(UpdateWorldImageRequest) returns (UpdateWorldImageResponse) {}
+  
   // Health check
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
 }
@@ -27,6 +30,8 @@ message CreateWorldRequest {
   string name = 2;
   string description = 3;
   string prompt = 4;
+  int32 characters_count = 5;
+  int32 posts_count = 6;
 }
 
 // WorldResponse contains information about a world
@@ -43,6 +48,8 @@ message WorldResponse {
   string created_at = 10;
   string updated_at = 11;
   bool is_joined = 12;
+  string image_url = 13;
+  string icon_url = 14;
 }
 
 // GetWorldRequest is the request for getting a world by ID
@@ -81,6 +88,19 @@ message JoinWorldResponse {
 // GetGenerationStatusRequest is the request for getting the generation status of a world
 message GetGenerationStatusRequest {
   string world_id = 1;
+}
+
+// UpdateWorldImageRequest is the request for updating a world's image
+message UpdateWorldImageRequest {
+  string world_id = 1;
+  string image_uuid = 2;
+  string icon_uuid = 3;
+}
+
+// UpdateWorldImageResponse is the response for updating a world's image
+message UpdateWorldImageResponse {
+  bool success = 1;
+  string message = 2;
 }
 
 // HealthCheckRequest is the request for performing a health check

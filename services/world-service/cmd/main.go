@@ -10,17 +10,17 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sdshorin/generia/pkg/config"
 	"github.com/sdshorin/generia/pkg/discovery"
 	"github.com/sdshorin/generia/pkg/logger"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"github.com/sdshorin/generia/pkg/telemetry"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -30,6 +30,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
+	mediapb "github.com/sdshorin/generia/api/grpc/media"
 	postpb "github.com/sdshorin/generia/api/grpc/post"
 	worldpb "github.com/sdshorin/generia/api/grpc/world"
 	"github.com/sdshorin/generia/services/world-service/internal/repository"
@@ -96,11 +97,17 @@ func main() {
 	}
 	defer postConn.Close()
 
+	mediaConn, mediaClient, err := createMediaClient(discoveryClient)
+	if err != nil {
+		logger.Logger.Fatal("Failed to create media client", zap.Error(err))
+	}
+	defer mediaConn.Close()
+
 	// Initialize repositories
 	worldRepo := repository.NewWorldRepository(db)
 
 	// Initialize world service
-	worldService := service.NewWorldService(worldRepo, authClient, postClient, cfg.Kafka.Brokers)
+	worldService := service.NewWorldService(worldRepo, authClient, postClient, mediaClient, cfg.Kafka.Brokers)
 
 	// Create gRPC server with middleware
 	grpcServer := grpc.NewServer(
@@ -224,6 +231,34 @@ func createPostClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientC
 
 	// Create client
 	client := postpb.NewPostServiceClient(conn)
+
+	return conn, client, nil
+}
+
+func createMediaClient(discoveryClient discovery.ServiceDiscovery) (*grpc.ClientConn, mediapb.MediaServiceClient, error) {
+	// Get service address from Consul
+	serviceAddress, err := discoveryClient.ResolveService("media-service")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to resolve media service: %w", err)
+	}
+
+	// Create gRPC connection
+	conn, err := grpc.Dial(
+		serviceAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to connect to media service: %w", err)
+	}
+
+	// Create client
+	client := mediapb.NewMediaServiceClient(conn)
 
 	return conn, client, nil
 }

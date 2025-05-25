@@ -12,8 +12,12 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
-# Copy the entire project
-COPY . .
+# Copy only necessary files
+COPY api/ ./api/
+COPY pkg/ ./pkg/
+COPY configs/ ./configs/
+COPY services/feed-service/ ./services/feed-service/
+COPY .env* ./
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o feed-service ./services/feed-service/cmd

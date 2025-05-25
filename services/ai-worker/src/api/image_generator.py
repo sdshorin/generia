@@ -28,11 +28,11 @@ class ImageGenerator:
     Image generator using Runware API.
     Handles image generation and upload to media-service.
     """
-    
+
     def __init__(self, api_key: str = RUNWARE_API_KEY, db_manager=None, service_client=None):
         """
         Initializes the image generator
-        
+
         Args:
             api_key: API key for Runware
             db_manager: Optional database manager for request logging
@@ -43,14 +43,14 @@ class ImageGenerator:
         self.service_client = service_client
         self.semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
         self._runware = None
-    
+
     async def _get_runware(self):
         """Get or create Runware client instance"""
         if self._runware is None:
             self._runware = Runware(api_key=self.api_key)
             await self._runware.connect()
         return self._runware
-    
+
     @circuit_breaker(name="prompt_enhance", failure_threshold=3, recovery_timeout=60.0)
     @with_retries(max_retries=2)
     async def enhance_prompt(
@@ -63,37 +63,37 @@ class ImageGenerator:
     ) -> str:
         """
         Enhances a prompt for better image generation results
-        
+
         Args:
             prompt: The original prompt to enhance
             versions: Number of enhanced versions to generate
             max_length: Maximum length of enhanced prompt
             task_id: Task ID for logging
             world_id: World ID for logging
-            
+
         Returns:
             The best enhanced prompt
         """
         async with self.semaphore:
             start_time = time.time()
             request_id = str(uuid.uuid4())
-            
+
             try:
                 runware = await self._get_runware()
-                
+
                 prompt_enhancer = IPromptEnhance(
                     prompt=prompt,
                     promptVersions=versions,
                     promptMaxLength=max_length,
                 )
-                
+
                 enhanced_prompts = await runware.promptEnhance(promptEnhancer=prompt_enhancer)
-                
+
                 # Pick the first enhanced prompt (best match)
                 best_prompt = enhanced_prompts[0].text if enhanced_prompts else prompt
-                
+
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Log request if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -108,13 +108,13 @@ class ImageGenerator:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 logger.info(f"Enhanced prompt in {duration_ms}ms. TaskID: {task_id or 'manual'}")
                 return best_prompt
-                
+
             except Exception as e:
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Log error if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -129,18 +129,19 @@ class ImageGenerator:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 logger.error(f"Prompt enhancement error: {str(e)}")
                 # Return original prompt if enhancement fails
                 return prompt
-    
+
     @circuit_breaker(name="image_generator", failure_threshold=3, recovery_timeout=60.0)
     @with_retries(max_retries=2)
     async def generate_image(
         self,
         prompt: str,
         world_id: str,
-        character_id: str,
+        media_type_enum: int,
+        character_id: Optional[str] = None,
         width: int = 512,
         height: int = 512,
         task_id: Optional[str] = None,
@@ -152,11 +153,12 @@ class ImageGenerator:
     ) -> Dict[str, Any]:
         """
         Generates an image from a prompt and uploads it via media-service
-        
+
         Args:
             prompt: Prompt for generation
-            world_id: World ID for logging
-            character_id: Character ID for media association
+            world_id: World ID for logging and storage path
+            media_type_enum: Media type enum value (from MediaType constants)
+            character_id: Character ID for media association (optional for world-level media)
             width: Image width
             height: Image height
             task_id: Task ID for logging
@@ -164,24 +166,24 @@ class ImageGenerator:
             filename: Filename (if not specified, will be generated)
             enhance_prompt: Whether to enhance the prompt automatically
             model: The model ID to use for generation
-            
+
         Returns:
             Dictionary with information about the generated image
         """
         async with self.semaphore:
             start_time = time.time()
             request_id = str(uuid.uuid4())
-            
+
             if filename is None:
                 filename = f"generia_{uuid.uuid4()}.png"
-            
+
             try:
                 # Enhance prompt if requested
                 if enhance_prompt:
                     prompt = await self.enhance_prompt(prompt, task_id=task_id, world_id=world_id)
-                
+
                 runware = await self._get_runware()
-                
+
                 # Prepare image generation request
                 request_image = IImageInference(
                     positivePrompt=prompt,
@@ -191,7 +193,7 @@ class ImageGenerator:
                     height=height,
                     width=width,
                 )
-                
+
                 # For request logging
                 request_data = {
                     "prompt": prompt,
@@ -199,17 +201,17 @@ class ImageGenerator:
                     "height": height,
                     "model": model
                 }
-                
+
                 # Generate the image
                 images = await runware.imageInference(requestImage=request_image)
-                
+
                 if not images:
                     raise Exception("No images were generated")
-                
+
                 # Get the image URL
                 image_url = images[0].imageURL
                 logger.info(f"Generated image at URL: {image_url}")
-                
+
                 # Upload image to media service
                 if not self.service_client:
                     logger.warning("Service client not available, cannot upload image")
@@ -218,23 +220,24 @@ class ImageGenerator:
                         "width": width,
                         "height": height
                     }
-                
+
                 logger.info("Getting presigned URL for upload")
                 # Get presigned URL for upload
                 media_id, upload_url, expires_at = await self.service_client.get_presigned_upload_url(
-                    character_id=character_id,
                     world_id=world_id,
+                    character_id=character_id or "",  # Empty string if None
                     filename=filename,
                     content_type=media_type,
                     size=0,  # Мы не знаем размер заранее, поэтому передаем 0
+                    media_type_enum=media_type_enum,
                     task_id=task_id
                 )
-                
+
                 if not media_id or not upload_url:
                     raise Exception("Failed to get presigned upload URL")
-                
+
                 logger.info(f"Got presigned URL with media_id: {media_id}")
-                
+
                 # Скачиваем и загружаем изображение
                 image_data, upload_result = await download_and_upload_image(
                     download_url=image_url,
@@ -242,32 +245,31 @@ class ImageGenerator:
                     content_type=media_type,
                     timeout=60
                 )
-                
+
                 if not upload_result["success"]:
                     raise Exception(f"Failed to upload image: {upload_result.get('error', 'Unknown error')}")
-                
+
                 if image_data is None:
                     raise Exception("Image download failed")
-                
+
                 logger.info(f"Successfully uploaded image, confirming upload with media_id: {media_id}")
-                
+
                 # Confirm upload
                 success = await self.service_client.confirm_upload(
                     media_id=media_id,
-                    character_id=character_id,
                     task_id=task_id
                 )
-                
+
                 if not success:
                     raise Exception("Failed to confirm upload")
-                
+
                 # Так как нам не возвращаются варианты из метода confirm_upload,
                 # мы будем использовать оригинальный URL для отображения
                 public_url = image_url
                 variants = []
-                
+
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Prepare result
                 result = {
                     "media_id": media_id,
@@ -276,7 +278,7 @@ class ImageGenerator:
                     "height": height,
                     "variants": variants
                 }
-                
+
                 # Log request if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -291,17 +293,17 @@ class ImageGenerator:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 logger.info(
                     f"Image generation completed in {duration_ms}ms. "
                     f"Media ID: {media_id}, TaskID: {task_id or 'manual'}"
                 )
-                
+
                 return result
-                
+
             except Exception as e:
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Log error if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -316,6 +318,6 @@ class ImageGenerator:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 logger.error(f"Image generation error: {str(e)}")
                 raise

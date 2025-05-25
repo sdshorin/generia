@@ -12,8 +12,12 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
-# Copy the entire project
-COPY . .
+# Copy only necessary files
+COPY api/ ./api/
+COPY pkg/ ./pkg/
+COPY configs/ ./configs/
+COPY services/media-service/ ./services/media-service/
+COPY .env* ./
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o media-service ./services/media-service/cmd

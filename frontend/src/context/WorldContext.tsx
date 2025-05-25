@@ -10,7 +10,7 @@ interface WorldContextType {
   isLoading: boolean;
   error: string | null;
   loadWorlds: (limit?: number, cursor?: string) => Promise<void>;
-  createWorld: (name: string, description: string, prompt: string) => Promise<World>;
+  createWorld: (name: string, description: string, prompt: string, charactersCount: number, postsCount: number) => Promise<World>;
   joinWorld: (worldId: string) => Promise<void>;
   setCurrentWorld: (world: World | null) => void;
   loadCurrentWorld: (worldId: string) => Promise<void>;
@@ -67,12 +67,12 @@ export const WorldProvider: React.FC<WorldProviderProps> = ({ children }) => {
   }, [isAuthenticated]);
 
   // Create a new world
-  const createWorld = async (name: string, description: string, prompt: string): Promise<World> => {
+  const createWorld = async (name: string, description: string, prompt: string, charactersCount: number, postsCount: number): Promise<World> => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const newWorld = await worldsAPI.createWorld(name, description, prompt);
+      const newWorld = await worldsAPI.createWorld(name, description, prompt, charactersCount, postsCount);
       setWorlds(prevWorlds => [...prevWorlds, newWorld]);
       return newWorld;
     } catch (err: any) {

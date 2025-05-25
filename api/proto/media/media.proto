@@ -6,17 +6,17 @@ package media;
 option go_package = "github.com/sdshorin/generia/api/proto/media";
 
 // MediaService предоставляет API для управления медиафайлами
-service MediaService {  
-  
+service MediaService {
+
   // Получение предподписанного URL для прямой загрузки в хранилище
   rpc GetPresignedUploadURL(GetPresignedUploadURLRequest) returns (GetPresignedUploadURLResponse);
-  
+
   // Подтверждение загрузки файла через предподписанный URL
   rpc ConfirmUpload(ConfirmUploadRequest) returns (ConfirmUploadResponse);
-  
+
   // Получение информации о медиафайле
   rpc GetMedia(GetMediaRequest) returns (Media);
-  
+
   // Получение URL для доступа к медиафайлу
   rpc GetMediaURL(GetMediaURLRequest) returns (GetMediaURLResponse);
 
@@ -49,13 +49,14 @@ message GetMediaRequest {
 
 message Media {
   string media_id = 1;
-  string character_id = 2;
+  string character_id = 2;  // Optional for world-level media
   string world_id = 3;
   string filename = 4;
   string content_type = 5;
   int64 size = 6;
   repeated MediaVariant variants = 7;
   string created_at = 8; // ISO 8601 format
+  MediaType media_type = 9;
 }
 
 message GetMediaURLRequest {
@@ -78,12 +79,22 @@ message OptimizeImageResponse {
   repeated MediaVariant variants = 1;
 }
 
+// Enum for media types to determine storage path structure
+enum MediaType {
+  MEDIA_TYPE_UNKNOWN = 0;
+  MEDIA_TYPE_WORLD_HEADER = 1;    // world_id/world_data/header.png
+  MEDIA_TYPE_WORLD_ICON = 2;      // world_id/world_data/icon.png
+  MEDIA_TYPE_CHARACTER_AVATAR = 3; // world_id/character_id/avatars/avatar.png
+  MEDIA_TYPE_POST_IMAGE = 4;      // world_id/character_id/posts/post.png
+}
+
 message GetPresignedUploadURLRequest {
-  string character_id = 1;
-  string world_id = 2;
+  string world_id = 1;
+  string character_id = 2;  // Optional for world-level media
   string filename = 3;
   string content_type = 4;
   int64 size = 5;
+  MediaType media_type = 6;
 }
 
 message GetPresignedUploadURLResponse {
@@ -94,7 +105,6 @@ message GetPresignedUploadURLResponse {
 
 message ConfirmUploadRequest {
   string media_id = 1;
-  string character_id = 2;
 }
 
 message ConfirmUploadResponse {

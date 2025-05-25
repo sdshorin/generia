@@ -109,6 +109,78 @@ const ErrorMessage = styled.div`
   margin-bottom: var(--space-4);
 `;
 
+const SliderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+`;
+
+const SliderWrapper = styled.div`
+  position: relative;
+  margin: var(--space-3) 0;
+`;
+
+const SliderInput = styled.input`
+  width: 100%;
+  height: 6px;
+  background: var(--color-input-bg);
+  border-radius: var(--radius-full);
+  outline: none;
+  -webkit-appearance: none;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    
+    &:hover {
+      transform: scale(1.1);
+      background: var(--color-primary-hover);
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+`;
+
+const SliderLabels = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-xs);
+  color: var(--color-text-lighter);
+  margin-top: var(--space-1);
+`;
+
+const SliderValue = styled.div`
+  text-align: center;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+`;
+
+const SlidersRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 // Example prompts for world generation
 const examplePrompts = [
   "A cyberpunk city where nature has reclaimed technology, with neon-lit trees and digital wildlife.",
@@ -122,6 +194,8 @@ export const CreateWorldPage: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [prompt, setPrompt] = useState('');
+  const [charactersCount, setCharactersCount] = useState(25);
+  const [postsCount, setPostsCount] = useState(150);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { createWorld, error, isLoading, clearError } = useWorld();
   const navigate = useNavigate();
@@ -154,7 +228,7 @@ export const CreateWorldPage: React.FC = () => {
     }
     
     try {
-      const world = await createWorld(name, description, prompt);
+      const world = await createWorld(name, description, prompt, charactersCount, postsCount);
       navigate(`/worlds/${world.id}/feed`);
     } catch (err) {
       console.error('Failed to create world:', err);
@@ -218,6 +292,52 @@ export const CreateWorldPage: React.FC = () => {
               />
               <HelperText>
                 Be specific and detailed about the world you want to create. This will guide the AI in generating users and content.
+              </HelperText>
+            </FieldGroup>
+            
+            <FieldGroup>
+              <Label>World Size Settings</Label>
+              <SlidersRow>
+                <SliderContainer>
+                  <Label htmlFor="charactersCount">Number of Characters</Label>
+                  <SliderValue>{charactersCount} characters</SliderValue>
+                  <SliderWrapper>
+                    <SliderInput
+                      id="charactersCount"
+                      type="range"
+                      min="1"
+                      max="40"
+                      value={charactersCount}
+                      onChange={(e) => setCharactersCount(parseInt(e.target.value))}
+                    />
+                    <SliderLabels>
+                      <span>1</span>
+                      <span>40</span>
+                    </SliderLabels>
+                  </SliderWrapper>
+                </SliderContainer>
+                
+                <SliderContainer>
+                  <Label htmlFor="postsCount">Number of Posts</Label>
+                  <SliderValue>{postsCount} posts</SliderValue>
+                  <SliderWrapper>
+                    <SliderInput
+                      id="postsCount"
+                      type="range"
+                      min="1"
+                      max="250"
+                      value={postsCount}
+                      onChange={(e) => setPostsCount(parseInt(e.target.value))}
+                    />
+                    <SliderLabels>
+                      <span>1</span>
+                      <span>250</span>
+                    </SliderLabels>
+                  </SliderWrapper>
+                </SliderContainer>
+              </SlidersRow>
+              <HelperText>
+                Configure how many AI characters and posts will be generated for your world. More content creates a richer experience but takes longer to generate.
               </HelperText>
             </FieldGroup>
             

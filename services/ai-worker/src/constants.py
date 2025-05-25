@@ -47,19 +47,20 @@ class KafkaEvents:
     TASK_COMPLETED = "task_completed"
     TASK_FAILED = "task_failed"
     PROGRESS_UPDATED = "progress_updated"
-    
+
 # Circuit Breaker states
 class CircuitBreakerState:
     CLOSED = "closed"
     OPEN = "open"
     HALF_OPEN = "half_open"
 
-# Media types
+# Media types (matching proto enum values)
 class MediaType:
-    WORLD_HEADER = "world_header"
-    WORLD_ICON = "world_icon"
-    CHARACTER_AVATAR = "character_avatar"
-    POST_IMAGE = "post_image"
+    UNKNOWN = 0
+    WORLD_HEADER = 1
+    WORLD_ICON = 2
+    CHARACTER_AVATAR = 3
+    POST_IMAGE = 4
 
 # Maximum number of task execution attempts
 MAX_ATTEMPTS = {

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11media/media.proto\x12\x05media\"m\n\rMediaMetadata\x12\x14\n\x0c\x63haracter_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04size\x18\x05 \x01(\x03\"H\n\x0cMediaVariant\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\r\n\x05width\x18\x03 \x01(\x05\x12\x0e\n\x06height\x18\x04 \x01(\x05\"#\n\x0fGetMediaRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\"\xb2\x01\n\x05Media\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63haracter_id\x18\x02 \x01(\t\x12\x10\n\x08world_id\x18\x03 \x01(\t\x12\x10\n\x08\x66ilename\x18\x04 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x05 \x01(\t\x12\x0c\n\x04size\x18\x06 \x01(\x03\x12%\n\x08variants\x18\x07 \x03(\x0b\x32\x13.media.MediaVariant\x12\x12\n\ncreated_at\x18\x08 \x01(\t\"K\n\x12GetMediaURLRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x0f\n\x07variant\x18\x02 \x01(\t\x12\x12\n\nexpires_in\x18\x03 \x01(\x03\"6\n\x13GetMediaURLResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x12\n\nexpires_at\x18\x02 \x01(\x03\"D\n\x14OptimizeImageRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x1a\n\x12variants_to_create\x18\x02 \x03(\t\">\n\x15OptimizeImageResponse\x12%\n\x08variants\x18\x01 \x03(\x0b\x32\x13.media.MediaVariant\"|\n\x1cGetPresignedUploadURLRequest\x12\x14\n\x0c\x63haracter_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04size\x18\x05 \x01(\x03\"Y\n\x1dGetPresignedUploadURLResponse\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x12\n\nupload_url\x18\x02 \x01(\t\x12\x12\n\nexpires_at\x18\x03 \x01(\x03\">\n\x14\x43onfirmUploadRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63haracter_id\x18\x02 \x01(\t\"O\n\x15\x43onfirmUploadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12%\n\x08variants\x18\x02 \x03(\x0b\x32\x13.media.MediaVariant\"\x14\n\x12HealthCheckRequest\"}\n\x13HealthCheckResponse\x12\x31\n\x06status\x18\x01 \x01(\x0e\x32!.media.HealthCheckResponse.Status\"3\n\x06Status\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SERVING\x10\x01\x12\x0f\n\x0bNOT_SERVING\x10\x02\x32\xc8\x03\n\x0cMediaService\x12\x62\n\x15GetPresignedUploadURL\x12#.media.GetPresignedUploadURLRequest\x1a$.media.GetPresignedUploadURLResponse\x12J\n\rConfirmUpload\x12\x1b.media.ConfirmUploadRequest\x1a\x1c.media.ConfirmUploadResponse\x12\x30\n\x08GetMedia\x12\x16.media.GetMediaRequest\x1a\x0c.media.Media\x12\x44\n\x0bGetMediaURL\x12\x19.media.GetMediaURLRequest\x1a\x1a.media.GetMediaURLResponse\x12J\n\rOptimizeImage\x12\x1b.media.OptimizeImageRequest\x1a\x1c.media.OptimizeImageResponse\x12\x44\n\x0bHealthCheck\x12\x19.media.HealthCheckRequest\x1a\x1a.media.HealthCheckResponseB-Z+github.com/sdshorin/generia/api/proto/mediab\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11media/media.proto\x12\x05media\"m\n\rMediaMetadata\x12\x14\n\x0c\x63haracter_id\x18\x01 \x01(\t\x12\x10\n\x08world_id\x18\x02 \x01(\t\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04size\x18\x05 \x01(\x03\"H\n\x0cMediaVariant\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\r\n\x05width\x18\x03 \x01(\x05\x12\x0e\n\x06height\x18\x04 \x01(\x05\"#\n\x0fGetMediaRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\"\xd8\x01\n\x05Media\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63haracter_id\x18\x02 \x01(\t\x12\x10\n\x08world_id\x18\x03 \x01(\t\x12\x10\n\x08\x66ilename\x18\x04 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x05 \x01(\t\x12\x0c\n\x04size\x18\x06 \x01(\x03\x12%\n\x08variants\x18\x07 \x03(\x0b\x32\x13.media.MediaVariant\x12\x12\n\ncreated_at\x18\x08 \x01(\t\x12$\n\nmedia_type\x18\t \x01(\x0e\x32\x10.media.MediaType\"K\n\x12GetMediaURLRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x0f\n\x07variant\x18\x02 \x01(\t\x12\x12\n\nexpires_in\x18\x03 \x01(\x03\"6\n\x13GetMediaURLResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x12\n\nexpires_at\x18\x02 \x01(\x03\"D\n\x14OptimizeImageRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x1a\n\x12variants_to_create\x18\x02 \x03(\t\">\n\x15OptimizeImageResponse\x12%\n\x08variants\x18\x01 \x03(\x0b\x32\x13.media.MediaVariant\"\xa2\x01\n\x1cGetPresignedUploadURLRequest\x12\x10\n\x08world_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63haracter_id\x18\x02 \x01(\t\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04size\x18\x05 \x01(\x03\x12$\n\nmedia_type\x18\x06 \x01(\x0e\x32\x10.media.MediaType\"Y\n\x1dGetPresignedUploadURLResponse\x12\x10\n\x08media_id\x18\x01 \x01(\t\x12\x12\n\nupload_url\x18\x02 \x01(\t\x12\x12\n\nexpires_at\x18\x03 \x01(\x03\"(\n\x14\x43onfirmUploadRequest\x12\x10\n\x08media_id\x18\x01 \x01(\t\"O\n\x15\x43onfirmUploadResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12%\n\x08variants\x18\x02 \x03(\x0b\x32\x13.media.MediaVariant\"\x14\n\x12HealthCheckRequest\"}\n\x13HealthCheckResponse\x12\x31\n\x06status\x18\x01 \x01(\x0e\x32!.media.HealthCheckResponse.Status\"3\n\x06Status\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SERVING\x10\x01\x12\x0f\n\x0bNOT_SERVING\x10\x02*\x97\x01\n\tMediaType\x12\x16\n\x12MEDIA_TYPE_UNKNOWN\x10\x00\x12\x1b\n\x17MEDIA_TYPE_WORLD_HEADER\x10\x01\x12\x19\n\x15MEDIA_TYPE_WORLD_ICON\x10\x02\x12\x1f\n\x1bMEDIA_TYPE_CHARACTER_AVATAR\x10\x03\x12\x19\n\x15MEDIA_TYPE_POST_IMAGE\x10\x04\x32\xc8\x03\n\x0cMediaService\x12\x62\n\x15GetPresignedUploadURL\x12#.media.GetPresignedUploadURLRequest\x1a$.media.GetPresignedUploadURLResponse\x12J\n\rConfirmUpload\x12\x1b.media.ConfirmUploadRequest\x1a\x1c.media.ConfirmUploadResponse\x12\x30\n\x08GetMedia\x12\x16.media.GetMediaRequest\x1a\x0c.media.Media\x12\x44\n\x0bGetMediaURL\x12\x19.media.GetMediaURLRequest\x1a\x1a.media.GetMediaURLResponse\x12J\n\rOptimizeImage\x12\x1b.media.OptimizeImageRequest\x1a\x1c.media.OptimizeImageResponse\x12\x44\n\x0bHealthCheck\x12\x19.media.HealthCheckRequest\x1a\x1a.media.HealthCheckResponseB-Z+github.com/sdshorin/generia/api/proto/mediab\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,6 +32,8 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'media.media_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z+github.com/sdshorin/generia/api/proto/media'
+  _globals['_MEDIATYPE']._serialized_start=1265
+  _globals['_MEDIATYPE']._serialized_end=1416
   _globals['_MEDIAMETADATA']._serialized_start=28
   _globals['_MEDIAMETADATA']._serialized_end=137
   _globals['_MEDIAVARIANT']._serialized_start=139
@@ -39,29 +41,29 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETMEDIAREQUEST']._serialized_start=213
   _globals['_GETMEDIAREQUEST']._serialized_end=248
   _globals['_MEDIA']._serialized_start=251
-  _globals['_MEDIA']._serialized_end=429
-  _globals['_GETMEDIAURLREQUEST']._serialized_start=431
-  _globals['_GETMEDIAURLREQUEST']._serialized_end=506
-  _globals['_GETMEDIAURLRESPONSE']._serialized_start=508
-  _globals['_GETMEDIAURLRESPONSE']._serialized_end=562
-  _globals['_OPTIMIZEIMAGEREQUEST']._serialized_start=564
-  _globals['_OPTIMIZEIMAGEREQUEST']._serialized_end=632
-  _globals['_OPTIMIZEIMAGERESPONSE']._serialized_start=634
-  _globals['_OPTIMIZEIMAGERESPONSE']._serialized_end=696
-  _globals['_GETPRESIGNEDUPLOADURLREQUEST']._serialized_start=698
-  _globals['_GETPRESIGNEDUPLOADURLREQUEST']._serialized_end=822
-  _globals['_GETPRESIGNEDUPLOADURLRESPONSE']._serialized_start=824
-  _globals['_GETPRESIGNEDUPLOADURLRESPONSE']._serialized_end=913
-  _globals['_CONFIRMUPLOADREQUEST']._serialized_start=915
-  _globals['_CONFIRMUPLOADREQUEST']._serialized_end=977
-  _globals['_CONFIRMUPLOADRESPONSE']._serialized_start=979
-  _globals['_CONFIRMUPLOADRESPONSE']._serialized_end=1058
-  _globals['_HEALTHCHECKREQUEST']._serialized_start=1060
-  _globals['_HEALTHCHECKREQUEST']._serialized_end=1080
-  _globals['_HEALTHCHECKRESPONSE']._serialized_start=1082
-  _globals['_HEALTHCHECKRESPONSE']._serialized_end=1207
-  _globals['_HEALTHCHECKRESPONSE_STATUS']._serialized_start=1156
-  _globals['_HEALTHCHECKRESPONSE_STATUS']._serialized_end=1207
-  _globals['_MEDIASERVICE']._serialized_start=1210
-  _globals['_MEDIASERVICE']._serialized_end=1666
+  _globals['_MEDIA']._serialized_end=467
+  _globals['_GETMEDIAURLREQUEST']._serialized_start=469
+  _globals['_GETMEDIAURLREQUEST']._serialized_end=544
+  _globals['_GETMEDIAURLRESPONSE']._serialized_start=546
+  _globals['_GETMEDIAURLRESPONSE']._serialized_end=600
+  _globals['_OPTIMIZEIMAGEREQUEST']._serialized_start=602
+  _globals['_OPTIMIZEIMAGEREQUEST']._serialized_end=670
+  _globals['_OPTIMIZEIMAGERESPONSE']._serialized_start=672
+  _globals['_OPTIMIZEIMAGERESPONSE']._serialized_end=734
+  _globals['_GETPRESIGNEDUPLOADURLREQUEST']._serialized_start=737
+  _globals['_GETPRESIGNEDUPLOADURLREQUEST']._serialized_end=899
+  _globals['_GETPRESIGNEDUPLOADURLRESPONSE']._serialized_start=901
+  _globals['_GETPRESIGNEDUPLOADURLRESPONSE']._serialized_end=990
+  _globals['_CONFIRMUPLOADREQUEST']._serialized_start=992
+  _globals['_CONFIRMUPLOADREQUEST']._serialized_end=1032
+  _globals['_CONFIRMUPLOADRESPONSE']._serialized_start=1034
+  _globals['_CONFIRMUPLOADRESPONSE']._serialized_end=1113
+  _globals['_HEALTHCHECKREQUEST']._serialized_start=1115
+  _globals['_HEALTHCHECKREQUEST']._serialized_end=1135
+  _globals['_HEALTHCHECKRESPONSE']._serialized_start=1137
+  _globals['_HEALTHCHECKRESPONSE']._serialized_end=1262
+  _globals['_HEALTHCHECKRESPONSE_STATUS']._serialized_start=1211
+  _globals['_HEALTHCHECKRESPONSE_STATUS']._serialized_end=1262
+  _globals['_MEDIASERVICE']._serialized_start=1419
+  _globals['_MEDIASERVICE']._serialized_end=1875
 # @@protoc_insertion_point(module_scope)

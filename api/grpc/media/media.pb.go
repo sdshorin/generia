@@ -21,6 +21,62 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Enum for media types to determine storage path structure
+type MediaType int32
+
+const (
+	MediaType_MEDIA_TYPE_UNKNOWN          MediaType = 0
+	MediaType_MEDIA_TYPE_WORLD_HEADER     MediaType = 1 // world_id/world_data/header.png
+	MediaType_MEDIA_TYPE_WORLD_ICON       MediaType = 2 // world_id/world_data/icon.png
+	MediaType_MEDIA_TYPE_CHARACTER_AVATAR MediaType = 3 // world_id/character_id/avatars/avatar.png
+	MediaType_MEDIA_TYPE_POST_IMAGE       MediaType = 4 // world_id/character_id/posts/post.png
+)
+
+// Enum value maps for MediaType.
+var (
+	MediaType_name = map[int32]string{
+		0: "MEDIA_TYPE_UNKNOWN",
+		1: "MEDIA_TYPE_WORLD_HEADER",
+		2: "MEDIA_TYPE_WORLD_ICON",
+		3: "MEDIA_TYPE_CHARACTER_AVATAR",
+		4: "MEDIA_TYPE_POST_IMAGE",
+	}
+	MediaType_value = map[string]int32{
+		"MEDIA_TYPE_UNKNOWN":          0,
+		"MEDIA_TYPE_WORLD_HEADER":     1,
+		"MEDIA_TYPE_WORLD_ICON":       2,
+		"MEDIA_TYPE_CHARACTER_AVATAR": 3,
+		"MEDIA_TYPE_POST_IMAGE":       4,
+	}
+)
+
+func (x MediaType) Enum() *MediaType {
+	p := new(MediaType)
+	*p = x
+	return p
+}
+
+func (x MediaType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MediaType) Descriptor() protoreflect.EnumDescriptor {
+	return file_media_media_proto_enumTypes[0].Descriptor()
+}
+
+func (MediaType) Type() protoreflect.EnumType {
+	return &file_media_media_proto_enumTypes[0]
+}
+
+func (x MediaType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use MediaType.Descriptor instead.
+func (MediaType) EnumDescriptor() ([]byte, []int) {
+	return file_media_media_proto_rawDescGZIP(), []int{0}
+}
+
 type HealthCheckResponse_Status int32
 
 const (
@@ -54,11 +110,11 @@ func (x HealthCheckResponse_Status) String() string {
 }
 
 func (HealthCheckResponse_Status) Descriptor() protoreflect.EnumDescriptor {
-	return file_media_media_proto_enumTypes[0].Descriptor()
+	return file_media_media_proto_enumTypes[1].Descriptor()
 }
 
 func (HealthCheckResponse_Status) Type() protoreflect.EnumType {
-	return &file_media_media_proto_enumTypes[0]
+	return &file_media_media_proto_enumTypes[1]
 }
 
 func (x HealthCheckResponse_Status) Number() protoreflect.EnumNumber {
@@ -261,13 +317,14 @@ func (x *GetMediaRequest) GetMediaId() string {
 type Media struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
-	CharacterId   string                 `protobuf:"bytes,2,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	CharacterId   string                 `protobuf:"bytes,2,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"` // Optional for world-level media
 	WorldId       string                 `protobuf:"bytes,3,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
 	Filename      string                 `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
 	ContentType   string                 `protobuf:"bytes,5,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
 	Size          int64                  `protobuf:"varint,6,opt,name=size,proto3" json:"size,omitempty"`
 	Variants      []*MediaVariant        `protobuf:"bytes,7,rep,name=variants,proto3" json:"variants,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // ISO 8601 format
+	MediaType     MediaType              `protobuf:"varint,9,opt,name=media_type,json=mediaType,proto3,enum=media.MediaType" json:"media_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -356,6 +413,13 @@ func (x *Media) GetCreatedAt() string {
 		return x.CreatedAt
 	}
 	return ""
+}
+
+func (x *Media) GetMediaType() MediaType {
+	if x != nil {
+		return x.MediaType
+	}
+	return MediaType_MEDIA_TYPE_UNKNOWN
 }
 
 type GetMediaURLRequest struct {
@@ -568,11 +632,12 @@ func (x *OptimizeImageResponse) GetVariants() []*MediaVariant {
 
 type GetPresignedUploadURLRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CharacterId   string                 `protobuf:"bytes,1,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
-	WorldId       string                 `protobuf:"bytes,2,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	WorldId       string                 `protobuf:"bytes,1,opt,name=world_id,json=worldId,proto3" json:"world_id,omitempty"`
+	CharacterId   string                 `protobuf:"bytes,2,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"` // Optional for world-level media
 	Filename      string                 `protobuf:"bytes,3,opt,name=filename,proto3" json:"filename,omitempty"`
 	ContentType   string                 `protobuf:"bytes,4,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
 	Size          int64                  `protobuf:"varint,5,opt,name=size,proto3" json:"size,omitempty"`
+	MediaType     MediaType              `protobuf:"varint,6,opt,name=media_type,json=mediaType,proto3,enum=media.MediaType" json:"media_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -607,16 +672,16 @@ func (*GetPresignedUploadURLRequest) Descriptor() ([]byte, []int) {
 	return file_media_media_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *GetPresignedUploadURLRequest) GetCharacterId() string {
+func (x *GetPresignedUploadURLRequest) GetWorldId() string {
 	if x != nil {
-		return x.CharacterId
+		return x.WorldId
 	}
 	return ""
 }
 
-func (x *GetPresignedUploadURLRequest) GetWorldId() string {
+func (x *GetPresignedUploadURLRequest) GetCharacterId() string {
 	if x != nil {
-		return x.WorldId
+		return x.CharacterId
 	}
 	return ""
 }
@@ -640,6 +705,13 @@ func (x *GetPresignedUploadURLRequest) GetSize() int64 {
 		return x.Size
 	}
 	return 0
+}
+
+func (x *GetPresignedUploadURLRequest) GetMediaType() MediaType {
+	if x != nil {
+		return x.MediaType
+	}
+	return MediaType_MEDIA_TYPE_UNKNOWN
 }
 
 type GetPresignedUploadURLResponse struct {
@@ -705,7 +777,6 @@ func (x *GetPresignedUploadURLResponse) GetExpiresAt() int64 {
 type ConfirmUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MediaId       string                 `protobuf:"bytes,1,opt,name=media_id,json=mediaId,proto3" json:"media_id,omitempty"`
-	CharacterId   string                 `protobuf:"bytes,2,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -743,13 +814,6 @@ func (*ConfirmUploadRequest) Descriptor() ([]byte, []int) {
 func (x *ConfirmUploadRequest) GetMediaId() string {
 	if x != nil {
 		return x.MediaId
-	}
-	return ""
-}
-
-func (x *ConfirmUploadRequest) GetCharacterId() string {
-	if x != nil {
-		return x.CharacterId
 	}
 	return ""
 }
@@ -903,7 +967,7 @@ const file_media_media_proto_rawDesc = "" +
 	"\x05width\x18\x03 \x01(\x05R\x05width\x12\x16\n" +
 	"\x06height\x18\x04 \x01(\x05R\x06height\",\n" +
 	"\x0fGetMediaRequest\x12\x19\n" +
-	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"\x83\x02\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"\xb4\x02\n" +
 	"\x05Media\x12\x19\n" +
 	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12!\n" +
 	"\fcharacter_id\x18\x02 \x01(\tR\vcharacterId\x12\x19\n" +
@@ -913,7 +977,9 @@ const file_media_media_proto_rawDesc = "" +
 	"\x04size\x18\x06 \x01(\x03R\x04size\x12/\n" +
 	"\bvariants\x18\a \x03(\v2\x13.media.MediaVariantR\bvariants\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\"h\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12/\n" +
+	"\n" +
+	"media_type\x18\t \x01(\x0e2\x10.media.MediaTypeR\tmediaType\"h\n" +
 	"\x12GetMediaURLRequest\x12\x19\n" +
 	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12\x18\n" +
 	"\avariant\x18\x02 \x01(\tR\avariant\x12\x1d\n" +
@@ -927,22 +993,23 @@ const file_media_media_proto_rawDesc = "" +
 	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12,\n" +
 	"\x12variants_to_create\x18\x02 \x03(\tR\x10variantsToCreate\"H\n" +
 	"\x15OptimizeImageResponse\x12/\n" +
-	"\bvariants\x18\x01 \x03(\v2\x13.media.MediaVariantR\bvariants\"\xaf\x01\n" +
-	"\x1cGetPresignedUploadURLRequest\x12!\n" +
-	"\fcharacter_id\x18\x01 \x01(\tR\vcharacterId\x12\x19\n" +
-	"\bworld_id\x18\x02 \x01(\tR\aworldId\x12\x1a\n" +
+	"\bvariants\x18\x01 \x03(\v2\x13.media.MediaVariantR\bvariants\"\xe0\x01\n" +
+	"\x1cGetPresignedUploadURLRequest\x12\x19\n" +
+	"\bworld_id\x18\x01 \x01(\tR\aworldId\x12!\n" +
+	"\fcharacter_id\x18\x02 \x01(\tR\vcharacterId\x12\x1a\n" +
 	"\bfilename\x18\x03 \x01(\tR\bfilename\x12!\n" +
 	"\fcontent_type\x18\x04 \x01(\tR\vcontentType\x12\x12\n" +
-	"\x04size\x18\x05 \x01(\x03R\x04size\"x\n" +
+	"\x04size\x18\x05 \x01(\x03R\x04size\x12/\n" +
+	"\n" +
+	"media_type\x18\x06 \x01(\x0e2\x10.media.MediaTypeR\tmediaType\"x\n" +
 	"\x1dGetPresignedUploadURLResponse\x12\x19\n" +
 	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12\x1d\n" +
 	"\n" +
 	"upload_url\x18\x02 \x01(\tR\tuploadUrl\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x03 \x01(\x03R\texpiresAt\"T\n" +
+	"expires_at\x18\x03 \x01(\x03R\texpiresAt\"1\n" +
 	"\x14ConfirmUploadRequest\x12\x19\n" +
-	"\bmedia_id\x18\x01 \x01(\tR\amediaId\x12!\n" +
-	"\fcharacter_id\x18\x02 \x01(\tR\vcharacterId\"b\n" +
+	"\bmedia_id\x18\x01 \x01(\tR\amediaId\"b\n" +
 	"\x15ConfirmUploadResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12/\n" +
 	"\bvariants\x18\x02 \x03(\v2\x13.media.MediaVariantR\bvariants\"\x14\n" +
@@ -952,7 +1019,13 @@ const file_media_media_proto_rawDesc = "" +
 	"\x06Status\x12\v\n" +
 	"\aUNKNOWN\x10\x00\x12\v\n" +
 	"\aSERVING\x10\x01\x12\x0f\n" +
-	"\vNOT_SERVING\x10\x022\xc8\x03\n" +
+	"\vNOT_SERVING\x10\x02*\x97\x01\n" +
+	"\tMediaType\x12\x16\n" +
+	"\x12MEDIA_TYPE_UNKNOWN\x10\x00\x12\x1b\n" +
+	"\x17MEDIA_TYPE_WORLD_HEADER\x10\x01\x12\x19\n" +
+	"\x15MEDIA_TYPE_WORLD_ICON\x10\x02\x12\x1f\n" +
+	"\x1bMEDIA_TYPE_CHARACTER_AVATAR\x10\x03\x12\x19\n" +
+	"\x15MEDIA_TYPE_POST_IMAGE\x10\x042\xc8\x03\n" +
 	"\fMediaService\x12b\n" +
 	"\x15GetPresignedUploadURL\x12#.media.GetPresignedUploadURLRequest\x1a$.media.GetPresignedUploadURLResponse\x12J\n" +
 	"\rConfirmUpload\x12\x1b.media.ConfirmUploadRequest\x1a\x1c.media.ConfirmUploadResponse\x120\n" +
@@ -973,47 +1046,50 @@ func file_media_media_proto_rawDescGZIP() []byte {
 	return file_media_media_proto_rawDescData
 }
 
-var file_media_media_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_media_media_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_media_media_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_media_media_proto_goTypes = []any{
-	(HealthCheckResponse_Status)(0),       // 0: media.HealthCheckResponse.Status
-	(*MediaMetadata)(nil),                 // 1: media.MediaMetadata
-	(*MediaVariant)(nil),                  // 2: media.MediaVariant
-	(*GetMediaRequest)(nil),               // 3: media.GetMediaRequest
-	(*Media)(nil),                         // 4: media.Media
-	(*GetMediaURLRequest)(nil),            // 5: media.GetMediaURLRequest
-	(*GetMediaURLResponse)(nil),           // 6: media.GetMediaURLResponse
-	(*OptimizeImageRequest)(nil),          // 7: media.OptimizeImageRequest
-	(*OptimizeImageResponse)(nil),         // 8: media.OptimizeImageResponse
-	(*GetPresignedUploadURLRequest)(nil),  // 9: media.GetPresignedUploadURLRequest
-	(*GetPresignedUploadURLResponse)(nil), // 10: media.GetPresignedUploadURLResponse
-	(*ConfirmUploadRequest)(nil),          // 11: media.ConfirmUploadRequest
-	(*ConfirmUploadResponse)(nil),         // 12: media.ConfirmUploadResponse
-	(*HealthCheckRequest)(nil),            // 13: media.HealthCheckRequest
-	(*HealthCheckResponse)(nil),           // 14: media.HealthCheckResponse
+	(MediaType)(0),                        // 0: media.MediaType
+	(HealthCheckResponse_Status)(0),       // 1: media.HealthCheckResponse.Status
+	(*MediaMetadata)(nil),                 // 2: media.MediaMetadata
+	(*MediaVariant)(nil),                  // 3: media.MediaVariant
+	(*GetMediaRequest)(nil),               // 4: media.GetMediaRequest
+	(*Media)(nil),                         // 5: media.Media
+	(*GetMediaURLRequest)(nil),            // 6: media.GetMediaURLRequest
+	(*GetMediaURLResponse)(nil),           // 7: media.GetMediaURLResponse
+	(*OptimizeImageRequest)(nil),          // 8: media.OptimizeImageRequest
+	(*OptimizeImageResponse)(nil),         // 9: media.OptimizeImageResponse
+	(*GetPresignedUploadURLRequest)(nil),  // 10: media.GetPresignedUploadURLRequest
+	(*GetPresignedUploadURLResponse)(nil), // 11: media.GetPresignedUploadURLResponse
+	(*ConfirmUploadRequest)(nil),          // 12: media.ConfirmUploadRequest
+	(*ConfirmUploadResponse)(nil),         // 13: media.ConfirmUploadResponse
+	(*HealthCheckRequest)(nil),            // 14: media.HealthCheckRequest
+	(*HealthCheckResponse)(nil),           // 15: media.HealthCheckResponse
 }
 var file_media_media_proto_depIdxs = []int32{
-	2,  // 0: media.Media.variants:type_name -> media.MediaVariant
-	2,  // 1: media.OptimizeImageResponse.variants:type_name -> media.MediaVariant
-	2,  // 2: media.ConfirmUploadResponse.variants:type_name -> media.MediaVariant
-	0,  // 3: media.HealthCheckResponse.status:type_name -> media.HealthCheckResponse.Status
-	9,  // 4: media.MediaService.GetPresignedUploadURL:input_type -> media.GetPresignedUploadURLRequest
-	11, // 5: media.MediaService.ConfirmUpload:input_type -> media.ConfirmUploadRequest
-	3,  // 6: media.MediaService.GetMedia:input_type -> media.GetMediaRequest
-	5,  // 7: media.MediaService.GetMediaURL:input_type -> media.GetMediaURLRequest
-	7,  // 8: media.MediaService.OptimizeImage:input_type -> media.OptimizeImageRequest
-	13, // 9: media.MediaService.HealthCheck:input_type -> media.HealthCheckRequest
-	10, // 10: media.MediaService.GetPresignedUploadURL:output_type -> media.GetPresignedUploadURLResponse
-	12, // 11: media.MediaService.ConfirmUpload:output_type -> media.ConfirmUploadResponse
-	4,  // 12: media.MediaService.GetMedia:output_type -> media.Media
-	6,  // 13: media.MediaService.GetMediaURL:output_type -> media.GetMediaURLResponse
-	8,  // 14: media.MediaService.OptimizeImage:output_type -> media.OptimizeImageResponse
-	14, // 15: media.MediaService.HealthCheck:output_type -> media.HealthCheckResponse
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	3,  // 0: media.Media.variants:type_name -> media.MediaVariant
+	0,  // 1: media.Media.media_type:type_name -> media.MediaType
+	3,  // 2: media.OptimizeImageResponse.variants:type_name -> media.MediaVariant
+	0,  // 3: media.GetPresignedUploadURLRequest.media_type:type_name -> media.MediaType
+	3,  // 4: media.ConfirmUploadResponse.variants:type_name -> media.MediaVariant
+	1,  // 5: media.HealthCheckResponse.status:type_name -> media.HealthCheckResponse.Status
+	10, // 6: media.MediaService.GetPresignedUploadURL:input_type -> media.GetPresignedUploadURLRequest
+	12, // 7: media.MediaService.ConfirmUpload:input_type -> media.ConfirmUploadRequest
+	4,  // 8: media.MediaService.GetMedia:input_type -> media.GetMediaRequest
+	6,  // 9: media.MediaService.GetMediaURL:input_type -> media.GetMediaURLRequest
+	8,  // 10: media.MediaService.OptimizeImage:input_type -> media.OptimizeImageRequest
+	14, // 11: media.MediaService.HealthCheck:input_type -> media.HealthCheckRequest
+	11, // 12: media.MediaService.GetPresignedUploadURL:output_type -> media.GetPresignedUploadURLResponse
+	13, // 13: media.MediaService.ConfirmUpload:output_type -> media.ConfirmUploadResponse
+	5,  // 14: media.MediaService.GetMedia:output_type -> media.Media
+	7,  // 15: media.MediaService.GetMediaURL:output_type -> media.GetMediaURLResponse
+	9,  // 16: media.MediaService.OptimizeImage:output_type -> media.OptimizeImageResponse
+	15, // 17: media.MediaService.HealthCheck:output_type -> media.HealthCheckResponse
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_media_media_proto_init() }
@@ -1026,7 +1102,7 @@ func file_media_media_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_media_media_proto_rawDesc), len(file_media_media_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,

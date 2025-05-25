@@ -40,8 +40,9 @@ type GetUploadURLRequest struct {
 	Filename    string `json:"filename"`
 	ContentType string `json:"content_type"`
 	Size        int64  `json:"size"`
-	CharacterID string `json:"character_id"` // Character ID who owns the media
-	WorldID     string `json:"world_id"`     // World ID where the media belongs
+	CharacterID string `json:"character_id,omitempty"` // Character ID who owns the media (optional for world-level media)
+	WorldID     string `json:"world_id"`               // World ID where the media belongs
+	MediaType   int32  `json:"media_type"`             // Media type enum (1=world_header, 2=world_icon, 3=character_avatar, 4=post_image)
 }
 
 // GetUploadURLResponse represents a response with a presigned upload URL
@@ -53,8 +54,7 @@ type GetUploadURLResponse struct {
 
 // ConfirmUploadRequest represents a request to confirm a direct upload
 type ConfirmUploadRequest struct {
-	MediaID     string `json:"media_id"`
-	CharacterID string `json:"character_id"` // Character ID who owns the media
+	MediaID string `json:"media_id"`
 }
 
 // UploadMediaResponse represents a response after uploading media
@@ -100,14 +100,21 @@ func (h *MediaHandler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.CharacterID == "" {
-		http.Error(w, "Character ID is required", http.StatusBadRequest)
+	if req.WorldID == "" {
+		http.Error(w, "World ID is required", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
 
-	if req.WorldID == "" {
-		http.Error(w, "World ID is required", http.StatusBadRequest)
+	if req.MediaType == 0 {
+		http.Error(w, "Media type is required", http.StatusBadRequest)
+		span.SetAttributes(attribute.Bool("error", true))
+		return
+	}
+
+	// For character-specific media types, character_id is required
+	if (req.MediaType == 3 || req.MediaType == 4) && req.CharacterID == "" {
+		http.Error(w, "Character ID is required for character-specific media", http.StatusBadRequest)
 		span.SetAttributes(attribute.Bool("error", true))
 		return
 	}
@@ -119,11 +126,12 @@ func (h *MediaHandler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 
 	// Get presigned upload URL
 	resp, err := h.mediaClient.GetPresignedUploadURL(ctx, &mediapb.GetPresignedUploadURLRequest{
-		CharacterId: req.CharacterID,
 		WorldId:     req.WorldID,
+		CharacterId: req.CharacterID,
 		Filename:    req.Filename,
 		ContentType: req.ContentType,
 		Size:        req.Size,
+		MediaType:   mediapb.MediaType(req.MediaType),
 	})
 	if err != nil {
 		http.Error(w, "Failed to generate upload URL", http.StatusInternalServerError)
@@ -176,16 +184,9 @@ func (h *MediaHandler) ConfirmUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.CharacterID == "" {
-		http.Error(w, "Character ID is required", http.StatusBadRequest)
-		span.SetAttributes(attribute.Bool("error", true))
-		return
-	}
-
 	// Confirm upload
 	resp, err := h.mediaClient.ConfirmUpload(ctx, &mediapb.ConfirmUploadRequest{
-		MediaId:     req.MediaID,
-		CharacterId: req.CharacterID,
+		MediaId: req.MediaID,
 	})
 	if err != nil {
 		http.Error(w, "Failed to confirm upload", http.StatusInternalServerError)

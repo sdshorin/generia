@@ -69,20 +69,20 @@ class GenerateWorldDescriptionJob(BaseJob):
             # Создаем следующие задачи
             tasks_to_create = []
 
-            # # Задача для генерации изображения мира
-            # world_image_task_id = str(uuid.uuid4())
-            # world_image_task = Task(
-            #     _id=world_image_task_id,
-            #     type=TaskType.GENERATE_WORLD_IMAGE,
-            #     world_id=world_id,
-            #     status="pending",
-            #     worker_id=None,
-            #     parameters={},
-            #     created_at=now,
-            #     updated_at=now,
-            #     attempt_count=0
-            # )
-            # tasks_to_create.append({"task": world_image_task})
+            # Задача для генерации изображения мира
+            world_image_task_id = str(uuid.uuid4())
+            world_image_task = Task(
+                _id=world_image_task_id,
+                type=TaskType.GENERATE_WORLD_IMAGE,
+                world_id=world_id,
+                status="pending",
+                worker_id=None,
+                parameters={},
+                created_at=now,
+                updated_at=now,
+                attempt_count=0
+            )
+            tasks_to_create.append({"task": world_image_task})
 
             # Задача для генерации пакета персонажей
             users_count = self.task.parameters.get("users_count", 10)

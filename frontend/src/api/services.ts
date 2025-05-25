@@ -44,11 +44,13 @@ export const worldsAPI = {
     return response.data;
   },
   
-  createWorld: async (name: string, description: string, prompt: string): Promise<World> => {
+  createWorld: async (name: string, description: string, prompt: string, charactersCount: number, postsCount: number): Promise<World> => {
     const response = await axiosInstance.post<World>('/worlds', {
       name,
       description,
       prompt,
+      characters_count: charactersCount,
+      posts_count: postsCount,
     });
     return response.data;
   },

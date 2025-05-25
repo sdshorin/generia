@@ -90,11 +90,12 @@ class GenerateCharacterAvatarJob(BaseJob):
             # Генерируем изображение аватара
             avatar_image = await self.image_generator.generate_image(
                 prompt=optimized_avatar_prompt,
+                world_id=world_id,
+                media_type_enum=MediaType.CHARACTER_AVATAR,
+                character_id=character_id,
                 width=512,
                 height=512,
                 task_id=self.task.id,
-                world_id=world_id,
-                character_id=character_id,
                 filename=f"avatar_{world_id}_{username}_{character_index}.png",
                 media_type="image/png"
             )

@@ -491,22 +491,24 @@ class ServiceClient:
     @with_retries(max_retries=2)
     async def get_presigned_upload_url(
         self,
-        character_id: str,
         world_id: str,
+        character_id: str,
         filename: str,
         content_type: str,
         size: int,
+        media_type_enum: int,
         task_id: Optional[str] = None
     ) -> Tuple[str, str, int]:
         """
         Gets a presigned URL for uploading media
 
         Args:
-            character_id: Character ID
             world_id: World ID
+            character_id: Character ID (can be empty for world-level media)
             filename: File name
             content_type: File content type (MIME)
             size: File size in bytes
+            media_type_enum: Media type enum value
             task_id: Task ID for logging
 
         Returns:
@@ -518,11 +520,12 @@ class ServiceClient:
         try:
             # Prepare request
             request = media_pb2.GetPresignedUploadURLRequest(
-                character_id=character_id,
                 world_id=world_id,
+                character_id=character_id,
                 filename=filename,
                 content_type=content_type,
-                size=size
+                size=size,
+                media_type=media_type_enum
             )
 
             # Call gRPC method
@@ -572,7 +575,6 @@ class ServiceClient:
     async def confirm_upload(
         self,
         media_id: str,
-        character_id: str,
         task_id: Optional[str] = None
     ) -> bool:
         """
@@ -580,7 +582,6 @@ class ServiceClient:
 
         Args:
             media_id: Media ID
-            character_id: Character ID
             task_id: Task ID for logging
 
         Returns:
@@ -592,8 +593,7 @@ class ServiceClient:
         try:
             # Prepare request
             request = media_pb2.ConfirmUploadRequest(
-                media_id=media_id,
-                character_id=character_id
+                media_id=media_id
             )
 
             # Call gRPC method
@@ -615,7 +615,7 @@ class ServiceClient:
 
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
-            error_message = f"gRPC error: {str(e)} for confirm_upload with media id {media_id} and character id {character_id} "
+            error_message = f"gRPC error: {str(e)} for confirm_upload with media id {media_id}"
             logger.error(error_message)
 
             # Log error
@@ -623,8 +623,7 @@ class ServiceClient:
                 service_name="media-service",
                 method_name="ConfirmUpload",
                 request_data={
-                    "media_id": media_id,
-                    "character_id": character_id
+                    "media_id": media_id
                 },
                 response_data=None,
                 error=error_message,
@@ -789,20 +788,20 @@ class ServiceClient:
 
     @circuit_breaker(name="world_service", failure_threshold=3, recovery_timeout=60.0)
     @with_retries(max_retries=2)
-    async def update_world_images(
+    async def update_world_image(
         self,
         world_id: str,
-        header_image_id: str,
-        icon_image_id: str,
+        image_uuid: str,
+        icon_uuid: str,
         task_id: Optional[str] = None
     ) -> bool:
         """
-        Updates world images
+        Updates world background image and icon
 
         Args:
             world_id: World ID
-            header_image_id: Header image media ID
-            icon_image_id: Icon image media ID
+            image_uuid: Background image UUID
+            icon_uuid: Icon image UUID
             task_id: Task ID for logging
 
         Returns:
@@ -813,20 +812,20 @@ class ServiceClient:
 
         try:
             # Prepare request
-            request = world_pb2.UpdateWorldImagesRequest(
-                id=world_id,
-                header_image_id=header_image_id,
-                icon_image_id=icon_image_id
+            request = world_pb2.UpdateWorldImageRequest(
+                world_id=world_id,
+                image_uuid=image_uuid,
+                icon_uuid=icon_uuid
             )
 
             # Call gRPC method
-            response = await stub.UpdateWorldImages(request)
+            response = await stub.UpdateWorldImage(request)
 
             # Log request
             duration_ms = int((time.time() - start_time) * 1000)
             await self._log_grpc_request(
                 service_name="world-service",
-                method_name="UpdateWorldImages",
+                method_name="UpdateWorldImage",
                 request_data=request,
                 response_data=response,
                 duration_ms=duration_ms,
@@ -838,17 +837,17 @@ class ServiceClient:
 
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
-            error_message = f"gRPC error: {str(e)} for update_world_images with world id {world_id} with header image id {header_image_id} and icon image id {icon_image_id}"
+            error_message = f"gRPC error: {str(e)} for update_world_image with world id {world_id}, image uuid {image_uuid}, and icon uuid {icon_uuid}"
             logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
                 service_name="world-service",
-                method_name="UpdateWorldImages",
+                method_name="UpdateWorldImage",
                 request_data={
-                    "id": world_id,
-                    "header_image_id": header_image_id,
-                    "icon_image_id": icon_image_id
+                    "world_id": world_id,
+                    "image_uuid": image_uuid,
+                    "icon_uuid": icon_uuid
                 },
                 response_data=None,
                 error=error_message,
@@ -857,4 +856,4 @@ class ServiceClient:
                 world_id=world_id
             )
 
-            raise Exception(f"Failed to update world images: {str(e)}")
+            raise Exception(f"Failed to update world image: {str(e)}")

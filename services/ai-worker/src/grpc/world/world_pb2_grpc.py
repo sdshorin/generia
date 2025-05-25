@@ -54,6 +54,11 @@ class WorldServiceStub(object):
                 request_serializer=world_dot_world__pb2.JoinWorldRequest.SerializeToString,
                 response_deserializer=world_dot_world__pb2.JoinWorldResponse.FromString,
                 _registered_method=True)
+        self.UpdateWorldImage = channel.unary_unary(
+                '/world.WorldService/UpdateWorldImage',
+                request_serializer=world_dot_world__pb2.UpdateWorldImageRequest.SerializeToString,
+                response_deserializer=world_dot_world__pb2.UpdateWorldImageResponse.FromString,
+                _registered_method=True)
         self.HealthCheck = channel.unary_unary(
                 '/world.WorldService/HealthCheck',
                 request_serializer=world_dot_world__pb2.HealthCheckRequest.SerializeToString,
@@ -92,6 +97,13 @@ class WorldServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def UpdateWorldImage(self, request, context):
+        """Update world image
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def HealthCheck(self, request, context):
         """Health check
         """
@@ -121,6 +133,11 @@ def add_WorldServiceServicer_to_server(servicer, server):
                     servicer.JoinWorld,
                     request_deserializer=world_dot_world__pb2.JoinWorldRequest.FromString,
                     response_serializer=world_dot_world__pb2.JoinWorldResponse.SerializeToString,
+            ),
+            'UpdateWorldImage': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateWorldImage,
+                    request_deserializer=world_dot_world__pb2.UpdateWorldImageRequest.FromString,
+                    response_serializer=world_dot_world__pb2.UpdateWorldImageResponse.SerializeToString,
             ),
             'HealthCheck': grpc.unary_unary_rpc_method_handler(
                     servicer.HealthCheck,
@@ -236,6 +253,33 @@ class WorldService(object):
             '/world.WorldService/JoinWorld',
             world_dot_world__pb2.JoinWorldRequest.SerializeToString,
             world_dot_world__pb2.JoinWorldResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateWorldImage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/world.WorldService/UpdateWorldImage',
+            world_dot_world__pb2.UpdateWorldImageRequest.SerializeToString,
+            world_dot_world__pb2.UpdateWorldImageResponse.FromString,
             options,
             channel_credentials,
             insecure,

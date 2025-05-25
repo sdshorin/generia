@@ -105,6 +105,7 @@ class TaskManager:
         # Проверяем, не превышен ли лимит параллельных задач
         if len(self.active_tasks) >= self.task_semaphore._value:
             logger.warning(f"Maximum concurrent tasks limit reached ({self.task_semaphore._value}), will process task {task_id} later")
+            # тут могут пропасть задачи????
             return False
         
         # Загружаем задачу из БД

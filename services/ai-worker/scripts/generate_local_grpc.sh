@@ -16,6 +16,8 @@ echo "Output to: $GRPC_DIR"
 # Create output directory if it doesn't exist
 mkdir -p $GRPC_DIR
 
+source $ROOT_DIR/.venv/bin/activate
+
 # Check for required tools
 if ! command -v python3 &> /dev/null; then
   echo "Error: Python 3 is not installed."

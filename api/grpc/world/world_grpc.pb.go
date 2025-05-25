@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorldService_CreateWorld_FullMethodName = "/world.WorldService/CreateWorld"
-	WorldService_GetWorld_FullMethodName    = "/world.WorldService/GetWorld"
-	WorldService_GetWorlds_FullMethodName   = "/world.WorldService/GetWorlds"
-	WorldService_JoinWorld_FullMethodName   = "/world.WorldService/JoinWorld"
-	WorldService_HealthCheck_FullMethodName = "/world.WorldService/HealthCheck"
+	WorldService_CreateWorld_FullMethodName      = "/world.WorldService/CreateWorld"
+	WorldService_GetWorld_FullMethodName         = "/world.WorldService/GetWorld"
+	WorldService_GetWorlds_FullMethodName        = "/world.WorldService/GetWorlds"
+	WorldService_JoinWorld_FullMethodName        = "/world.WorldService/JoinWorld"
+	WorldService_UpdateWorldImage_FullMethodName = "/world.WorldService/UpdateWorldImage"
+	WorldService_HealthCheck_FullMethodName      = "/world.WorldService/HealthCheck"
 )
 
 // WorldServiceClient is the client API for WorldService service.
@@ -38,6 +39,8 @@ type WorldServiceClient interface {
 	GetWorlds(ctx context.Context, in *GetWorldsRequest, opts ...grpc.CallOption) (*WorldsResponse, error)
 	// Join a world (add to user's available worlds)
 	JoinWorld(ctx context.Context, in *JoinWorldRequest, opts ...grpc.CallOption) (*JoinWorldResponse, error)
+	// Update world image
+	UpdateWorldImage(ctx context.Context, in *UpdateWorldImageRequest, opts ...grpc.CallOption) (*UpdateWorldImageResponse, error)
 	// Health check
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
@@ -90,6 +93,16 @@ func (c *worldServiceClient) JoinWorld(ctx context.Context, in *JoinWorldRequest
 	return out, nil
 }
 
+func (c *worldServiceClient) UpdateWorldImage(ctx context.Context, in *UpdateWorldImageRequest, opts ...grpc.CallOption) (*UpdateWorldImageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateWorldImageResponse)
+	err := c.cc.Invoke(ctx, WorldService_UpdateWorldImage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *worldServiceClient) HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HealthCheckResponse)
@@ -112,6 +125,8 @@ type WorldServiceServer interface {
 	GetWorlds(context.Context, *GetWorldsRequest) (*WorldsResponse, error)
 	// Join a world (add to user's available worlds)
 	JoinWorld(context.Context, *JoinWorldRequest) (*JoinWorldResponse, error)
+	// Update world image
+	UpdateWorldImage(context.Context, *UpdateWorldImageRequest) (*UpdateWorldImageResponse, error)
 	// Health check
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedWorldServiceServer()
@@ -135,6 +150,9 @@ func (UnimplementedWorldServiceServer) GetWorlds(context.Context, *GetWorldsRequ
 }
 func (UnimplementedWorldServiceServer) JoinWorld(context.Context, *JoinWorldRequest) (*JoinWorldResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinWorld not implemented")
+}
+func (UnimplementedWorldServiceServer) UpdateWorldImage(context.Context, *UpdateWorldImageRequest) (*UpdateWorldImageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorldImage not implemented")
 }
 func (UnimplementedWorldServiceServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
@@ -232,6 +250,24 @@ func _WorldService_JoinWorld_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorldService_UpdateWorldImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorldImageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorldServiceServer).UpdateWorldImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorldService_UpdateWorldImage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorldServiceServer).UpdateWorldImage(ctx, req.(*UpdateWorldImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _WorldService_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HealthCheckRequest)
 	if err := dec(in); err != nil {
@@ -272,6 +308,10 @@ var WorldService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "JoinWorld",
 			Handler:    _WorldService_JoinWorld_Handler,
+		},
+		{
+			MethodName: "UpdateWorldImage",
+			Handler:    _WorldService_UpdateWorldImage_Handler,
 		},
 		{
 			MethodName: "HealthCheck",

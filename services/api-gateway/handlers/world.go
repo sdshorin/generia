@@ -10,13 +10,20 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sdshorin/generia/pkg/logger"
-	"github.com/sdshorin/generia/pkg/models"
 	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	worldpb "github.com/sdshorin/generia/api/grpc/world"
 )
+
+type WorldCreateRequest struct {
+	Name            string `json:"name" validate:"required,min=3,max=100"`
+	Description     string `json:"description"`
+	Prompt          string `json:"prompt" validate:"required,min=10"`
+	CharactersCount int32  `json:"characters_count" validate:"min=1,max=40"`
+	PostsCount      int32  `json:"posts_count" validate:"min=1,max=250"`
+}
 
 // WorldHandler handles world-related requests
 type WorldHandler struct {
@@ -83,8 +90,12 @@ func (h *WorldHandler) GetWorlds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// print full response
+	logger.Logger.Info("GetWorlds response", zap.Any("response", resp))
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+
 }
 
 // CreateWorld handles POST /worlds
@@ -107,7 +118,7 @@ func (h *WorldHandler) CreateWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req models.WorldCreateRequest
+	var req WorldCreateRequest
 	if err := json.Unmarshal(body, &req); err != nil {
 		http.Error(w, "Invalid request format", http.StatusBadRequest)
 		return
@@ -117,10 +128,12 @@ func (h *WorldHandler) CreateWorld(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	resp, err := h.worldClient.CreateWorld(timeoutCtx, &worldpb.CreateWorldRequest{
-		UserId:      userID,
-		Name:        req.Name,
-		Description: req.Description,
-		Prompt:      req.Prompt,
+		UserId:          userID,
+		Name:            req.Name,
+		Description:     req.Description,
+		Prompt:          req.Prompt,
+		CharactersCount: req.CharactersCount,
+		PostsCount:      req.PostsCount,
 	})
 
 	if err != nil {
