@@ -70,4 +70,31 @@ export interface UploadUrlResponse {
   expires_at: number;
 }
 
+export interface StageInfo {
+  name: string;
+  status: string;
+}
+
+export interface WorldGenerationStatus {
+  status: string;
+  current_stage: string;
+  stages: StageInfo[];
+  tasks_total: number;
+  tasks_completed: number;
+  tasks_failed: number;
+  task_predicted: number;
+  users_created: number;
+  posts_created: number;
+  users_predicted: number;
+  posts_predicted: number;
+  api_call_limits_llm: number;
+  api_call_limits_images: number;
+  api_calls_made_llm: number;
+  api_calls_made_images: number;
+  llm_cost_total: number;
+  image_cost_total: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export * from './character';

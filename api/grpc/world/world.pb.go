@@ -67,7 +67,7 @@ func (x HealthCheckResponse_ServingStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use HealthCheckResponse_ServingStatus.Descriptor instead.
 func (HealthCheckResponse_ServingStatus) EnumDescriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{11, 0}
+	return file_world_world_proto_rawDescGZIP(), []int{13, 0}
 }
 
 // CreateWorldRequest is the request for creating a new world
@@ -630,6 +630,248 @@ func (x *GetGenerationStatusRequest) GetWorldId() string {
 	return ""
 }
 
+// StageInfo represents information about a generation stage
+type StageInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StageInfo) Reset() {
+	*x = StageInfo{}
+	mi := &file_world_world_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StageInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StageInfo) ProtoMessage() {}
+
+func (x *StageInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_world_world_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StageInfo.ProtoReflect.Descriptor instead.
+func (*StageInfo) Descriptor() ([]byte, []int) {
+	return file_world_world_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *StageInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *StageInfo) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+// GetGenerationStatusResponse is the response for getting the generation status of a world
+type GetGenerationStatusResponse struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Status              string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	CurrentStage        string                 `protobuf:"bytes,2,opt,name=current_stage,json=currentStage,proto3" json:"current_stage,omitempty"`
+	Stages              []*StageInfo           `protobuf:"bytes,3,rep,name=stages,proto3" json:"stages,omitempty"`
+	TasksTotal          int32                  `protobuf:"varint,4,opt,name=tasks_total,json=tasksTotal,proto3" json:"tasks_total,omitempty"`
+	TasksCompleted      int32                  `protobuf:"varint,5,opt,name=tasks_completed,json=tasksCompleted,proto3" json:"tasks_completed,omitempty"`
+	TasksFailed         int32                  `protobuf:"varint,6,opt,name=tasks_failed,json=tasksFailed,proto3" json:"tasks_failed,omitempty"`
+	TaskPredicted       int32                  `protobuf:"varint,7,opt,name=task_predicted,json=taskPredicted,proto3" json:"task_predicted,omitempty"`
+	UsersCreated        int32                  `protobuf:"varint,8,opt,name=users_created,json=usersCreated,proto3" json:"users_created,omitempty"`
+	PostsCreated        int32                  `protobuf:"varint,9,opt,name=posts_created,json=postsCreated,proto3" json:"posts_created,omitempty"`
+	UsersPredicted      int32                  `protobuf:"varint,10,opt,name=users_predicted,json=usersPredicted,proto3" json:"users_predicted,omitempty"`
+	PostsPredicted      int32                  `protobuf:"varint,11,opt,name=posts_predicted,json=postsPredicted,proto3" json:"posts_predicted,omitempty"`
+	ApiCallLimitsLlm    int32                  `protobuf:"varint,12,opt,name=api_call_limits_llm,json=apiCallLimitsLlm,proto3" json:"api_call_limits_llm,omitempty"`
+	ApiCallLimitsImages int32                  `protobuf:"varint,13,opt,name=api_call_limits_images,json=apiCallLimitsImages,proto3" json:"api_call_limits_images,omitempty"`
+	ApiCallsMadeLlm     int32                  `protobuf:"varint,14,opt,name=api_calls_made_llm,json=apiCallsMadeLlm,proto3" json:"api_calls_made_llm,omitempty"`
+	ApiCallsMadeImages  int32                  `protobuf:"varint,15,opt,name=api_calls_made_images,json=apiCallsMadeImages,proto3" json:"api_calls_made_images,omitempty"`
+	LlmCostTotal        float64                `protobuf:"fixed64,16,opt,name=llm_cost_total,json=llmCostTotal,proto3" json:"llm_cost_total,omitempty"`
+	ImageCostTotal      float64                `protobuf:"fixed64,17,opt,name=image_cost_total,json=imageCostTotal,proto3" json:"image_cost_total,omitempty"`
+	CreatedAt           string                 `protobuf:"bytes,18,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt           string                 `protobuf:"bytes,19,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetGenerationStatusResponse) Reset() {
+	*x = GetGenerationStatusResponse{}
+	mi := &file_world_world_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGenerationStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGenerationStatusResponse) ProtoMessage() {}
+
+func (x *GetGenerationStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_world_world_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGenerationStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetGenerationStatusResponse) Descriptor() ([]byte, []int) {
+	return file_world_world_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetGenerationStatusResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *GetGenerationStatusResponse) GetCurrentStage() string {
+	if x != nil {
+		return x.CurrentStage
+	}
+	return ""
+}
+
+func (x *GetGenerationStatusResponse) GetStages() []*StageInfo {
+	if x != nil {
+		return x.Stages
+	}
+	return nil
+}
+
+func (x *GetGenerationStatusResponse) GetTasksTotal() int32 {
+	if x != nil {
+		return x.TasksTotal
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetTasksCompleted() int32 {
+	if x != nil {
+		return x.TasksCompleted
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetTasksFailed() int32 {
+	if x != nil {
+		return x.TasksFailed
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetTaskPredicted() int32 {
+	if x != nil {
+		return x.TaskPredicted
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetUsersCreated() int32 {
+	if x != nil {
+		return x.UsersCreated
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetPostsCreated() int32 {
+	if x != nil {
+		return x.PostsCreated
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetUsersPredicted() int32 {
+	if x != nil {
+		return x.UsersPredicted
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetPostsPredicted() int32 {
+	if x != nil {
+		return x.PostsPredicted
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetApiCallLimitsLlm() int32 {
+	if x != nil {
+		return x.ApiCallLimitsLlm
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetApiCallLimitsImages() int32 {
+	if x != nil {
+		return x.ApiCallLimitsImages
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetApiCallsMadeLlm() int32 {
+	if x != nil {
+		return x.ApiCallsMadeLlm
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetApiCallsMadeImages() int32 {
+	if x != nil {
+		return x.ApiCallsMadeImages
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetLlmCostTotal() float64 {
+	if x != nil {
+		return x.LlmCostTotal
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetImageCostTotal() float64 {
+	if x != nil {
+		return x.ImageCostTotal
+	}
+	return 0
+}
+
+func (x *GetGenerationStatusResponse) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *GetGenerationStatusResponse) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
 // UpdateWorldImageRequest is the request for updating a world's image
 type UpdateWorldImageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -642,7 +884,7 @@ type UpdateWorldImageRequest struct {
 
 func (x *UpdateWorldImageRequest) Reset() {
 	*x = UpdateWorldImageRequest{}
-	mi := &file_world_world_proto_msgTypes[8]
+	mi := &file_world_world_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -654,7 +896,7 @@ func (x *UpdateWorldImageRequest) String() string {
 func (*UpdateWorldImageRequest) ProtoMessage() {}
 
 func (x *UpdateWorldImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[8]
+	mi := &file_world_world_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -667,7 +909,7 @@ func (x *UpdateWorldImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWorldImageRequest.ProtoReflect.Descriptor instead.
 func (*UpdateWorldImageRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{8}
+	return file_world_world_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateWorldImageRequest) GetWorldId() string {
@@ -702,7 +944,7 @@ type UpdateWorldImageResponse struct {
 
 func (x *UpdateWorldImageResponse) Reset() {
 	*x = UpdateWorldImageResponse{}
-	mi := &file_world_world_proto_msgTypes[9]
+	mi := &file_world_world_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -714,7 +956,7 @@ func (x *UpdateWorldImageResponse) String() string {
 func (*UpdateWorldImageResponse) ProtoMessage() {}
 
 func (x *UpdateWorldImageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[9]
+	mi := &file_world_world_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -727,7 +969,7 @@ func (x *UpdateWorldImageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateWorldImageResponse.ProtoReflect.Descriptor instead.
 func (*UpdateWorldImageResponse) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{9}
+	return file_world_world_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateWorldImageResponse) GetSuccess() bool {
@@ -753,7 +995,7 @@ type HealthCheckRequest struct {
 
 func (x *HealthCheckRequest) Reset() {
 	*x = HealthCheckRequest{}
-	mi := &file_world_world_proto_msgTypes[10]
+	mi := &file_world_world_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -765,7 +1007,7 @@ func (x *HealthCheckRequest) String() string {
 func (*HealthCheckRequest) ProtoMessage() {}
 
 func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[10]
+	mi := &file_world_world_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -778,7 +1020,7 @@ func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
 func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{10}
+	return file_world_world_proto_rawDescGZIP(), []int{12}
 }
 
 // HealthCheckResponse is the response for the health check
@@ -791,7 +1033,7 @@ type HealthCheckResponse struct {
 
 func (x *HealthCheckResponse) Reset() {
 	*x = HealthCheckResponse{}
-	mi := &file_world_world_proto_msgTypes[11]
+	mi := &file_world_world_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -803,7 +1045,7 @@ func (x *HealthCheckResponse) String() string {
 func (*HealthCheckResponse) ProtoMessage() {}
 
 func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_world_world_proto_msgTypes[11]
+	mi := &file_world_world_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -816,7 +1058,7 @@ func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
 func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_world_world_proto_rawDescGZIP(), []int{11}
+	return file_world_world_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *HealthCheckResponse) GetStatus() HealthCheckResponse_ServingStatus {
@@ -878,7 +1120,34 @@ const file_world_world_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"7\n" +
 	"\x1aGetGenerationStatusRequest\x12\x19\n" +
-	"\bworld_id\x18\x01 \x01(\tR\aworldId\"p\n" +
+	"\bworld_id\x18\x01 \x01(\tR\aworldId\"7\n" +
+	"\tStageInfo\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"\x86\x06\n" +
+	"\x1bGetGenerationStatusResponse\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\x12#\n" +
+	"\rcurrent_stage\x18\x02 \x01(\tR\fcurrentStage\x12(\n" +
+	"\x06stages\x18\x03 \x03(\v2\x10.world.StageInfoR\x06stages\x12\x1f\n" +
+	"\vtasks_total\x18\x04 \x01(\x05R\n" +
+	"tasksTotal\x12'\n" +
+	"\x0ftasks_completed\x18\x05 \x01(\x05R\x0etasksCompleted\x12!\n" +
+	"\ftasks_failed\x18\x06 \x01(\x05R\vtasksFailed\x12%\n" +
+	"\x0etask_predicted\x18\a \x01(\x05R\rtaskPredicted\x12#\n" +
+	"\rusers_created\x18\b \x01(\x05R\fusersCreated\x12#\n" +
+	"\rposts_created\x18\t \x01(\x05R\fpostsCreated\x12'\n" +
+	"\x0fusers_predicted\x18\n" +
+	" \x01(\x05R\x0eusersPredicted\x12'\n" +
+	"\x0fposts_predicted\x18\v \x01(\x05R\x0epostsPredicted\x12-\n" +
+	"\x13api_call_limits_llm\x18\f \x01(\x05R\x10apiCallLimitsLlm\x123\n" +
+	"\x16api_call_limits_images\x18\r \x01(\x05R\x13apiCallLimitsImages\x12+\n" +
+	"\x12api_calls_made_llm\x18\x0e \x01(\x05R\x0fapiCallsMadeLlm\x121\n" +
+	"\x15api_calls_made_images\x18\x0f \x01(\x05R\x12apiCallsMadeImages\x12$\n" +
+	"\x0ellm_cost_total\x18\x10 \x01(\x01R\fllmCostTotal\x12(\n" +
+	"\x10image_cost_total\x18\x11 \x01(\x01R\x0eimageCostTotal\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x12 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x13 \x01(\tR\tupdatedAt\"p\n" +
 	"\x17UpdateWorldImageRequest\x12\x19\n" +
 	"\bworld_id\x18\x01 \x01(\tR\aworldId\x12\x1d\n" +
 	"\n" +
@@ -893,13 +1162,14 @@ const file_world_world_proto_rawDesc = "" +
 	"\rServingStatus\x12\v\n" +
 	"\aUNKNOWN\x10\x00\x12\v\n" +
 	"\aSERVING\x10\x01\x12\x0f\n" +
-	"\vNOT_SERVING\x10\x022\xac\x03\n" +
+	"\vNOT_SERVING\x10\x022\x8c\x04\n" +
 	"\fWorldService\x12@\n" +
 	"\vCreateWorld\x12\x19.world.CreateWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12:\n" +
 	"\bGetWorld\x12\x16.world.GetWorldRequest\x1a\x14.world.WorldResponse\"\x00\x12=\n" +
 	"\tGetWorlds\x12\x17.world.GetWorldsRequest\x1a\x15.world.WorldsResponse\"\x00\x12@\n" +
 	"\tJoinWorld\x12\x17.world.JoinWorldRequest\x1a\x18.world.JoinWorldResponse\"\x00\x12U\n" +
-	"\x10UpdateWorldImage\x12\x1e.world.UpdateWorldImageRequest\x1a\x1f.world.UpdateWorldImageResponse\"\x00\x12F\n" +
+	"\x10UpdateWorldImage\x12\x1e.world.UpdateWorldImageRequest\x1a\x1f.world.UpdateWorldImageResponse\"\x00\x12^\n" +
+	"\x13GetGenerationStatus\x12!.world.GetGenerationStatusRequest\x1a\".world.GetGenerationStatusResponse\"\x00\x12F\n" +
 	"\vHealthCheck\x12\x19.world.HealthCheckRequest\x1a\x1a.world.HealthCheckResponse\"\x00B,Z*github.com/sdshorin/generia/api/grpc/worldb\x06proto3"
 
 var (
@@ -915,7 +1185,7 @@ func file_world_world_proto_rawDescGZIP() []byte {
 }
 
 var file_world_world_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_world_world_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_world_world_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_world_world_proto_goTypes = []any{
 	(HealthCheckResponse_ServingStatus)(0), // 0: world.HealthCheckResponse.ServingStatus
 	(*CreateWorldRequest)(nil),             // 1: world.CreateWorldRequest
@@ -926,31 +1196,36 @@ var file_world_world_proto_goTypes = []any{
 	(*JoinWorldRequest)(nil),               // 6: world.JoinWorldRequest
 	(*JoinWorldResponse)(nil),              // 7: world.JoinWorldResponse
 	(*GetGenerationStatusRequest)(nil),     // 8: world.GetGenerationStatusRequest
-	(*UpdateWorldImageRequest)(nil),        // 9: world.UpdateWorldImageRequest
-	(*UpdateWorldImageResponse)(nil),       // 10: world.UpdateWorldImageResponse
-	(*HealthCheckRequest)(nil),             // 11: world.HealthCheckRequest
-	(*HealthCheckResponse)(nil),            // 12: world.HealthCheckResponse
+	(*StageInfo)(nil),                      // 9: world.StageInfo
+	(*GetGenerationStatusResponse)(nil),    // 10: world.GetGenerationStatusResponse
+	(*UpdateWorldImageRequest)(nil),        // 11: world.UpdateWorldImageRequest
+	(*UpdateWorldImageResponse)(nil),       // 12: world.UpdateWorldImageResponse
+	(*HealthCheckRequest)(nil),             // 13: world.HealthCheckRequest
+	(*HealthCheckResponse)(nil),            // 14: world.HealthCheckResponse
 }
 var file_world_world_proto_depIdxs = []int32{
 	2,  // 0: world.WorldsResponse.worlds:type_name -> world.WorldResponse
-	0,  // 1: world.HealthCheckResponse.status:type_name -> world.HealthCheckResponse.ServingStatus
-	1,  // 2: world.WorldService.CreateWorld:input_type -> world.CreateWorldRequest
-	3,  // 3: world.WorldService.GetWorld:input_type -> world.GetWorldRequest
-	4,  // 4: world.WorldService.GetWorlds:input_type -> world.GetWorldsRequest
-	6,  // 5: world.WorldService.JoinWorld:input_type -> world.JoinWorldRequest
-	9,  // 6: world.WorldService.UpdateWorldImage:input_type -> world.UpdateWorldImageRequest
-	11, // 7: world.WorldService.HealthCheck:input_type -> world.HealthCheckRequest
-	2,  // 8: world.WorldService.CreateWorld:output_type -> world.WorldResponse
-	2,  // 9: world.WorldService.GetWorld:output_type -> world.WorldResponse
-	5,  // 10: world.WorldService.GetWorlds:output_type -> world.WorldsResponse
-	7,  // 11: world.WorldService.JoinWorld:output_type -> world.JoinWorldResponse
-	10, // 12: world.WorldService.UpdateWorldImage:output_type -> world.UpdateWorldImageResponse
-	12, // 13: world.WorldService.HealthCheck:output_type -> world.HealthCheckResponse
-	8,  // [8:14] is the sub-list for method output_type
-	2,  // [2:8] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	9,  // 1: world.GetGenerationStatusResponse.stages:type_name -> world.StageInfo
+	0,  // 2: world.HealthCheckResponse.status:type_name -> world.HealthCheckResponse.ServingStatus
+	1,  // 3: world.WorldService.CreateWorld:input_type -> world.CreateWorldRequest
+	3,  // 4: world.WorldService.GetWorld:input_type -> world.GetWorldRequest
+	4,  // 5: world.WorldService.GetWorlds:input_type -> world.GetWorldsRequest
+	6,  // 6: world.WorldService.JoinWorld:input_type -> world.JoinWorldRequest
+	11, // 7: world.WorldService.UpdateWorldImage:input_type -> world.UpdateWorldImageRequest
+	8,  // 8: world.WorldService.GetGenerationStatus:input_type -> world.GetGenerationStatusRequest
+	13, // 9: world.WorldService.HealthCheck:input_type -> world.HealthCheckRequest
+	2,  // 10: world.WorldService.CreateWorld:output_type -> world.WorldResponse
+	2,  // 11: world.WorldService.GetWorld:output_type -> world.WorldResponse
+	5,  // 12: world.WorldService.GetWorlds:output_type -> world.WorldsResponse
+	7,  // 13: world.WorldService.JoinWorld:output_type -> world.JoinWorldResponse
+	12, // 14: world.WorldService.UpdateWorldImage:output_type -> world.UpdateWorldImageResponse
+	10, // 15: world.WorldService.GetGenerationStatus:output_type -> world.GetGenerationStatusResponse
+	14, // 16: world.WorldService.HealthCheck:output_type -> world.HealthCheckResponse
+	10, // [10:17] is the sub-list for method output_type
+	3,  // [3:10] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_world_world_proto_init() }
@@ -964,7 +1239,7 @@ func file_world_world_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_world_world_proto_rawDesc), len(file_world_world_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

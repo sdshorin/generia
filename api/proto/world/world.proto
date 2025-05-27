@@ -20,6 +20,9 @@ service WorldService {
   // Update world image
   rpc UpdateWorldImage(UpdateWorldImageRequest) returns (UpdateWorldImageResponse) {}
   
+  // Get world generation status
+  rpc GetGenerationStatus(GetGenerationStatusRequest) returns (GetGenerationStatusResponse) {}
+  
   // Health check
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
 }
@@ -88,6 +91,35 @@ message JoinWorldResponse {
 // GetGenerationStatusRequest is the request for getting the generation status of a world
 message GetGenerationStatusRequest {
   string world_id = 1;
+}
+
+// StageInfo represents information about a generation stage
+message StageInfo {
+  string name = 1;
+  string status = 2;
+}
+
+// GetGenerationStatusResponse is the response for getting the generation status of a world
+message GetGenerationStatusResponse {
+  string status = 1;
+  string current_stage = 2;
+  repeated StageInfo stages = 3;
+  int32 tasks_total = 4;
+  int32 tasks_completed = 5;
+  int32 tasks_failed = 6;
+  int32 task_predicted = 7;
+  int32 users_created = 8;
+  int32 posts_created = 9;
+  int32 users_predicted = 10;
+  int32 posts_predicted = 11;
+  int32 api_call_limits_llm = 12;
+  int32 api_call_limits_images = 13;
+  int32 api_calls_made_llm = 14;
+  int32 api_calls_made_images = 15;
+  double llm_cost_total = 16;
+  double image_cost_total = 17;
+  string created_at = 18;
+  string updated_at = 19;
 }
 
 // UpdateWorldImageRequest is the request for updating a world's image

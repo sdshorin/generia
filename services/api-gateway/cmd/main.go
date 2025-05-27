@@ -115,7 +115,7 @@ func main() {
 	mediaHandler := handlers.NewMediaHandler(clients.mediaClient, clients.cdnClient, tracer)
 	interactionHandler := handlers.NewInteractionHandler(clients.interactionClient, tracer)
 
-	worldHandler := handlers.NewWorldHandler(clients.worldClient, 30*time.Second)
+	worldHandler := handlers.NewWorldHandler(clients.worldClient, 30*time.Second, cfg.JWT.Secret)
 	characterHandler := handlers.NewCharacterHandler(clients.characterClient, 30*time.Second)
 
 	// Initialize router
@@ -161,7 +161,8 @@ func main() {
 	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorlds))).Methods("GET")
 	router.Handle("/api/v1/worlds", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.CreateWorld))).Methods("POST")
 	router.Handle("/api/v1/worlds/{world_id}/join", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.JoinWorld))).Methods("POST")
-	// router.Handle("/api/v1/worlds/{world_id}/status", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorldStatus))).Methods("GET")
+	router.Handle("/api/v1/worlds/{world_id}/status", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorldStatus))).Methods("GET")
+	router.HandleFunc("/api/v1/worlds/{world_id}/status/stream", worldHandler.StreamWorldStatus).Methods("GET")
 	router.Handle("/api/v1/worlds/{world_id}", jwtMiddleware.RequireAuth(http.HandlerFunc(worldHandler.GetWorld))).Methods("GET")
 
 	// Character routes

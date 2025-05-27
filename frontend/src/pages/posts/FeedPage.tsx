@@ -7,10 +7,11 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Loader } from '../../components/ui/Loader';
 import { PostCard } from '../../components/common/PostCard';
+import { WorldGenerationProgress } from '../../components/common/WorldGenerationProgress';
 import { useWorld } from '../../hooks/useWorld';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { postsAPI } from '../../api/services';
-import { Post } from '../../types';
+import { Post, WorldGenerationStatus } from '../../types';
 
 const PageHeader = styled.div<{ $backgroundImage?: string }>`
   position: relative;
@@ -165,6 +166,7 @@ export const FeedPage: React.FC = () => {
   const { worldId } = useParams<{ worldId: string }>();
   const { currentWorld, loadCurrentWorld, error: worldError } = useWorld();
   const [isLoading, setIsLoading] = useState(true);
+  const [showGenerationProgress, setShowGenerationProgress] = useState(false);
   
   const {
     items: posts,
@@ -194,6 +196,12 @@ export const FeedPage: React.FC = () => {
         if (!currentWorld) return;
         setIsLoading(true);
         reset(); // Clear existing posts when switching worlds
+        
+        // Show generation progress if world is still generating
+        setShowGenerationProgress(
+          currentWorld.generation_status !== 'completed' && 
+          currentWorld.generation_status !== 'failed'
+        );
       } catch (error) {
         console.error('Failed to fetch initial posts:', error);
       } finally {
@@ -209,6 +217,21 @@ export const FeedPage: React.FC = () => {
       fetchInitialPosts();
     }
   }, [worldId, currentWorld, reset, loadCurrentWorld]);
+  
+  const handleGenerationComplete = (status: WorldGenerationStatus) => {
+    setShowGenerationProgress(false);
+    // Reload the current world to get updated data
+    if (worldId) {
+      loadCurrentWorld(worldId);
+    }
+    // Reset posts to load new content
+    reset();
+  };
+  
+  const handlePostsUpdated = (postsCount: number) => {
+    // Reset posts to load new content when posts are created
+    reset();
+  };
   
   const handlePostLike = (postId: string, isLiked: boolean) => {
     // Update post in the list
@@ -259,6 +282,15 @@ export const FeedPage: React.FC = () => {
       
       <ContentContainer>
         <FeedContainer>
+          {/* Show generation progress if world is still generating */}
+          {showGenerationProgress && worldId && (
+            <WorldGenerationProgress
+              worldId={worldId}
+              onGenerationComplete={handleGenerationComplete}
+              onPostsUpdated={handlePostsUpdated}
+            />
+          )}
+          
           {posts.length > 0 ? (
             <>
               {posts.map((post) => (
@@ -286,10 +318,12 @@ export const FeedPage: React.FC = () => {
           ) : (
             <EmptyState>
               <h3>No posts yet</h3>
-              <p>Be the first to create content in this world!</p>
-              <Link to={`/worlds/${worldId}/create`}>
-                <Button variant="primary">Create a Post</Button>
-              </Link>
+              <p>{showGenerationProgress ? 'Posts will appear here as they are generated!' : 'Be the first to create content in this world!'}</p>
+              {!showGenerationProgress && (
+                <Link to={`/worlds/${worldId}/create`}>
+                  <Button variant="primary">Create a Post</Button>
+                </Link>
+              )}
             </EmptyState>
           )}
           

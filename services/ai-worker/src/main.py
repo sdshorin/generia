@@ -41,33 +41,33 @@ async def initialize_components():
     """Initializes all application components"""
     global db_manager, kafka_consumer, kafka_producer, llm_client, image_generator
     global service_client, progress_manager, task_manager, job_factory
-    
+
     # Initialize DB manager
     db_manager = MongoDBManager()
     await db_manager.initialize()
     logger.info("MongoDB manager initialized")
-    
+
     # Initialize Kafka
     kafka_producer = KafkaProducer()
     await kafka_producer.start()
     logger.info("Kafka producer started")
-    
+
     # Initialize service client with Consul discovery
     service_client = ServiceClient(db_manager=db_manager)
     await service_client.initialize()
     logger.info("Service client initialized with Consul service discovery")
-    
-    # Initialize images and LLM (order is important)
-    image_generator = ImageGenerator(db_manager=db_manager, service_client=service_client)
-    logger.info("Image generator initialized")
-    
-    llm_client = LLMClient(db_manager=db_manager)
-    logger.info("LLM client initialized")
-    
+
     # Initialize progress manager
     progress_manager = ProgressManager(db_manager, None) #  kafka_producer)
     logger.info("Progress manager initialized")
-    
+
+    # Initialize images and LLM with progress manager (order is important)
+    image_generator = ImageGenerator(db_manager=db_manager, service_client=service_client, progress_manager=progress_manager)
+    logger.info("Image generator initialized")
+
+    llm_client = LLMClient(db_manager=db_manager, progress_manager=progress_manager)
+    logger.info("LLM client initialized")
+
     # Initialize job factory
     job_factory = JobFactory(
         db_manager=db_manager,
@@ -77,7 +77,7 @@ async def initialize_components():
         progress_manager=progress_manager,
         kafka_producer=kafka_producer
     )
-    
+
     # Register job classes
     job_factory.register_jobs({
         TaskType.INIT_WORLD_CREATION: InitWorldCreationJob,
@@ -91,7 +91,7 @@ async def initialize_components():
         TaskType.GENERATE_POST_IMAGE: GeneratePostImageJob
     })
     logger.info("Job factory initialized with registered job types")
-    
+
     # Initialize task manager
     task_manager = TaskManager(
         db_manager=db_manager,
@@ -102,7 +102,7 @@ async def initialize_components():
     )
     await task_manager.start()
     logger.info("Task manager started")
-    
+
     # Initialize Kafka consumer
     kafka_consumer = KafkaConsumer(processor=process_kafka_message)
     await kafka_consumer.start()
@@ -111,67 +111,67 @@ async def initialize_components():
 async def process_kafka_message(message):
     """
     Processes a Kafka message and immediately starts task processing
-    
+
     Args:
         message: Kafka message
     """
     try:
         event_type = message.get("event_type")
-        
+
         if event_type == "task_created":
             # Process new task
             task_id = message.get("task_id")
             task_type = message.get("task_type")
             world_id = message.get("world_id")
             parameters = message.get("parameters", {})
-            
+
             logger.info(f"Received task_created event for task {task_id} of type {task_type}")
-            
+
             # Immediately start task processing
             success = await task_manager.process_task_by_id(task_id)
             if success:
                 logger.info(f"Started processing task {task_id} from Kafka message")
             else:
                 logger.warning(f"Could not start processing task {task_id} from Kafka message")
-        
+
         elif event_type == "task_updated":
             # Process task update
             task_id = message.get("task_id")
             status = message.get("status")
-            
+
             logger.info(f"Received task_updated event for task {task_id}, status: {status}")
             # Updates are already happening in the respective jobs
-        
+
         else:
             logger.warning(f"Unknown event type: {event_type}")
-    
+
     except Exception as e:
         logger.error(f"Error processing Kafka message: {str(e)}")
 
 async def shutdown():
     """Closes all application components"""
     logger.info("Shutting down...")
-    
+
     if task_manager:
         await task_manager.stop()
         logger.info("Task manager stopped")
-    
+
     if kafka_consumer:
         await kafka_consumer.stop()
         logger.info("Kafka consumer stopped")
-    
+
     if kafka_producer:
         await kafka_producer.stop()
         logger.info("Kafka producer stopped")
-    
+
     if service_client:
         await service_client.close()
         logger.info("Service client closed")
-    
+
     if image_generator:
         await image_generator.close()
         logger.info("Image generator closed")
-    
+
     logger.info("Shutdown complete")
 
 async def main():
@@ -181,28 +181,28 @@ async def main():
     if not config_status["valid"]:
         logger.error(f"Invalid configuration: {config_status['issues']}")
         sys.exit(1)
-    
+
     # Output configuration information
     logger.info(f"Starting AI Worker with configuration: {config_status['config']}")
-    
+
     # Set signal handlers for graceful shutdown
     loop = asyncio.get_event_loop()
-    
+
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown()))
-    
+
     try:
         logger.info("Starting AI Worker service")
         worker_id = f"worker-{uuid.uuid4().hex[:8]}"
         logger.info(f"Worker ID: {worker_id}")
-        
+
         # Initialize components
         await initialize_components()
-        
+
         # Main application loop
         while True:
             await asyncio.sleep(3600)  # Just keep the application running
-            
+
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
     finally:
@@ -214,6 +214,6 @@ if __name__ == "__main__":
         import uvloop
         uvloop.install()
         logger.info("Using uvloop event loop")
-    
+
     # Run main function
     asyncio.run(main())

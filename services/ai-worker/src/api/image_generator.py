@@ -22,6 +22,8 @@ from ..db.models import ApiRequestHistory
 from ..utils.media_uploader import download_and_upload_image
 
 MODEL_ID = "runware:100@1"
+# Cost per image generation in USD
+IMAGE_GENERATION_COST = 0.0006
 
 class ImageGenerator:
     """
@@ -29,7 +31,7 @@ class ImageGenerator:
     Handles image generation and upload to media-service.
     """
 
-    def __init__(self, api_key: str = RUNWARE_API_KEY, db_manager=None, service_client=None):
+    def __init__(self, api_key: str = RUNWARE_API_KEY, db_manager=None, service_client=None, progress_manager=None):
         """
         Initializes the image generator
 
@@ -37,10 +39,12 @@ class ImageGenerator:
             api_key: API key for Runware
             db_manager: Optional database manager for request logging
             service_client: Client for interacting with other services
+            progress_manager: Optional progress manager for cost tracking
         """
         self.api_key = api_key
         self.db_manager = db_manager
         self.service_client = service_client
+        self.progress_manager = progress_manager
         self.semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
         self._runware = None
 
@@ -208,6 +212,14 @@ class ImageGenerator:
                 if not images:
                     raise Exception("No images were generated")
 
+                # Update cost in progress manager if available
+                if self.progress_manager and world_id:
+                    await self.progress_manager.increment_cost(
+                        world_id=world_id,
+                        cost_type="image",
+                        cost=IMAGE_GENERATION_COST
+                    )
+
                 # Get the image URL
                 image_url = images[0].imageURL
                 logger.info(f"Generated image at URL: {image_url}")
@@ -276,7 +288,8 @@ class ImageGenerator:
                     "image_url": public_url or image_url,
                     "width": width,
                     "height": height,
-                    "variants": variants
+                    "variants": variants,
+                    "cost": IMAGE_GENERATION_COST
                 }
 
                 # Log request if db_manager is available

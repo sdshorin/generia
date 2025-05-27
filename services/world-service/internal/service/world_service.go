@@ -25,6 +25,37 @@ import (
 	worldpb "github.com/sdshorin/generia/api/grpc/world"
 )
 
+// StageInfo represents information about generation stage status
+type StageInfo struct {
+	Name   string `bson:"name"`
+	Status string `bson:"status"`
+}
+
+// WorldGenerationStatus represents the world generation progress information
+type WorldGenerationStatus struct {
+	ID                     string      `bson:"_id"`
+	Status                 string      `bson:"status"`
+	CurrentStage           string      `bson:"current_stage"`
+	Stages                 []StageInfo `bson:"stages"`
+	TasksTotal             int         `bson:"tasks_total"`
+	TasksCompleted         int         `bson:"tasks_completed"`
+	TasksFailed            int         `bson:"tasks_failed"`
+	TaskPredicted          int         `bson:"task_predicted"`
+	UsersCreated           int         `bson:"users_created"`
+	PostsCreated           int         `bson:"posts_created"`
+	UsersPredicted         int         `bson:"users_predicted"`
+	PostsPredicted         int         `bson:"posts_predicted"`
+	ApiCallLimitsLLM       int         `bson:"api_call_limits_LLM"`
+	ApiCallLimitsImages    int         `bson:"api_call_limits_images"`
+	ApiCallsMadeLLM        int         `bson:"api_calls_made_LLM"`
+	ApiCallsMadeImages     int         `bson:"api_calls_made_images"`
+	LlmCostTotal           float64     `bson:"llm_cost_total"`
+	ImageCostTotal         float64     `bson:"image_cost_total"`
+	Parameters             bson.M      `bson:"parameters"`
+	CreatedAt              time.Time   `bson:"created_at"`
+	UpdatedAt              time.Time   `bson:"updated_at"`
+}
+
 // WorldService implements the world gRPC service
 type WorldService struct {
 	worldpb.UnimplementedWorldServiceServer
@@ -460,34 +491,79 @@ func (s *WorldService) UpdateWorldImage(ctx context.Context, req *worldpb.Update
 	}, nil
 }
 
-// // GetGenerationStatus handles getting the generation status of a world
-// func (s *WorldService) GetGenerationStatus(ctx context.Context, req *worldpb.GetGenerationStatusRequest) (*worldpb.GetGenerationStatusResponse, error) {
-// 	// Validate input
-// 	if req.WorldId == "" {
-// 		return nil, status.Errorf(codes.InvalidArgument, "world_id is required")
-// 	}
+// GetGenerationStatus handles getting the generation status of a world
+func (s *WorldService) GetGenerationStatus(ctx context.Context, req *worldpb.GetGenerationStatusRequest) (*worldpb.GetGenerationStatusResponse, error) {
+	// Validate input
+	if req.WorldId == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "world_id is required")
+	}
 
-// 	// Get world
-// 	world, err := s.worldRepo.GetByID(ctx, req.WorldId)
-// 	if err != nil {
-// 		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", req.WorldId))
-// 		return nil, status.Errorf(codes.Internal, "failed to get world")
-// 	}
+	// Get world
+	world, err := s.worldRepo.GetByID(ctx, req.WorldId)
+	if err != nil {
+		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to get world")
+	}
 
-// 	if world == nil {
-// 		return nil, status.Errorf(codes.NotFound, "world not found")
-// 	}
+	if world == nil {
+		return nil, status.Errorf(codes.NotFound, "world not found")
+	}
 
-// 	// todo: load status from mongo - services/ai-worker/src/utils/progress.py
+	// Get generation status from MongoDB
+	generationStatus, err := s.getGenerationStatusFromMongo(ctx, req.WorldId)
+	if err != nil {
+		logger.Logger.Error("Failed to get generation status from MongoDB", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to get generation status")
+	}
 
-// 	return &worldpb.GetGenerationStatusResponse{
-// 		Status:             world.GenerationStatus,
-// 		Message:            message,
-// 		UsersGenerated:     int32(usersGenerated),
-// 		PostsGenerated:     int32(postsGenerated),
-// 		ProgressPercentage: progressPercentage,
-// 	}, nil
-// }
+	if generationStatus == nil {
+		// No generation status found, return default response
+		return &worldpb.GetGenerationStatusResponse{
+			Status:         "not_started",
+			CurrentStage:   "",
+			Stages:         []*worldpb.StageInfo{},
+			TasksTotal:     0,
+			TasksCompleted: 0,
+			TasksFailed:    0,
+			TaskPredicted:  0,
+			UsersCreated:   0,
+			PostsCreated:   0,
+			UsersPredicted: 0,
+			PostsPredicted: 0,
+		}, nil
+	}
+
+	// Convert stages to protobuf format
+	stages := make([]*worldpb.StageInfo, len(generationStatus.Stages))
+	for i, stage := range generationStatus.Stages {
+		stages[i] = &worldpb.StageInfo{
+			Name:   stage.Name,
+			Status: stage.Status,
+		}
+	}
+
+	return &worldpb.GetGenerationStatusResponse{
+		Status:                generationStatus.Status,
+		CurrentStage:          generationStatus.CurrentStage,
+		Stages:                stages,
+		TasksTotal:            int32(generationStatus.TasksTotal),
+		TasksCompleted:        int32(generationStatus.TasksCompleted),
+		TasksFailed:           int32(generationStatus.TasksFailed),
+		TaskPredicted:         int32(generationStatus.TaskPredicted),
+		UsersCreated:          int32(generationStatus.UsersCreated),
+		PostsCreated:          int32(generationStatus.PostsCreated),
+		UsersPredicted:        int32(generationStatus.UsersPredicted),
+		PostsPredicted:        int32(generationStatus.PostsPredicted),
+		ApiCallLimitsLlm:      int32(generationStatus.ApiCallLimitsLLM),
+		ApiCallLimitsImages:   int32(generationStatus.ApiCallLimitsImages),
+		ApiCallsMadeLlm:       int32(generationStatus.ApiCallsMadeLLM),
+		ApiCallsMadeImages:    int32(generationStatus.ApiCallsMadeImages),
+		LlmCostTotal:          generationStatus.LlmCostTotal,
+		ImageCostTotal:        generationStatus.ImageCostTotal,
+		CreatedAt:             generationStatus.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:             generationStatus.UpdatedAt.Format(time.RFC3339),
+	}, nil
+}
 
 // HealthCheck implements health check
 func (s *WorldService) HealthCheck(ctx context.Context, req *worldpb.HealthCheckRequest) (*worldpb.HealthCheckResponse, error) {
@@ -606,4 +682,36 @@ func (s *WorldService) createMongoDBTask(ctx context.Context, taskID, worldID st
 		zap.String("world_id", worldID))
 
 	return nil
+}
+
+// getGenerationStatusFromMongo retrieves the world generation status from MongoDB
+func (s *WorldService) getGenerationStatusFromMongo(ctx context.Context, worldID string) (*WorldGenerationStatus, error) {
+	// Get MongoDB configuration from environment
+	mongoURI := os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://mongodb:27017" // Default value if not set
+	}
+
+	// Connect to MongoDB
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
+	}
+	defer client.Disconnect(ctx)
+
+	// Select database and collection
+	db := client.Database("generia_ai_worker")
+	collection := db.Collection("world_generation_status")
+
+	// Find generation status by world ID
+	var generationStatus WorldGenerationStatus
+	err = collection.FindOne(ctx, bson.M{"_id": worldID}).Decode(&generationStatus)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil // No generation status found
+		}
+		return nil, fmt.Errorf("failed to find generation status: %w", err)
+	}
+
+	return &generationStatus, nil
 }

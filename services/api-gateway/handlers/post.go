@@ -230,6 +230,7 @@ type FeedResponse struct {
 	Posts      []PostResponse `json:"posts"`
 	Total      int            `json:"total"`
 	NextCursor string         `json:"next_cursor,omitempty"`
+	HasMore    bool           `json:"has_more"`
 }
 
 // GetUserPosts handles requests to get posts by user ID
@@ -325,8 +326,9 @@ func (h *PostHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 
 	// Send response
 	response := FeedResponse{
-		Posts: posts,
-		Total: int(resp.Total),
+		Posts:   posts,
+		Total:   int(resp.Total),
+		HasMore: len(posts) == limit,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -398,8 +400,9 @@ func (h *PostHandler) GetCharacterPosts(w http.ResponseWriter, r *http.Request) 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(FeedResponse{
-		Posts: posts,
-		Total: len(posts),
+		Posts:   posts,
+		Total:   len(posts),
+		HasMore: len(posts) == limit,
 	})
 }
 
@@ -485,6 +488,7 @@ func (h *PostHandler) GetGlobalPosts(w http.ResponseWriter, r *http.Request) {
 		Posts:      posts,
 		Total:      len(posts),
 		NextCursor: resp.NextCursor,
+		HasMore:    resp.NextCursor != "",
 	}
 
 	w.Header().Set("Content-Type", "application/json")

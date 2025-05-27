@@ -44,6 +44,8 @@ class WorldGenerationStatus(BaseModel):
     api_call_limits_images: int
     api_calls_made_LLM: int
     api_calls_made_images: int
+    llm_cost_total: float
+    image_cost_total: float
     parameters: Dict[str, Any]
     created_at: datetime
     updated_at: datetime

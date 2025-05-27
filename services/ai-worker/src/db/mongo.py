@@ -372,6 +372,8 @@ class MongoDBManager:
             api_call_limits_images=api_call_limits_images,
             api_calls_made_LLM=0,
             api_calls_made_images=0,
+            llm_cost_total=0.0,
+            image_cost_total=0.0,
             parameters={
                 "users_count": users_count,
                 "posts_count": posts_count,
@@ -494,7 +496,8 @@ class MongoDBManager:
         allowed_fields = [
             "tasks_total", "tasks_completed", "tasks_failed",
             "users_created", "posts_created",
-            "api_calls_made_LLM", "api_calls_made_images"
+            "api_calls_made_LLM", "api_calls_made_images",
+            "llm_cost_total", "image_cost_total"
         ]
 
         if field not in allowed_fields:
@@ -517,6 +520,48 @@ class MongoDBManager:
         updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})
 
         # logger.debug(f"Incremented {field} counter by {increment} for world {world_id}")
+
+        return updated_status
+
+    async def increment_world_generation_cost(
+        self, world_id: str, cost_type: str, cost: float
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Atomically increments cost in the generation status document
+
+        Args:
+            world_id: World ID
+            cost_type: Type of cost ("llm" or "image")
+            cost: Cost amount to add
+
+        Returns:
+            Updated document or None if document not found
+
+        Raises:
+            ValueError: If cost_type is not valid
+        """
+        if cost_type not in ["llm", "image"]:
+            error_msg = f"Invalid cost type: {cost_type}. Must be 'llm' or 'image'"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        field_name = f"{cost_type}_cost_total"
+
+        result = await self.world_generation_status_collection.update_one(
+            {"_id": world_id},
+            {
+                "$inc": {field_name: cost},
+                "$set": {"updated_at": datetime.now(timezone.utc)}
+            }
+        )
+
+        if result.matched_count == 0:
+            logger.error(f"Could not find generation status for world {world_id}")
+            return None
+
+        updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})
+
+        logger.debug(f"Incremented {cost_type} cost by ${cost:.6f} for world {world_id}")
 
         return updated_status
 

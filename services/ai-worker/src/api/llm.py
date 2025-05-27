@@ -23,19 +23,21 @@ class LLMClient:
     """
     Client for working with LLM API via OpenRouter
     """
-    
-    def __init__(self, api_key: str = OPENROUTER_API_KEY, db_manager=None):
+
+    def __init__(self, api_key: str = OPENROUTER_API_KEY, db_manager=None, progress_manager=None):
         """
         Initializes LLM client
-        
+
         Args:
             api_key: API key for OpenRouter
             db_manager: Optional database manager for request logging
+            progress_manager: Optional progress manager for cost tracking
         """
         self.api_key = api_key
         self.db_manager = db_manager
+        self.progress_manager = progress_manager
         self.semaphore = asyncio.Semaphore(15)  # Limit the number of concurrent requests
-    
+
     @circuit_breaker(name="llm_content", failure_threshold=3, recovery_timeout=60.0, timeout=120.0)
     @with_retries(max_retries=2)
     async def generate_content(
@@ -49,7 +51,7 @@ class LLMClient:
     ) -> Dict[str, Any]:
         """
         Generates text content using LLM
-        
+
         Args:
             prompt: Prompt for generation
             model: Model to use
@@ -57,20 +59,20 @@ class LLMClient:
             max_output_tokens: Maximum number of tokens in the response
             task_id: Task ID for logging
             world_id: World ID for logging
-            
+
         Returns:
             Dictionary with API response
         """
         async with self.semaphore:
             start_time = time.time()
             request_id = str(uuid.uuid4())
-            
+
             try:
                 headers = {
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
                 }
-                
+
                 data = {
                     "model": model,
                     "messages": [
@@ -78,8 +80,11 @@ class LLMClient:
                     ],
                     "temperature": temperature,
                     "max_tokens": max_output_tokens,
+                    "usage": {
+                        "include": True
+                    }
                 }
-                
+
                 # For request logging
                 request_data = {
                     "prompt": prompt,
@@ -87,7 +92,7 @@ class LLMClient:
                     "temperature": temperature,
                     "max_output_tokens": max_output_tokens,
                 }
-                
+
                 # Execute request in a separate thread to avoid blocking
                 loop = asyncio.get_event_loop()
                 response = await loop.run_in_executor(
@@ -98,53 +103,67 @@ class LLMClient:
                         json=data,
                     )
                 )
-                
+
                 # Логируем статус ответа и заголовки
                 # logger.info(f"OpenRouter API response status: {response.status_code}")
                 # logger.info(f"OpenRouter API response headers: {dict(response.headers)}")
-                
+
                 if response.status_code != 200:
                     error_text = response.text
                     logger.error(f"OpenRouter API error response: {error_text}")
                     raise Exception(f"OpenRouter API error: {response.status_code} - {error_text}")
-                
+
                 response_data = response.json()
-                
+
                 # Логируем полный ответ от API
                 # logger.info(f"OpenRouter API full response: {json.dumps(response_data, indent=2)}")
-                
+
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Проверяем наличие необходимых полей в ответе
                 if "choices" not in response_data:
                     logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                     raise Exception(f"Unexpected response format from OpenRouter API: missing 'choices' field")
-                
+
                 if not response_data["choices"]:
                     logger.error(f"Empty choices array in OpenRouter API response: {json.dumps(response_data, indent=2)}")
                     raise Exception("Empty choices array in OpenRouter API response")
-                
+
                 if "message" not in response_data["choices"][0]:
                     logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                     raise Exception(f"Unexpected response format from OpenRouter API: missing 'message' field in first choice")
-                
+
                 if "content" not in response_data["choices"][0]["message"]:
                     logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                     raise Exception(f"Unexpected response format from OpenRouter API: missing 'content' field in message")
-                
+
                 # Get and parse JSON response
                 content = response_data["choices"][0]["message"]["content"]
-                
+
                 # Логируем полученный контент
                 # logger.info(f"OpenRouter API content: {content}")
-                
+
+                # Extract cost information if available
+                cost = 0.0
+                if "usage" in response_data and "cost" in response_data["usage"]:
+                    cost = float(response_data["usage"]["cost"])
+
+                    # Update cost in progress manager if available
+                    if self.progress_manager and world_id:
+                        await self.progress_manager.increment_cost(
+                            world_id=world_id,
+                            cost_type="llm",
+                            cost=cost
+                        )
+
                 # Prepare response for logging
                 result = {
                     "text": content,
                     "model": model,
                     "finish_reason": response_data["choices"][0].get("finish_reason", "unknown"),
+                    "cost": cost,
                 }
-                
+
                 # Log request if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -159,17 +178,17 @@ class LLMClient:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 # logger.info(
                 #     f"LLM API call completed in {duration_ms}ms. "
                 #     f"Model: {model}, TaskID: {task_id or 'manual'}"
                 # )
-                
+
                 return result
-                
+
             except Exception as e:
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Log error if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -184,10 +203,10 @@ class LLMClient:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 logger.error(f"LLM API error: {str(e)}")
                 raise
-    
+
     @circuit_breaker(name="llm_structured", failure_threshold=3, recovery_timeout=60.0, timeout=120.0)
     @with_retries(max_retries=2)
     async def generate_structured_content(
@@ -203,7 +222,7 @@ class LLMClient:
     ) -> Any:
         """
         Generates structured content using LLM
-        
+
         Args:
             prompt: Prompt for generation
             response_schema: Pydantic schema or JSON schema dictionary for structured output
@@ -212,14 +231,14 @@ class LLMClient:
             max_output_tokens: Maximum number of tokens in the response
             task_id: Task ID for logging
             world_id: World ID for logging
-            
+
         Returns:
             Object matching the response_schema
         """
         async with self.semaphore:
             start_time = time.time()
             request_id = str(uuid.uuid4())
-            
+
             try:
                 # Prepare JSON schema for request
                 if isinstance(response_schema, dict):
@@ -230,7 +249,7 @@ class LLMClient:
                     # If Pydantic schema is passed
                     schema_dict = response_schema.model_json_schema()
                     schema_str = str(response_schema)
-                
+
                 # Функция для замены всех $ref на соответствующие определения из $defs
                 def replace_refs_with_defs(schema):
                     if isinstance(schema, dict):
@@ -251,10 +270,10 @@ class LLMClient:
                                     if isinstance(item, dict):
                                         replace_refs_with_defs(item)
                     return schema
-                
+
                 # Заменяем все $ref на определения
                 schema_dict = replace_refs_with_defs(schema_dict)
-                
+
                 # Упрощаем allOf конструкции
                 def simplify_allof(schema):
                     if isinstance(schema, dict):
@@ -273,16 +292,16 @@ class LLMClient:
                     return schema
 
                 schema_dict = simplify_allof(schema_dict)
-                
+
                 # Удаляем $defs, так как все ссылки уже заменены
                 if "$defs" in schema_dict:
                     del schema_dict["$defs"]
-                
+
                 # Ensure additionalProperties is set to false for strict validation
                 if isinstance(schema_dict, dict):
                     # Add additionalProperties: false to the root schema
                     schema_dict["additionalProperties"] = False
-                    
+
                     # Also add it to all object properties
                     def add_additional_properties_false(schema):
                         if isinstance(schema, dict):
@@ -297,13 +316,13 @@ class LLMClient:
                                     for item in value:
                                         if isinstance(item, dict):
                                             add_additional_properties_false(item)
-                    
+
                     add_additional_properties_false(schema_dict)
-                    
+
                     # Добавляем массив required, включающий все ключи из properties
                     if "properties" in schema_dict:
                         schema_dict["required"] = list(schema_dict["properties"].keys())
-                        
+
                         # Рекурсивно добавляем required для вложенных объектов
                         def add_required_to_objects(schema):
                             if isinstance(schema, dict):
@@ -316,15 +335,15 @@ class LLMClient:
                                         for item in value:
                                             if isinstance(item, dict):
                                                 add_required_to_objects(item)
-                        
+
                         add_required_to_objects(schema_dict)
-                
+
                 # logger.info(f"schema_dict: {schema_dict}")
                 headers = {
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
                 }
-                
+
                 data = {
                     "model": model,
                     "messages": [
@@ -340,8 +359,11 @@ class LLMClient:
                             "schema": schema_dict
                         },
                     },
+                    "usage": {
+                        "include": True
+                    }
                 }
-                
+
                 # For request logging
                 request_data = {
                     "prompt": prompt,
@@ -350,7 +372,7 @@ class LLMClient:
                     "max_output_tokens": max_output_tokens,
                     "response_schema": schema_str
                 }
-                
+
                 # Execute request in a separate thread to avoid blocking
                 loop = asyncio.get_event_loop()
                 response = await loop.run_in_executor(
@@ -361,50 +383,63 @@ class LLMClient:
                         json=data,
                     )
                 )
-                
+
                 # Логируем статус ответа и заголовки
                 # logger.info(f"OpenRouter API response status: {response.status_code}")
                 # logger.info(f"OpenRouter API response headers: {dict(response.headers)}")
-                
+
                 if response.status_code != 200:
                     error_text = response.text
                     # logger.error(f"OpenRouter API error response: {error_text}")
                     raise Exception(f"OpenRouter API error: {response.status_code} - {error_text}")
-                
+
                 response_data = response.json()
-                
+
                 # Логируем полный ответ от API
                 # logger.info(f"OpenRouter API full response: {json.dumps(response_data, indent=2)}")
-                
+
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Проверяем наличие необходимых полей в ответе
                 # if "choices" not in response_data:
                 #     logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                 #     raise Exception(f"Unexpected response format from OpenRouter API: missing 'choices' field")
-                
+
                 # if not response_data["choices"]:
                 #     logger.error(f"Empty choices array in OpenRouter API response: {json.dumps(response_data, indent=2)}")
                 #     raise Exception("Empty choices array in OpenRouter API response")
-                
+
                 # if "message" not in response_data["choices"][0]:
                 #     logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                 #     raise Exception(f"Unexpected response format from OpenRouter API: missing 'message' field in first choice")
-                
+
                 # if "content" not in response_data["choices"][0]["message"]:
                 #     logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                 #     raise Exception(f"Unexpected response format from OpenRouter API: missing 'content' field in message")
-                
+
                 # Get and parse JSON response
                 content = response_data["choices"][0]["message"]["content"]
-                
+
                 # Логируем полученный контент
                 # logger.info(f"OpenRouter API content: {content}")
-                
+
+                # Extract cost information if available
+                cost = 0.0
+                if "usage" in response_data and "cost" in response_data["usage"]:
+                    cost = float(response_data["usage"]["cost"])
+
+                    # Update cost in progress manager if available
+                    if self.progress_manager and world_id:
+                        await self.progress_manager.increment_cost(
+                            world_id=world_id,
+                            cost_type="llm",
+                            cost=cost
+                        )
+
                 try:
                     structured_response = json.loads(content)
                     # logger.info(f"Parsed structured response: {json.dumps(structured_response, indent=2)}")
-                    
+
                     # Преобразуем словарь в объект Pydantic, если передан класс схемы
                     if not isinstance(response_schema, dict):
                         structured_response = response_schema.model_validate(structured_response)
@@ -415,13 +450,14 @@ class LLMClient:
                 except Exception as e:
                     logger.error(f"Failed to validate response against schema: {str(e)}")
                     raise Exception(f"Failed to validate response against schema: {str(e)}")
-                
+
                 # Prepare response for logging
                 result = {
                     "model": model,
-                    "structured_data": content
+                    "structured_data": content,
+                    "cost": cost
                 }
-                
+
                 # Log request if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -436,17 +472,17 @@ class LLMClient:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 # logger.info(
                 #     f"LLM API structured call completed in {duration_ms}ms. "
                 #     f"Model: {model}, TaskID: {task_id or 'manual'}"
                 # )
-                
+
                 return structured_response
-                
+
             except Exception as e:
                 duration_ms = int((time.time() - start_time) * 1000)
-                
+
                 # Log error if db_manager is available
                 if self.db_manager:
                     log_entry = ApiRequestHistory(
@@ -461,6 +497,6 @@ class LLMClient:
                         created_at=datetime.utcnow()
                     )
                     await self.db_manager.log_api_request(log_entry)
-                
+
                 logger.error(f"LLM API structured error: {str(e)}")
                 raise

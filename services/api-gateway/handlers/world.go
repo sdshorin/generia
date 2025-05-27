@@ -3,11 +3,13 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"github.com/sdshorin/generia/pkg/logger"
 	"github.com/sdshorin/generia/services/api-gateway/middleware"
@@ -30,13 +32,15 @@ type WorldHandler struct {
 	worldClient worldpb.WorldServiceClient
 	timeout     time.Duration
 	tracer      trace.Tracer
+	jwtSecret   string
 }
 
 // NewWorldHandler creates a new WorldHandler
-func NewWorldHandler(worldClient worldpb.WorldServiceClient, timeout time.Duration) *WorldHandler {
+func NewWorldHandler(worldClient worldpb.WorldServiceClient, timeout time.Duration, jwtSecret string) *WorldHandler {
 	return &WorldHandler{
 		worldClient: worldClient,
 		timeout:     timeout,
+		jwtSecret:   jwtSecret,
 	}
 }
 
@@ -229,41 +233,158 @@ func (h *WorldHandler) JoinWorld(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetWorldStatus handles GET /worlds/{world_id}/status
-// func (h *WorldHandler) GetWorldStatus(w http.ResponseWriter, r *http.Request) {
-// 	ctx := r.Context()
-// 	userIDValue := ctx.Value(middleware.UserIDKey)
-// 	if userIDValue == nil {
-// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-// 		return
-// 	}
-// 	userID, ok := userIDValue.(string)
-// 	if !ok || userID == "" {
-// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-// 		return
-// 	}
+func (h *WorldHandler) GetWorldStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userIDValue := ctx.Value(middleware.UserIDKey)
+	if userIDValue == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userID, ok := userIDValue.(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
-// 	vars := mux.Vars(r)
-// 	worldID := vars["world_id"]
-// 	if worldID == "" {
-// 		http.Error(w, "world_id is required", http.StatusBadRequest)
-// 		return
-// 	}
+	vars := mux.Vars(r)
+	worldID := vars["world_id"]
+	if worldID == "" {
+		http.Error(w, "world_id is required", http.StatusBadRequest)
+		return
+	}
 
-// 	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
-// 	defer cancel()
+	timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
+	defer cancel()
 
-// 	resp, err := h.worldClient.GetGenerationStatus(timeoutCtx, &worldpb.GetGenerationStatusRequest{
-// 		WorldId: worldID,
-// 	})
+	resp, err := h.worldClient.GetGenerationStatus(timeoutCtx, &worldpb.GetGenerationStatusRequest{
+		WorldId: worldID,
+	})
 
-// 	if err != nil {
-// 		logger.Logger.Error("Failed to get world generation status",
-// 			zap.Error(err),
-// 			zap.String("world_id", worldID))
-// 		http.Error(w, "Failed to get world generation status", http.StatusInternalServerError)
-// 		return
-// 	}
+	if err != nil {
+		logger.Logger.Error("Failed to get world generation status",
+			zap.Error(err),
+			zap.String("world_id", worldID))
+		http.Error(w, "Failed to get world generation status", http.StatusInternalServerError)
+		return
+	}
 
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(resp)
-// }
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+// validateTokenFromQuery validates JWT token from query parameters
+func (h *WorldHandler) validateTokenFromQuery(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(h.jwtSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return "", fmt.Errorf("invalid token: %w", err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if userID, ok := claims["user_id"].(string); ok {
+			return userID, nil
+		}
+		return "", fmt.Errorf("user_id not found in token")
+	}
+
+	return "", fmt.Errorf("invalid token format")
+}
+
+// StreamWorldStatus handles SSE for world generation status
+func (h *WorldHandler) StreamWorldStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	
+	// For SSE, we need to check token from query params since EventSource doesn't support custom headers
+	token := r.URL.Query().Get("token")
+	var userID string
+	
+	if token == "" {
+		// Fallback to context (if middleware already handled it)
+		userIDValue := ctx.Value(middleware.UserIDKey)
+		if userIDValue == nil {
+			http.Error(w, "Unauthorized: token required", http.StatusUnauthorized)
+			return
+		}
+		var ok bool
+		userID, ok = userIDValue.(string)
+		if !ok || userID == "" {
+			http.Error(w, "Unauthorized: invalid user context", http.StatusUnauthorized)
+			return
+		}
+	} else {
+		// Validate token manually for SSE
+		var err error
+		userID, err = h.validateTokenFromQuery(token)
+		if err != nil {
+			logger.Logger.Debug("SSE token validation failed", zap.Error(err))
+			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+			return
+		}
+	}
+
+	vars := mux.Vars(r)
+	worldID := vars["world_id"]
+	if worldID == "" {
+		http.Error(w, "world_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Set SSE headers
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Cache-Control")
+
+	// Send a ping immediately to establish connection
+	fmt.Fprintf(w, "data: {\"type\": \"ping\"}\n\n")
+	if flusher, ok := w.(http.Flusher); ok {
+		flusher.Flush()
+	}
+
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			// Get generation status
+			timeoutCtx, cancel := context.WithTimeout(ctx, h.timeout)
+			resp, err := h.worldClient.GetGenerationStatus(timeoutCtx, &worldpb.GetGenerationStatusRequest{
+				WorldId: worldID,
+			})
+			cancel()
+
+			if err != nil {
+				logger.Logger.Error("Failed to get world generation status in SSE",
+					zap.Error(err),
+					zap.String("world_id", worldID))
+				continue
+			}
+
+			// Convert response to JSON
+			jsonData, err := json.Marshal(resp)
+			if err != nil {
+				logger.Logger.Error("Failed to marshal generation status",
+					zap.Error(err),
+					zap.String("world_id", worldID))
+				continue
+			}
+
+			// Send data
+			fmt.Fprintf(w, "data: %s\n\n", jsonData)
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
+			}
+
+			// Stop streaming if generation is completed
+			if resp.Status == "completed" || resp.Status == "failed" {
+				return
+			}
+		}
+	}
+}

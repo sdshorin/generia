@@ -1,6 +1,6 @@
 import axios from 'axios';
 import axiosInstance from './axios';
-import { AuthResponse, World, Post, Comment, UploadUrlResponse, Media } from '../types';
+import { AuthResponse, World, Post, Comment, UploadUrlResponse, Media, WorldGenerationStatus } from '../types';
 
 // Auth API
 export const authAPI = {
@@ -60,9 +60,18 @@ export const worldsAPI = {
     return response.data;
   },
   
-  getWorldStatus: async (worldId: string) => {
-    const response = await axiosInstance.get(`/worlds/${worldId}/status`);
+  getWorldStatus: async (worldId: string): Promise<WorldGenerationStatus> => {
+    const response = await axiosInstance.get<WorldGenerationStatus>(`/worlds/${worldId}/status`);
     return response.data;
+  },
+
+  createWorldStatusEventSource: (worldId: string): EventSource => {
+    const token = localStorage.getItem('token');
+    const url = new URL(`${axiosInstance.defaults.baseURL}/worlds/${worldId}/status/stream`);
+    if (token) {
+      url.searchParams.append('token', token);
+    }
+    return new EventSource(url.toString());
   },
   
   generateWorldContent: async (worldId: string) => {
