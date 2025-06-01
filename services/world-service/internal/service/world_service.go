@@ -7,9 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/sdshorin/generia/pkg/kafka"
 	"github.com/sdshorin/generia/pkg/logger"
+	"github.com/sdshorin/generia/pkg/temporal"
 	"github.com/sdshorin/generia/services/world-service/internal/models"
 	"github.com/sdshorin/generia/services/world-service/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,37 +32,37 @@ type StageInfo struct {
 
 // WorldGenerationStatus represents the world generation progress information
 type WorldGenerationStatus struct {
-	ID                     string      `bson:"_id"`
-	Status                 string      `bson:"status"`
-	CurrentStage           string      `bson:"current_stage"`
-	Stages                 []StageInfo `bson:"stages"`
-	TasksTotal             int         `bson:"tasks_total"`
-	TasksCompleted         int         `bson:"tasks_completed"`
-	TasksFailed            int         `bson:"tasks_failed"`
-	TaskPredicted          int         `bson:"task_predicted"`
-	UsersCreated           int         `bson:"users_created"`
-	PostsCreated           int         `bson:"posts_created"`
-	UsersPredicted         int         `bson:"users_predicted"`
-	PostsPredicted         int         `bson:"posts_predicted"`
-	ApiCallLimitsLLM       int         `bson:"api_call_limits_LLM"`
-	ApiCallLimitsImages    int         `bson:"api_call_limits_images"`
-	ApiCallsMadeLLM        int         `bson:"api_calls_made_LLM"`
-	ApiCallsMadeImages     int         `bson:"api_calls_made_images"`
-	LlmCostTotal           float64     `bson:"llm_cost_total"`
-	ImageCostTotal         float64     `bson:"image_cost_total"`
-	Parameters             bson.M      `bson:"parameters"`
-	CreatedAt              time.Time   `bson:"created_at"`
-	UpdatedAt              time.Time   `bson:"updated_at"`
+	ID                  string      `bson:"_id"`
+	Status              string      `bson:"status"`
+	CurrentStage        string      `bson:"current_stage"`
+	Stages              []StageInfo `bson:"stages"`
+	TasksTotal          int         `bson:"tasks_total"`
+	TasksCompleted      int         `bson:"tasks_completed"`
+	TasksFailed         int         `bson:"tasks_failed"`
+	TaskPredicted       int         `bson:"task_predicted"`
+	UsersCreated        int         `bson:"users_created"`
+	PostsCreated        int         `bson:"posts_created"`
+	UsersPredicted      int         `bson:"users_predicted"`
+	PostsPredicted      int         `bson:"posts_predicted"`
+	ApiCallLimitsLLM    int         `bson:"api_call_limits_LLM"`
+	ApiCallLimitsImages int         `bson:"api_call_limits_images"`
+	ApiCallsMadeLLM     int         `bson:"api_calls_made_LLM"`
+	ApiCallsMadeImages  int         `bson:"api_calls_made_images"`
+	LlmCostTotal        float64     `bson:"llm_cost_total"`
+	ImageCostTotal      float64     `bson:"image_cost_total"`
+	Parameters          bson.M      `bson:"parameters"`
+	CreatedAt           time.Time   `bson:"created_at"`
+	UpdatedAt           time.Time   `bson:"updated_at"`
 }
 
 // WorldService implements the world gRPC service
 type WorldService struct {
 	worldpb.UnimplementedWorldServiceServer
-	worldRepo     repository.WorldRepository
-	authClient    authpb.AuthServiceClient
-	postClient    postpb.PostServiceClient
-	mediaClient   mediapb.MediaServiceClient
-	kafkaProducer *kafka.Producer
+	worldRepo      repository.WorldRepository
+	authClient     authpb.AuthServiceClient
+	postClient     postpb.PostServiceClient
+	mediaClient    mediapb.MediaServiceClient
+	temporalClient *temporal.Client
 }
 
 // NewWorldService creates a new WorldService
@@ -72,14 +71,19 @@ func NewWorldService(
 	authClient authpb.AuthServiceClient,
 	postClient postpb.PostServiceClient,
 	mediaClient mediapb.MediaServiceClient,
-	kafkaBrokers []string,
+	temporalHostPort string,
 ) worldpb.WorldServiceServer {
+	temporalClient, err := temporal.NewClient(temporalHostPort)
+	if err != nil {
+		logger.Logger.Fatal("Failed to create Temporal client", zap.Error(err))
+	}
+
 	return &WorldService{
-		worldRepo:     worldRepo,
-		authClient:    authClient,
-		postClient:    postClient,
-		mediaClient:   mediaClient,
-		kafkaProducer: kafka.NewProducer(kafkaBrokers),
+		worldRepo:      worldRepo,
+		authClient:     authClient,
+		postClient:     postClient,
+		mediaClient:    mediaClient,
+		temporalClient: temporalClient,
 	}
 }
 
@@ -543,25 +547,25 @@ func (s *WorldService) GetGenerationStatus(ctx context.Context, req *worldpb.Get
 	}
 
 	return &worldpb.GetGenerationStatusResponse{
-		Status:                generationStatus.Status,
-		CurrentStage:          generationStatus.CurrentStage,
-		Stages:                stages,
-		TasksTotal:            int32(generationStatus.TasksTotal),
-		TasksCompleted:        int32(generationStatus.TasksCompleted),
-		TasksFailed:           int32(generationStatus.TasksFailed),
-		TaskPredicted:         int32(generationStatus.TaskPredicted),
-		UsersCreated:          int32(generationStatus.UsersCreated),
-		PostsCreated:          int32(generationStatus.PostsCreated),
-		UsersPredicted:        int32(generationStatus.UsersPredicted),
-		PostsPredicted:        int32(generationStatus.PostsPredicted),
-		ApiCallLimitsLlm:      int32(generationStatus.ApiCallLimitsLLM),
-		ApiCallLimitsImages:   int32(generationStatus.ApiCallLimitsImages),
-		ApiCallsMadeLlm:       int32(generationStatus.ApiCallsMadeLLM),
-		ApiCallsMadeImages:    int32(generationStatus.ApiCallsMadeImages),
-		LlmCostTotal:          generationStatus.LlmCostTotal,
-		ImageCostTotal:        generationStatus.ImageCostTotal,
-		CreatedAt:             generationStatus.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:             generationStatus.UpdatedAt.Format(time.RFC3339),
+		Status:              generationStatus.Status,
+		CurrentStage:        generationStatus.CurrentStage,
+		Stages:              stages,
+		TasksTotal:          int32(generationStatus.TasksTotal),
+		TasksCompleted:      int32(generationStatus.TasksCompleted),
+		TasksFailed:         int32(generationStatus.TasksFailed),
+		TaskPredicted:       int32(generationStatus.TaskPredicted),
+		UsersCreated:        int32(generationStatus.UsersCreated),
+		PostsCreated:        int32(generationStatus.PostsCreated),
+		UsersPredicted:      int32(generationStatus.UsersPredicted),
+		PostsPredicted:      int32(generationStatus.PostsPredicted),
+		ApiCallLimitsLlm:    int32(generationStatus.ApiCallLimitsLLM),
+		ApiCallLimitsImages: int32(generationStatus.ApiCallLimitsImages),
+		ApiCallsMadeLlm:     int32(generationStatus.ApiCallsMadeLLM),
+		ApiCallsMadeImages:  int32(generationStatus.ApiCallsMadeImages),
+		LlmCostTotal:        generationStatus.LlmCostTotal,
+		ImageCostTotal:      generationStatus.ImageCostTotal,
+		CreatedAt:           generationStatus.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:           generationStatus.UpdatedAt.Format(time.RFC3339),
 	}, nil
 }
 
@@ -574,7 +578,7 @@ func (s *WorldService) HealthCheck(ctx context.Context, req *worldpb.HealthCheck
 
 // Helper methods
 
-// createInitialGenerationTasks creates the initial task for world generation in Kafka and MongoDB
+// createInitialGenerationTasks starts the world creation workflow using Temporal
 func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID string, charactersCount, postsCount int) {
 	// Get world details
 	world, err := s.worldRepo.GetByID(ctx, worldID)
@@ -591,97 +595,31 @@ func (s *WorldService) createInitialGenerationTasks(ctx context.Context, worldID
 		return
 	}
 
-	// Create task ID
-	taskID := uuid.New().String()
-
-	// Parameters for initialization task with dynamic values
-	parameters := map[string]interface{}{
-		"user_prompt": world.Prompt,
-		"users_count": charactersCount,
-		"posts_count": postsCount,
-		"created_at":  time.Now().Format(time.RFC3339),
+	// Create input for Temporal workflow
+	input := temporal.InitWorldCreationInput{
+		WorldID:         worldID,
+		WorldName:       world.Name,
+		WorldPrompt:     world.Prompt,
+		CharactersCount: charactersCount,
+		PostsCount:      postsCount,
 	}
 
-	// Save task to MongoDB
-	err = s.createMongoDBTask(ctx, taskID, worldID, parameters)
+	// Execute Temporal workflow
+	workflowRun, err := s.temporalClient.ExecuteInitWorldCreationWorkflow(ctx, input)
 	if err != nil {
-		logger.Logger.Error("Failed to create task in MongoDB",
+		logger.Logger.Error("Failed to start Temporal workflow",
 			zap.Error(err),
-			zap.String("world_id", worldID),
-			zap.String("task_id", taskID))
+			zap.String("world_id", worldID))
 		return
 	}
 
-	// Send message to Kafka
-	kafkaMessage := map[string]interface{}{
-		"event_type": "task_created",
-		"task_id":    taskID,
-		"task_type":  "init_world_creation",
-		"world_id":   worldID,
-		"parameters": parameters,
-	}
-
-	err = s.kafkaProducer.SendJSON("generia-tasks", kafkaMessage)
-	if err != nil {
-		logger.Logger.Error("Failed to send task to Kafka",
-			zap.Error(err),
-			zap.String("world_id", worldID),
-			zap.String("task_id", taskID))
-	} else {
-		logger.Logger.Info("Successfully sent AI generation task to Kafka",
-			zap.String("task_id", taskID),
-			zap.String("world_id", worldID),
-			zap.String("prompt", world.Prompt),
-			zap.Int("users_count", charactersCount),
-			zap.Int("posts_count", postsCount))
-	}
-}
-
-// createMongoDBTask creates a task record in MongoDB
-func (s *WorldService) createMongoDBTask(ctx context.Context, taskID, worldID string, parameters map[string]interface{}) error {
-	// Get MongoDB configuration from environment
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		mongoURI = "mongodb://mongodb:27017" // Default value if not set
-	}
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		return fmt.Errorf("failed to connect to MongoDB: %w", err)
-	}
-	defer client.Disconnect(ctx)
-
-	// Select database
-	db := client.Database("generia_ai_worker")
-
-	// Create task document
-	now := time.Now()
-	task := bson.M{
-		"_id":           taskID,
-		"world_id":      worldID,
-		"type":          "init_world_creation",
-		"status":        "pending",
-		"parameters":    parameters,
-		"created_at":    now,
-		"updated_at":    now,
-		"attempt_count": 0,
-		"worker_id":     nil,
-		"result":        nil,
-		"error":         nil,
-	}
-
-	// Insert document into tasks collection
-	_, err = db.Collection("tasks").InsertOne(ctx, task)
-	if err != nil {
-		return fmt.Errorf("failed to insert task into MongoDB: %w", err)
-	}
-
-	logger.Logger.Info("Task created in MongoDB",
-		zap.String("task_id", taskID),
-		zap.String("world_id", worldID))
-
-	return nil
+	logger.Logger.Info("Successfully started world creation workflow",
+		zap.String("workflow_id", workflowRun.GetID()),
+		zap.String("run_id", workflowRun.GetRunID()),
+		zap.String("world_id", worldID),
+		zap.String("prompt", world.Prompt),
+		zap.Int("users_count", charactersCount),
+		zap.Int("posts_count", postsCount))
 }
 
 // getGenerationStatusFromMongo retrieves the world generation status from MongoDB

@@ -10,7 +10,26 @@ from ..config import LOG_LEVEL
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
         super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
-        log_record['timestamp'] = datetime.utcnow().isoformat()
+        
+        # Safe timestamp generation - detect if we're in workflow context
+        try:
+            # First check if we're in a workflow execution context
+            from temporalio import workflow
+            if workflow.unsafe.is_replaying():
+                # We're in a workflow context, use workflow time
+                log_record['timestamp'] = workflow.now().isoformat()
+            else:
+                # We're in an activity or regular context, use system time
+                log_record['timestamp'] = datetime.utcnow().isoformat()
+        except Exception:
+            try:
+                # Fallback to workflow time if available
+                from temporalio import workflow
+                log_record['timestamp'] = workflow.now().isoformat()
+            except Exception:
+                # Last resort - use a placeholder timestamp
+                log_record['timestamp'] = "WORKFLOW_TIME"
+        
         log_record['level'] = record.levelname
         log_record['service'] = 'ai-worker'
         

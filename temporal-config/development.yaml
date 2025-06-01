@@ -1,0 +1,33 @@
+system.forceSearchAttributesCacheRefreshOnRead:
+  - value: true
+    constraints: {}
+
+frontend.workerVersioningDataAPIs:
+  - value: true
+    constraints: {}
+
+frontend.workerVersioningWorkflowAPIs:
+  - value: true
+    constraints: {}
+
+worker.buildIdScavengerEnabled:
+  - value: true
+    constraints: {}
+
+# Improve performance for development
+system.blobSizeLimitError:
+  - value: 2097152  # 2MB
+    constraints: {}
+
+system.blobSizeLimitWarn:
+  - value: 1048576  # 1MB
+    constraints: {}
+
+# Reduce retention for development
+system.standardVisibilityPersistenceMaxReadQPS:
+  - value: 9000
+    constraints: {}
+
+system.standardVisibilityPersistenceMaxWriteQPS:
+  - value: 9000
+    constraints: {}

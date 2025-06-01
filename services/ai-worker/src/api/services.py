@@ -174,7 +174,7 @@ class ServiceClient:
         try:
             # Get service address from Consul
             address = await self.discovery_client.resolve_service("character-service")
-            logger.info(f"Using character service at: {address}")
+            # logger.info(f"Using character service at: {address}")
 
             # Create channel and stub
             self.character_channel = grpc.aio.insecure_channel(address)
@@ -190,7 +190,7 @@ class ServiceClient:
         try:
             # Get service address from Consul
             address = await self.discovery_client.resolve_service("media-service")
-            logger.info(f"Using media service at: {address}")
+            # logger.info(f"Using media service at: {address}")
 
             # Create channel and stub
             self.media_channel = grpc.aio.insecure_channel(address)
@@ -206,7 +206,7 @@ class ServiceClient:
         try:
             # Get service address from Consul
             address = await self.discovery_client.resolve_service("post-service")
-            logger.info(f"Using post service at: {address}")
+            # logger.info(f"Using post service at: {address}")
 
             # Create channel and stub
             self.post_channel = grpc.aio.insecure_channel(address)
@@ -222,7 +222,7 @@ class ServiceClient:
         try:
             # Get service address from Consul
             address = await self.discovery_client.resolve_service("world-service")
-            logger.info(f"Using world service at: {address}")
+            # logger.info(f"Using world service at: {address}")
 
             # Create channel and stub
             self.world_channel = grpc.aio.insecure_channel(address)

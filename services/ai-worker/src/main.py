@@ -1,176 +1,187 @@
 import asyncio
-import os
 import signal
 import sys
-import uuid
-from datetime import datetime
+from datetime import timedelta
+from typing import List
 
-from .config import validate_config, MAX_CONCURRENT_TASKS, MAX_CONCURRENT_LLM_REQUESTS, MAX_CONCURRENT_IMAGE_REQUESTS, API_GATEWAY_URL
-from .utils.discovery import ConsulServiceDiscovery
-from .constants import TaskType
-from .db import MongoDBManager
-from .kafka import KafkaConsumer, KafkaProducer
-from .api import LLMClient, ImageGenerator, ServiceClient
-from .core import TaskManager, JobFactory
-from .utils import logger
-from .utils.progress import ProgressManager
-from .jobs import (
-    InitWorldCreationJob,
-    GenerateWorldDescriptionJob,
-    GenerateWorldImageJob,
-    GenerateCharacterBatchJob,
-    GenerateCharacterJob,
-    GenerateCharacterAvatarJob,
-    GeneratePostBatchJob,
-    GeneratePostJob,
-    GeneratePostImageJob
+from temporalio.client import Client
+from temporalio.worker import Worker
+from temporalio.common import RetryPolicy
+
+from .config import (
+    validate_config, 
+    MAX_CONCURRENT_TASKS, 
+    MAX_CONCURRENT_LLM_REQUESTS, 
+    MAX_CONCURRENT_IMAGE_REQUESTS,
+    MAX_CONCURRENT_GRPC_CALLS,
+    MAX_CONCURRENT_DB_OPERATIONS,
+    MAX_WORKFLOW_TASKS_PER_WORKER,
+    MAX_ACTIVITIES_PER_WORKER,
+    TEMPORAL_HOST,
+    TEMPORAL_NAMESPACE
 )
+from .temporal.shared_resources import SharedResourcesManager
+from .temporal.activities import create_activity_functions
+from .workflows import (
+    InitWorldCreationWorkflow,
+    GenerateWorldDescriptionWorkflow,
+    GenerateWorldImageWorkflow,
+    GenerateCharacterBatchWorkflow,
+    GenerateCharacterWorkflow,
+    GenerateCharacterAvatarWorkflow,
+    GeneratePostBatchWorkflow,
+    GeneratePostWorkflow
+)
+from .utils import logger
 
-# Global variables for application components
-db_manager = None
-kafka_consumer = None
-kafka_producer = None
-llm_client = None
-image_generator = None
-service_client = None
-progress_manager = None
-task_manager = None
-job_factory = None
+# Application state
+resource_manager = None
+temporal_client = None
+workers: List[Worker] = []
 
 async def initialize_components():
-    """Initializes all application components"""
-    global db_manager, kafka_consumer, kafka_producer, llm_client, image_generator
-    global service_client, progress_manager, task_manager, job_factory
+    """Initializes all application components with proper resource pooling"""
+    global resource_manager, temporal_client
 
-    # Initialize DB manager
-    db_manager = MongoDBManager()
-    await db_manager.initialize()
-    logger.info("MongoDB manager initialized")
+    # Initialize shared resources manager with proper connection pools
+    resource_manager = SharedResourcesManager()
+    await resource_manager.initialize()
+    logger.info("Shared resources manager initialized with connection pools")
 
-    # Initialize Kafka
-    kafka_producer = KafkaProducer()
-    await kafka_producer.start()
-    logger.info("Kafka producer started")
+    # Initialize Temporal client
+    temporal_client = await Client.connect(TEMPORAL_HOST, namespace=TEMPORAL_NAMESPACE)
+    logger.info(f"Temporal client connected to {TEMPORAL_HOST} namespace {TEMPORAL_NAMESPACE}")
 
-    # Initialize service client with Consul discovery
-    service_client = ServiceClient(db_manager=db_manager)
-    await service_client.initialize()
-    logger.info("Service client initialized with Consul service discovery")
-
-    # Initialize progress manager
-    progress_manager = ProgressManager(db_manager, None) #  kafka_producer)
-    logger.info("Progress manager initialized")
-
-    # Initialize images and LLM with progress manager (order is important)
-    image_generator = ImageGenerator(db_manager=db_manager, service_client=service_client, progress_manager=progress_manager)
-    logger.info("Image generator initialized")
-
-    llm_client = LLMClient(db_manager=db_manager, progress_manager=progress_manager)
-    logger.info("LLM client initialized")
-
-    # Initialize job factory
-    job_factory = JobFactory(
-        db_manager=db_manager,
-        llm_client=llm_client,
-        image_generator=image_generator,
-        service_client=service_client,
-        progress_manager=progress_manager,
-        kafka_producer=kafka_producer
+async def create_workers():
+    """Creates and configures Temporal workers with injected resources"""
+    global workers, resource_manager, temporal_client
+    
+    # Create activity functions with injected resources
+    activities = create_activity_functions(resource_manager)
+    
+    # Default retry policy
+    default_retry_policy = RetryPolicy(
+        initial_interval=timedelta(seconds=1),
+        backoff_coefficient=2.0,
+        maximum_interval=timedelta(minutes=10),
+        maximum_attempts=5,
     )
-
-    # Register job classes
-    job_factory.register_jobs({
-        TaskType.INIT_WORLD_CREATION: InitWorldCreationJob,
-        TaskType.GENERATE_WORLD_DESCRIPTION: GenerateWorldDescriptionJob,
-        TaskType.GENERATE_WORLD_IMAGE: GenerateWorldImageJob,
-        TaskType.GENERATE_CHARACTER_BATCH: GenerateCharacterBatchJob,
-        TaskType.GENERATE_CHARACTER: GenerateCharacterJob,
-        TaskType.GENERATE_CHARACTER_AVATAR: GenerateCharacterAvatarJob,
-        TaskType.GENERATE_POST_BATCH: GeneratePostBatchJob,
-        TaskType.GENERATE_POST: GeneratePostJob,
-        TaskType.GENERATE_POST_IMAGE: GeneratePostImageJob
-    })
-    logger.info("Job factory initialized with registered job types")
-
-    # Initialize task manager
-    task_manager = TaskManager(
-        db_manager=db_manager,
-        job_factory=job_factory,
-        progress_manager=progress_manager,
-        kafka_producer=kafka_producer,
-        max_tasks=MAX_CONCURRENT_TASKS
+    
+    # Main worker - workflows and general activities
+    main_worker = Worker(
+        temporal_client,
+        task_queue="ai-worker-main",
+        activities=[
+            activities['load_prompt'],
+            activities['generate_structured_content'],
+            activities['enhance_prompt'],
+            activities['save_world_parameters'],
+            activities['get_world_parameters'],
+            activities['generate_image'],
+            activities['upload_image_to_media_service'],
+            activities['create_character'],
+            activities['create_post'],
+            activities['update_character_avatar'],
+            activities['create_task'],
+            activities['get_task'],
+        ],
+        workflows=[
+            InitWorldCreationWorkflow,
+            GenerateWorldDescriptionWorkflow,
+            GenerateWorldImageWorkflow,
+            GenerateCharacterBatchWorkflow,
+            GenerateCharacterWorkflow,
+            GenerateCharacterAvatarWorkflow,
+            GeneratePostBatchWorkflow,
+            GeneratePostWorkflow,
+            GeneratePostImageWorkflow
+        ],
+        max_concurrent_activities=MAX_ACTIVITIES_PER_WORKER,
+        max_concurrent_workflow_tasks=MAX_WORKFLOW_TASKS_PER_WORKER,
     )
-    await task_manager.start()
-    logger.info("Task manager started")
-
-    # Initialize Kafka consumer
-    kafka_consumer = KafkaConsumer(processor=process_kafka_message)
-    await kafka_consumer.start()
-    logger.info("Kafka consumer started")
-
-async def process_kafka_message(message):
-    """
-    Processes a Kafka message and immediately starts task processing
-
-    Args:
-        message: Kafka message
-    """
-    try:
-        event_type = message.get("event_type")
-
-        if event_type == "task_created":
-            # Process new task
-            task_id = message.get("task_id")
-            task_type = message.get("task_type")
-            world_id = message.get("world_id")
-            parameters = message.get("parameters", {})
-
-            logger.info(f"Received task_created event for task {task_id} of type {task_type}")
-
-            # Immediately start task processing
-            success = await task_manager.process_task_by_id(task_id)
-            if success:
-                logger.info(f"Started processing task {task_id} from Kafka message")
-            else:
-                logger.warning(f"Could not start processing task {task_id} from Kafka message")
-
-        elif event_type == "task_updated":
-            # Process task update
-            task_id = message.get("task_id")
-            status = message.get("status")
-
-            logger.info(f"Received task_updated event for task {task_id}, status: {status}")
-            # Updates are already happening in the respective jobs
-
-        else:
-            logger.warning(f"Unknown event type: {event_type}")
-
-    except Exception as e:
-        logger.error(f"Error processing Kafka message: {str(e)}")
+    
+    # Specialized LLM worker
+    llm_worker = Worker(
+        temporal_client,
+        task_queue="ai-worker-llm",
+        activities=[
+            activities['generate_structured_content'],
+            activities['enhance_prompt'],
+        ],
+        max_concurrent_activities=MAX_CONCURRENT_LLM_REQUESTS,
+    )
+    
+    # Specialized image worker
+    image_worker = Worker(
+        temporal_client,
+        task_queue="ai-worker-images",
+        activities=[
+            activities['generate_image'],
+            activities['upload_image_to_media_service'],
+        ],
+        max_concurrent_activities=MAX_CONCURRENT_IMAGE_REQUESTS,
+    )
+    
+    # Specialized progress worker
+    progress_worker = Worker(
+        temporal_client,
+        task_queue="ai-worker-progress",
+        activities=[
+            activities['initialize_world_generation'],
+            activities['update_stage'],
+            activities['increment_counter'],
+            activities['increment_cost'],
+            activities['update_progress'],
+            activities['create_task'],
+            activities['get_task'],
+        ],
+        max_concurrent_activities=MAX_CONCURRENT_DB_OPERATIONS,
+    )
+    
+    # Service worker for gRPC calls
+    service_worker = Worker(
+        temporal_client,
+        task_queue="ai-worker-services",
+        activities=[
+            activities['create_character'],
+            activities['create_post'],
+            activities['update_character_avatar'],
+            
+        ],
+        max_concurrent_activities=MAX_CONCURRENT_GRPC_CALLS,
+    )
+    
+    workers = [
+        main_worker,
+        llm_worker, 
+        image_worker, 
+        progress_worker, 
+        service_worker
+    ]
+    # logger.info(f"Created {len(workers)} specialized Temporal workers with resource injection")
 
 async def shutdown():
-    """Closes all application components"""
+    """Closes all application components gracefully"""
     logger.info("Shutting down...")
 
-    if task_manager:
-        await task_manager.stop()
-        logger.info("Task manager stopped")
+    # Stop all workers
+    for i, worker in enumerate(workers):
+        try:
+            worker.shutdown()
+            # logger.info(f"Worker {i+1} stopped")
+        except Exception as e:
+            pass
+            # logger.error(f"Error stopping worker {i+1}: {str(e)}")
 
-    if kafka_consumer:
-        await kafka_consumer.stop()
-        logger.info("Kafka consumer stopped")
+    # Close shared resources manager and all connection pools
+    if resource_manager:
+        await resource_manager.close()
+        # logger.info("Shared resources manager closed")
 
-    if kafka_producer:
-        await kafka_producer.stop()
-        logger.info("Kafka producer stopped")
-
-    if service_client:
-        await service_client.close()
-        logger.info("Service client closed")
-
-    if image_generator:
-        await image_generator.close()
-        logger.info("Image generator closed")
+    # Close temporal client
+    if temporal_client:
+        await temporal_client.close()
+        # logger.info("Temporal client closed")
 
     logger.info("Shutdown complete")
 
@@ -179,41 +190,70 @@ async def main():
     # Check configuration
     config_status = validate_config()
     if not config_status["valid"]:
-        logger.error(f"Invalid configuration: {config_status['issues']}")
+        # logger.error(f"Invalid configuration: {config_status['issues']}")
         sys.exit(1)
 
     # Output configuration information
-    logger.info(f"Starting AI Worker with configuration: {config_status['config']}")
+    # logger.info(f"Starting AI Worker with Temporal configuration: {config_status['config']}")
 
     # Set signal handlers for graceful shutdown
     loop = asyncio.get_event_loop()
+    shutdown_event = asyncio.Event()
+
+    def signal_handler():
+        # logger.info("Received shutdown signal")
+        shutdown_event.set()
 
     for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown()))
+        loop.add_signal_handler(sig, signal_handler)
 
     try:
-        logger.info("Starting AI Worker service")
-        worker_id = f"worker-{uuid.uuid4().hex[:8]}"
-        logger.info(f"Worker ID: {worker_id}")
-
+        # logger.info("Starting AI Worker service with Temporal")
+        
         # Initialize components
         await initialize_components()
-
-        # Main application loop
-        while True:
-            await asyncio.sleep(3600)  # Just keep the application running
-
+        
+        # Create workers
+        await create_workers()
+        
+        # Start all workers using context managers for proper cleanup
+        try:
+            worker_tasks = []
+            for i, worker in enumerate(workers):
+                task = asyncio.create_task(worker.run(), name=f"worker-{i+1}")
+                worker_tasks.append(task)
+                # logger.info(f"Started Temporal worker {i+1} on task queue {worker.task_queue}")
+            
+            # logger.info(f"All {len(workers)} Temporal workers started and running")
+            
+            # Wait for shutdown signal
+            await shutdown_event.wait()
+            
+        finally:
+            # Cancel all worker tasks
+            for task in worker_tasks:
+                if not task.done():
+                    task.cancel()
+            
+            # Wait for tasks to finish cancellation
+            await asyncio.gather(*worker_tasks, return_exceptions=True)
+        
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
+        raise
     finally:
         await shutdown()
 
 if __name__ == "__main__":
     # Set policy for creating event loops
-    if sys.platform == "linux" and "uvloop" in sys.modules:
-        import uvloop
-        uvloop.install()
-        logger.info("Using uvloop event loop")
+    if sys.platform == "linux":
+        try:
+            import uvloop
+            uvloop.install()
+            # logger.info("Using uvloop event loop")
+        except ImportError:
+            pass
+            # logger.info("uvloop not available, using default event loop")
 
     # Run main function
     asyncio.run(main())

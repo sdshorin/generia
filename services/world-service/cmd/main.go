@@ -106,8 +106,14 @@ func main() {
 	// Initialize repositories
 	worldRepo := repository.NewWorldRepository(db)
 
+	// Get Temporal host from config or environment
+	temporalHost := os.Getenv("TEMPORAL_HOST")
+	if temporalHost == "" {
+		temporalHost = "temporal:7233" // Default to docker-compose service name
+	}
+
 	// Initialize world service
-	worldService := service.NewWorldService(worldRepo, authClient, postClient, mediaClient, cfg.Kafka.Brokers)
+	worldService := service.NewWorldService(worldRepo, authClient, postClient, mediaClient, temporalHost)
 
 	// Create gRPC server with middleware
 	grpcServer := grpc.NewServer(

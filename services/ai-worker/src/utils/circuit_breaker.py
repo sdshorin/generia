@@ -61,7 +61,7 @@ class CircuitBreaker:
         async with self._lock:
             if self.state == CircuitBreakerState.OPEN:
                 if time.time() > self.last_failure_time + self.recovery_timeout:
-                    logger.info(f"Circuit Breaker '{self.name}' transitioning to HALF-OPEN state")
+                    # logger.info(f"Circuit Breaker '{self.name}' transitioning to HALF-OPEN state")
                     self.state = CircuitBreakerState.HALF_OPEN
                     self.success_count = 0
                 else:
@@ -75,7 +75,7 @@ class CircuitBreaker:
                 if self.state == CircuitBreakerState.HALF_OPEN:
                     self.success_count += 1
                     if self.success_count >= self.recovery_threshold:
-                        logger.info(f"Circuit Breaker '{self.name}' recovered, transitioning to CLOSED state")
+                        # logger.info(f"Circuit Breaker '{self.name}' recovered, transitioning to CLOSED state")
                         self.state = CircuitBreakerState.CLOSED
                         self.failure_count = 0
                         self.success_count = 0
@@ -91,15 +91,15 @@ class CircuitBreaker:
                 if self.state == CircuitBreakerState.CLOSED:
                     self.failure_count += 1
                     if self.failure_count >= self.failure_threshold:
-                        logger.warning(
-                            f"Circuit Breaker '{self.name}' opened after {self.failure_count} errors"
-                        )
+                        # logger.warning(
+                        #     f"Circuit Breaker '{self.name}' opened after {self.failure_count} errors"
+                        # )
                         self.state = CircuitBreakerState.OPEN
                 elif self.state == CircuitBreakerState.HALF_OPEN:
-                    logger.warning(f"Circuit Breaker '{self.name}' opened again after error in HALF-OPEN state")
+                    # logger.warning(f"Circuit Breaker '{self.name}' opened again after error in HALF-OPEN state")
                     self.state = CircuitBreakerState.OPEN
             
-            logger.error(f"Circuit Breaker '{self.name}' error: {str(e)}")
+            # logger.error(f"Circuit Breaker '{self.name}' error: {str(e)}")
             raise e
 
 

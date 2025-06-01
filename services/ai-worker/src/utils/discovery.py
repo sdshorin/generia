@@ -61,7 +61,7 @@ class ConsulServiceDiscovery:
         if service_name in self.service_cache and (
             current_time - self.cache_timestamps.get(service_name, 0) < self.cache_ttl
         ):
-            logger.info(f"Using cached address for service {service_name}: {self.service_cache[service_name]}")
+            # logger.info(f"Using cached address for service {service_name}: {self.service_cache[service_name]}")
             return self.service_cache[service_name]
         
         await self._ensure_session()
@@ -105,7 +105,7 @@ class ConsulServiceDiscovery:
                     logger.warning(f"Empty service address detected for {service_name}, falling back to service name")
                 
                 address = f"{service_address}:{service_port}"
-                logger.info(f"Resolved service {service_name} to {address}")
+                # logger.info(f"Resolved service {service_name} to {address}")
                 
                 self._update_cache(service_name, address)
                 return address

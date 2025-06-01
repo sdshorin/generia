@@ -16,15 +16,22 @@ class MongoDBManager:
     Manager for working with MongoDB
     """
 
-    def __init__(self, uri: str = MONGODB_URI, db_name: str = MONGODB_DATABASE):
+    def __init__(self, mongo_client=None, uri: str = MONGODB_URI, db_name: str = MONGODB_DATABASE):
         """
         Initializes connection to MongoDB
 
         Args:
-            uri: URI for connecting to MongoDB
+            mongo_client: Existing AsyncIOMotorClient instance (for connection pooling)
+            uri: URI for connecting to MongoDB (used only if mongo_client is None)
             db_name: Database name
         """
-        self.client = AsyncIOMotorClient(uri)
+        if mongo_client:
+            # Use existing client with connection pool
+            self.client = mongo_client
+        else:
+            # Create new client (legacy mode)
+            self.client = AsyncIOMotorClient(uri)
+        
         self.db = self.client[db_name]
 
         # Collections
@@ -51,7 +58,7 @@ class MongoDBManager:
         await self.api_requests_history_collection.create_index("task_id")
         await self.api_requests_history_collection.create_index("api_type")
 
-        logger.info("MongoDB indexes initialized")
+        # logger.info("MongoDB indexes initialized")
 
     def get_lock(self, key: str) -> asyncio.Lock:
         """
@@ -85,10 +92,10 @@ class MongoDBManager:
         task_dict = task.dict(by_alias=True)
         try:
             await self.tasks_collection.insert_one(task_dict)
-            logger.info(f"Created task {task.id} of type {task.type}")
+            # logger.info(f"Created task {task.id} of type {task.type}")
             return task.id
         except DuplicateKeyError:
-            logger.warning(f"Task with ID {task.id} already exists")
+            # logger.warning(f"Task with ID {task.id} already exists")
             raise
 
     async def get_task(self, task_id: str) -> Optional[Task]:
@@ -114,7 +121,7 @@ class MongoDBManager:
             # logger.info(f"Task fou    nd: {doc}")
             return Task(**doc)
 
-        logger.warning(f"Task not found: task_id={task_id}, collection={self.tasks_collection.name}, database={self.tasks_collection.database.name}")
+        # logger.warning(f"Task not found: task_id={task_id}, collection={self.tasks_collection.name}, database={self.tasks_collection.database.name}")
         return None
 
     async def update_task(
@@ -138,10 +145,10 @@ class MongoDBManager:
         )
 
         success = result.matched_count > 0
-        if success:
-            logger.debug(f"Updated task {task_id} with fields {updates.keys()}")
-        else:
-            logger.warning(f"Failed to update task {task_id}, not found")
+        # if success:
+        #     logger.debug(f"Updated task {task_id} with fields {updates.keys()}")
+        # else:
+        #     logger.warning(f"Failed to update task {task_id}, not found")
 
         return success
 
@@ -174,10 +181,10 @@ class MongoDBManager:
         )
 
         success = result.matched_count > 0
-        if success:
-            logger.info(f"Updated task {task_id} status to {status}")
-        else:
-            logger.warning(f"Failed to update task {task_id} status, not found")
+        # if success:
+        #     logger.info(f"Updated task {task_id} status to {status}")
+        # else:
+        #     logger.warning(f"Failed to update task {task_id} status, not found")
 
         return success
 
@@ -197,19 +204,19 @@ class MongoDBManager:
             task = await self.get_task(task_id)
 
             if not task:
-                logger.warning(f"Failed to claim task {task_id}, not found")
+                # logger.warning(f"Failed to claim task {task_id}, not found")
                 return False
 
             if task.status != "pending":
-                logger.warning(
-                    f"Failed to claim task {task_id}, invalid status: {task.status}"
-                )
+                # logger.warning(
+                #     f"Failed to claim task {task_id}, invalid status: {task.status}"
+                # )
                 return False
 
             if task.worker_id:
-                logger.warning(
-                    f"Failed to claim task {task_id}, already being processed by worker {task.worker_id}"
-                )
+                # logger.warning(
+                #     f"Failed to claim task {task_id}, already being processed by worker {task.worker_id}"
+                # )
                 return False
 
             result = await self.tasks_collection.update_one(
@@ -280,11 +287,11 @@ class MongoDBManager:
                 {"_id": params.id},
                 {"$set": {**params_dict, "updated_at": now}}
             )
-            logger.info(f"Updated world parameters {params.id}")
+            # logger.info(f"Updated world parameters {params.id}")
         else:
             # Create new parameters
             await self.world_parameters_collection.insert_one(params_dict)
-            logger.info(f"Created world parameters {params.id}")
+            # logger.info(f"Created world parameters {params.id}")
 
         return params.id
 
@@ -385,10 +392,10 @@ class MongoDBManager:
 
         try:
             await self.world_generation_status_collection.insert_one(status.dict(by_alias=True))
-            logger.info(f"Initialized generation status for world {world_id}")
+            # logger.info(f"Initialized generation status for world {world_id}")
             return status
         except DuplicateKeyError:
-            logger.warning(f"Generation status for world {world_id} already exists")
+            # logger.warning(f"Generation status for world {world_id} already exists")
             raise
 
     async def get_world_generation_status(self, world_id: str) -> Optional[Dict[str, Any]]:
@@ -431,8 +438,8 @@ class MongoDBManager:
         current_status = await self.world_generation_status_collection.find_one({"_id": world_id})
 
         if not current_status:
-            error_msg = f"Could not find generation status for world {world_id}"
-            logger.error(error_msg)
+            # error_msg = f"Could not find generation status for world {world_id}"
+            # logger.error(error_msg)
             raise RuntimeError(error_msg)
 
         # Update stage status
@@ -472,8 +479,8 @@ class MongoDBManager:
             # logger.info(f"Updated stage {stage} status to {status} for world {world_id}")
             return current_status
         except Exception as e:
-            error_msg = f"Failed to update stage status for world {world_id}: {str(e)}"
-            logger.error(error_msg)
+            # error_msg = f"Failed to update stage status for world {world_id}: {str(e)}"
+            # logger.error(error_msg)
             raise RuntimeError(error_msg)
 
     async def increment_world_generation_counter(
@@ -502,7 +509,7 @@ class MongoDBManager:
 
         if field not in allowed_fields:
             error_msg = f"Invalid field for increment: {field}"
-            logger.error(error_msg)
+            # logger.error(error_msg)
             raise ValueError(error_msg)
 
         result = await self.world_generation_status_collection.update_one(
@@ -514,7 +521,7 @@ class MongoDBManager:
         )
 
         if result.matched_count == 0:
-            logger.error(f"Could not find generation status for world {world_id}")
+            # logger.error(f"Could not find generation status for world {world_id}")
             return None
 
         updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})
@@ -523,11 +530,12 @@ class MongoDBManager:
 
         return updated_status
 
+
     async def increment_world_generation_cost(
         self, world_id: str, cost_type: str, cost: float
     ) -> Optional[Dict[str, Any]]:
         """
-        Atomically increments cost in the generation status document
+        Increments cost for world generation
 
         Args:
             world_id: World ID
@@ -536,33 +544,26 @@ class MongoDBManager:
 
         Returns:
             Updated document or None if document not found
-
-        Raises:
-            ValueError: If cost_type is not valid
         """
-        if cost_type not in ["llm", "image"]:
-            error_msg = f"Invalid cost type: {cost_type}. Must be 'llm' or 'image'"
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        field_name = f"{cost_type}_cost_total"
-
-        result = await self.world_generation_status_collection.update_one(
+        cost_field = f"{cost_type}_cost_total"
+        
+        update_result = await self.world_generation_status_collection.update_one(
             {"_id": world_id},
             {
-                "$inc": {field_name: cost},
+                "$inc": {cost_field: cost},
                 "$set": {"updated_at": datetime.now(timezone.utc)}
             }
         )
 
-        if result.matched_count == 0:
-            logger.error(f"Could not find generation status for world {world_id}")
+        if update_result.matched_count == 0:
+            # logger.error(f"Could not find generation status for world {world_id}")
             return None
 
+        # Возвращаем обновленный документ
         updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})
-
-        logger.debug(f"Incremented {cost_type} cost by ${cost:.6f} for world {world_id}")
-
+        
+        # logger.debug(f"Incremented {cost_type} cost for world {world_id} by ${cost}")
+        
         return updated_status
 
     async def update_world_generation_progress(
@@ -590,7 +591,7 @@ class MongoDBManager:
         )
 
         if result.matched_count == 0:
-            logger.error(f"Could not find generation status for world {world_id}")
+            # logger.error(f"Could not find generation status for world {world_id}")
             return None
 
         updated_status = await self.world_generation_status_collection.find_one({"_id": world_id})

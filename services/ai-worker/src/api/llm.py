@@ -24,18 +24,18 @@ class LLMClient:
     Client for working with LLM API via OpenRouter
     """
 
-    def __init__(self, api_key: str = OPENROUTER_API_KEY, db_manager=None, progress_manager=None):
+    def __init__(self, api_key: str = OPENROUTER_API_KEY, db_manager=None, http_client=None):
         """
         Initializes LLM client
 
         Args:
             api_key: API key for OpenRouter
             db_manager: Optional database manager for request logging
-            progress_manager: Optional progress manager for cost tracking
+            http_client: Optional HTTP client with connection pooling
         """
         self.api_key = api_key
         self.db_manager = db_manager
-        self.progress_manager = progress_manager
+        self.http_client = http_client  # Will be used for async requests
         self.semaphore = asyncio.Semaphore(15)  # Limit the number of concurrent requests
 
     @circuit_breaker(name="llm_content", failure_threshold=3, recovery_timeout=60.0, timeout=120.0)
@@ -110,7 +110,7 @@ class LLMClient:
 
                 if response.status_code != 200:
                     error_text = response.text
-                    logger.error(f"OpenRouter API error response: {error_text}")
+                    # logger.error(f"OpenRouter API error response: {error_text}")
                     raise Exception(f"OpenRouter API error: {response.status_code} - {error_text}")
 
                 response_data = response.json()
@@ -122,19 +122,19 @@ class LLMClient:
 
                 # Проверяем наличие необходимых полей в ответе
                 if "choices" not in response_data:
-                    logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
+                    # logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                     raise Exception(f"Unexpected response format from OpenRouter API: missing 'choices' field")
 
                 if not response_data["choices"]:
-                    logger.error(f"Empty choices array in OpenRouter API response: {json.dumps(response_data, indent=2)}")
+                    # logger.error(f"Empty choices array in OpenRouter API response: {json.dumps(response_data, indent=2)}")
                     raise Exception("Empty choices array in OpenRouter API response")
 
                 if "message" not in response_data["choices"][0]:
-                    logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
+                    # logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                     raise Exception(f"Unexpected response format from OpenRouter API: missing 'message' field in first choice")
 
                 if "content" not in response_data["choices"][0]["message"]:
-                    logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
+                    # logger.error(f"Unexpected response format from OpenRouter API: {json.dumps(response_data, indent=2)}")
                     raise Exception(f"Unexpected response format from OpenRouter API: missing 'content' field in message")
 
                 # Get and parse JSON response
@@ -148,13 +148,18 @@ class LLMClient:
                 if "usage" in response_data and "cost" in response_data["usage"]:
                     cost = float(response_data["usage"]["cost"])
 
-                    # Update cost in progress manager if available
-                    if self.progress_manager and world_id:
-                        await self.progress_manager.increment_cost(
-                            world_id=world_id,
-                            cost_type="llm",
-                            cost=cost
-                        )
+                    # Update cost in database if available
+                    if self.db_manager and world_id and cost > 0:
+                        try:
+                            await self.db_manager.increment_world_generation_cost(
+                                world_id=world_id,
+                                cost_type="llm",
+                                cost=cost
+                            )
+                            # logger.debug(f"Updated LLM cost for world {world_id}: ${cost}")
+                        except Exception as e:
+                            raise e
+                            # logger.error(f"Failed to update LLM cost for world {world_id}: {str(e)}")
 
                 # Prepare response for logging
                 result = {
@@ -204,7 +209,7 @@ class LLMClient:
                     )
                     await self.db_manager.log_api_request(log_entry)
 
-                logger.error(f"LLM API error: {str(e)}")
+                # logger.error(f"LLM API error: {str(e)}")
                 raise
 
     @circuit_breaker(name="llm_structured", failure_threshold=3, recovery_timeout=60.0, timeout=120.0)
@@ -428,13 +433,18 @@ class LLMClient:
                 if "usage" in response_data and "cost" in response_data["usage"]:
                     cost = float(response_data["usage"]["cost"])
 
-                    # Update cost in progress manager if available
-                    if self.progress_manager and world_id:
-                        await self.progress_manager.increment_cost(
-                            world_id=world_id,
-                            cost_type="llm",
-                            cost=cost
-                        )
+                    # Update cost in database if available
+                    if self.db_manager and world_id and cost > 0:
+                        try:
+                            await self.db_manager.increment_world_generation_cost(
+                                world_id=world_id,
+                                cost_type="llm",
+                                cost=cost
+                            )
+                            # logger.debug(f"Updated LLM cost for world {world_id}: ${cost}")
+                        except Exception as e:
+                            raise e
+                            # logger.error(f"Failed to update LLM cost for world {world_id}: {str(e)}")
 
                 try:
                     structured_response = json.loads(content)
@@ -444,11 +454,11 @@ class LLMClient:
                     if not isinstance(response_schema, dict):
                         structured_response = response_schema.model_validate(structured_response)
                 except json.JSONDecodeError as e:
-                    logger.error(f"Failed to parse JSON content: {content}")
-                    logger.error(f"JSON parse error: {str(e)}")
+                    # logger.error(f"Failed to parse JSON content: {content}")
+                    # logger.error(f"JSON parse error: {str(e)}")
                     raise Exception(f"Failed to parse JSON content from OpenRouter API: {str(e)}")
                 except Exception as e:
-                    logger.error(f"Failed to validate response against schema: {str(e)}")
+                    # logger.error(f"Failed to validate response against schema: {str(e)}")
                     raise Exception(f"Failed to validate response against schema: {str(e)}")
 
                 # Prepare response for logging
@@ -498,5 +508,5 @@ class LLMClient:
                     )
                     await self.db_manager.log_api_request(log_entry)
 
-                logger.error(f"LLM API structured error: {str(e)}")
+                # logger.error(f"LLM API structured error: {str(e)}")
                 raise

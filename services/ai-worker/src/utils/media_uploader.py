@@ -27,7 +27,7 @@ async def download_and_upload_image(
         # Скачиваем изображение
         image_data = None
         async with aiohttp.ClientSession() as session:
-            logger.info(f"Downloading image from: {download_url}")
+            # logger.info(f"Downloading image from: {download_url}")
             
             try:
                 async with session.get(download_url, timeout=timeout) as response:
@@ -41,7 +41,7 @@ async def download_and_upload_image(
                         }
                     
                     image_data = await response.read()
-                    logger.info(f"Successfully downloaded image ({len(image_data)} bytes)")
+                    # logger.info(f"Successfully downloaded image ({len(image_data)} bytes)")
             
             except Exception as e:
                 logger.error(f"Error downloading image: {str(e)}")
@@ -52,7 +52,7 @@ async def download_and_upload_image(
             
             # Загружаем изображение
             if image_data:
-                logger.info(f"Uploading image to: {upload_url}")
+                # logger.info(f"Uploading image to: {upload_url}")
                 
                 try:
                     headers = {"Content-Type": content_type}
@@ -71,7 +71,7 @@ async def download_and_upload_image(
                                 "error": f"Upload failed: {error_text}"
                             }
                         
-                        logger.info(f"Successfully uploaded image to presigned URL")
+                        # logger.info(f"Successfully uploaded image to presigned URL")
                         return image_data, {
                             "success": True,
                             "status": response.status

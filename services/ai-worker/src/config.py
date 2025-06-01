@@ -19,11 +19,9 @@ SERVICE_PORT = int(os.getenv("SERVICE_PORT", "8081"))
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://admin:password@mongodb:27017")
 MONGODB_DATABASE = os.getenv("MONGODB_DATABASE", "generia_ai_worker")
 
-# Kafka
-KAFKA_BROKERS = os.getenv("KAFKA_BROKERS", "localhost:9092")
-KAFKA_TOPIC_TASKS = os.getenv("KAFKA_TOPIC_TASKS", "generia-tasks")
-KAFKA_TOPIC_PROGRESS = os.getenv("KAFKA_TOPIC_PROGRESS", "generia-progress")
-KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "ai-worker")
+# Temporal
+TEMPORAL_HOST = os.getenv("TEMPORAL_HOST", "localhost:7233")
+TEMPORAL_NAMESPACE = os.getenv("TEMPORAL_NAMESPACE", "default")
 
 # API Keys
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
@@ -33,10 +31,16 @@ RUNWARE_API_KEY = os.getenv("RUNWARE_API_KEY", "")
 # LLM Configuration
 DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL", "openai/gpt-3.5-turbo")
 
-# Service limits
-MAX_CONCURRENT_TASKS = int(os.getenv("MAX_CONCURRENT_TASKS", "100"))
-MAX_CONCURRENT_LLM_REQUESTS = int(os.getenv("MAX_CONCURRENT_LLM_REQUESTS", "15"))
-MAX_CONCURRENT_IMAGE_REQUESTS = int(os.getenv("MAX_CONCURRENT_IMAGE_REQUESTS", "10"))
+# Service limits - optimized for high throughput
+MAX_CONCURRENT_TASKS = int(os.getenv("MAX_CONCURRENT_TASKS", "500"))
+MAX_CONCURRENT_LLM_REQUESTS = int(os.getenv("MAX_CONCURRENT_LLM_REQUESTS", "50"))
+MAX_CONCURRENT_IMAGE_REQUESTS = int(os.getenv("MAX_CONCURRENT_IMAGE_REQUESTS", "30"))
+MAX_CONCURRENT_GRPC_CALLS = int(os.getenv("MAX_CONCURRENT_GRPC_CALLS", "100"))
+MAX_CONCURRENT_DB_OPERATIONS = int(os.getenv("MAX_CONCURRENT_DB_OPERATIONS", "20"))
+
+# Worker specific limits
+MAX_WORKFLOW_TASKS_PER_WORKER = int(os.getenv("MAX_WORKFLOW_TASKS_PER_WORKER", "100"))
+MAX_ACTIVITIES_PER_WORKER = int(os.getenv("MAX_ACTIVITIES_PER_WORKER", "200"))
 
 # MinIO
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
@@ -47,6 +51,10 @@ MINIO_USE_SSL = os.getenv("MINIO_USE_SSL", "false").lower() == "true"
 
 # API Gateway
 API_GATEWAY_URL = os.getenv("API_GATEWAY_URL", "http://api-gateway:8080")
+
+# Consul
+CONSUL_HOST = os.getenv("CONSUL_HOST", "consul")
+CONSUL_PORT = int(os.getenv("CONSUL_PORT", "8500"))
 
 # Logger
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
@@ -75,11 +83,9 @@ def validate_config() -> Dict[str, Any]:
                 "uri": MONGODB_URI,
                 "database": MONGODB_DATABASE,
             },
-            "kafka": {
-                "brokers": KAFKA_BROKERS,
-                "topic_tasks": KAFKA_TOPIC_TASKS,
-                "topic_progress": KAFKA_TOPIC_PROGRESS,
-                "group_id": KAFKA_GROUP_ID,
+            "temporal": {
+                "host": TEMPORAL_HOST,
+                "namespace": TEMPORAL_NAMESPACE,
             },
             "llm": {
                 "model": DEFAULT_LLM_MODEL
@@ -88,6 +94,10 @@ def validate_config() -> Dict[str, Any]:
                 "max_concurrent_tasks": MAX_CONCURRENT_TASKS,
                 "max_concurrent_llm_requests": MAX_CONCURRENT_LLM_REQUESTS,
                 "max_concurrent_image_requests": MAX_CONCURRENT_IMAGE_REQUESTS,
+                "max_concurrent_grpc_calls": MAX_CONCURRENT_GRPC_CALLS,
+                "max_concurrent_db_operations": MAX_CONCURRENT_DB_OPERATIONS,
+                "max_workflow_tasks_per_worker": MAX_WORKFLOW_TASKS_PER_WORKER,
+                "max_activities_per_worker": MAX_ACTIVITIES_PER_WORKER,
             },
             "minio": {
                 "endpoint": MINIO_ENDPOINT,

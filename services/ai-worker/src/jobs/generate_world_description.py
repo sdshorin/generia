@@ -150,17 +150,6 @@ class GenerateWorldDescriptionJob(BaseJob):
             f"{result.get('world_name')} - {result.get('world_theme')}"
         )
 
-        # # Обновляем информацию о мире в World Service, если необходимо
-        # try:
-        #     if self.service_client:
-        #         # Передаем информацию о сгенерированном мире в World Service
-        #         await self.service_client.update_world_status(
-        #             world_id=self.task.world_id,
-        #             status="description_generated",
-        #             task_id=self.task.id
-        #         )
-        # except Exception as e:
-        #     logger.error(f"Failed to update world service with description: {str(e)}")
 
     async def on_failure(self, error: Exception) -> None:
         """

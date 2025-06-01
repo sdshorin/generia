@@ -245,17 +245,6 @@ class GeneratePostImageJob(BaseJob):
                         status=GenerationStatus.COMPLETED
                     )
 
-                    # # Обновляем статус мира в World Service
-                    # if self.service_client:
-                    #     try:
-                    #         await self.service_client.update_world_status(
-                    #             world_id=self.task.world_id,
-                    #             status="completed",
-                    #             task_id=self.task.id
-                    #         )
-                    #         logger.info(f"Updated world status to completed for world {self.task.world_id}")
-                    #     except Exception as e:
-                    #         logger.error(f"Error updating world status: {str(e)}")
 
     async def on_failure(self, error: Exception) -> None:
         """

@@ -127,7 +127,7 @@ class ProgressManager:
 
                 return updated_status
             except Exception as e:
-                logger.error(f"Error incrementing task counter: {str(e)}")
+                # logger.error(f"Error incrementing task counter: {str(e)}")
                 return None
 
     async def increment_cost(
@@ -154,7 +154,7 @@ class ProgressManager:
 
                 return updated_status
             except Exception as e:
-                logger.error(f"Error incrementing cost: {str(e)}")
+                # logger.error(f"Error incrementing cost: {str(e)}")
                 return None
 
     async def update_progress(

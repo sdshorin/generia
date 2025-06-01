@@ -31,7 +31,7 @@ class ImageGenerator:
     Handles image generation and upload to media-service.
     """
 
-    def __init__(self, api_key: str = RUNWARE_API_KEY, db_manager=None, service_client=None, progress_manager=None):
+    def __init__(self, api_key: str = RUNWARE_API_KEY, db_manager=None, service_client=None, http_client=None):
         """
         Initializes the image generator
 
@@ -39,12 +39,12 @@ class ImageGenerator:
             api_key: API key for Runware
             db_manager: Optional database manager for request logging
             service_client: Client for interacting with other services
-            progress_manager: Optional progress manager for cost tracking
+            http_client: Optional HTTP client with connection pooling
         """
         self.api_key = api_key
         self.db_manager = db_manager
         self.service_client = service_client
-        self.progress_manager = progress_manager
+        self.http_client = http_client  # Will be used for async requests
         self.semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
         self._runware = None
 
@@ -85,16 +85,17 @@ class ImageGenerator:
             try:
                 runware = await self._get_runware()
 
-                prompt_enhancer = IPromptEnhance(
-                    prompt=prompt,
-                    promptVersions=versions,
-                    promptMaxLength=max_length,
-                )
+                # prompt_enhancer = IPromptEnhance(
+                #     prompt=prompt,
+                #     promptVersions=versions,
+                #     promptMaxLength=max_length,
+                # )
 
-                enhanced_prompts = await runware.promptEnhance(promptEnhancer=prompt_enhancer)
+                # enhanced_prompts = await runware.promptEnhance(promptEnhancer=prompt_enhancer)
 
-                # Pick the first enhanced prompt (best match)
-                best_prompt = enhanced_prompts[0].text if enhanced_prompts else prompt
+                # # Pick the first enhanced prompt (best match)
+                # best_prompt = enhanced_prompts[0].text if enhanced_prompts else prompt
+                best_prompt = prompt
 
                 duration_ms = int((time.time() - start_time) * 1000)
 
@@ -113,7 +114,7 @@ class ImageGenerator:
                     )
                     await self.db_manager.log_api_request(log_entry)
 
-                logger.info(f"Enhanced prompt in {duration_ms}ms. TaskID: {task_id or 'manual'}")
+                # logger.info(f"Enhanced prompt in {duration_ms}ms. TaskID: {task_id or 'manual'}")
                 return best_prompt
 
             except Exception as e:
@@ -134,7 +135,7 @@ class ImageGenerator:
                     )
                     await self.db_manager.log_api_request(log_entry)
 
-                logger.error(f"Prompt enhancement error: {str(e)}")
+                # logger.error(f"Prompt enhancement error: {str(e)}")
                 # Return original prompt if enhancement fails
                 return prompt
 
@@ -212,28 +213,33 @@ class ImageGenerator:
                 if not images:
                     raise Exception("No images were generated")
 
-                # Update cost in progress manager if available
-                if self.progress_manager and world_id:
-                    await self.progress_manager.increment_cost(
-                        world_id=world_id,
-                        cost_type="image",
-                        cost=IMAGE_GENERATION_COST
-                    )
+                # Update cost in database if available
+                if self.db_manager and world_id:
+                    try:
+                        await self.db_manager.increment_world_generation_cost(
+                            world_id=world_id,
+                            cost_type="image",
+                            cost=IMAGE_GENERATION_COST
+                        )
+                        # logger.debug(f"Updated image generation cost for world {world_id}: ${IMAGE_GENERATION_COST}")
+                    except Exception as e:
+                        raise
+                        # logger.error(f"Failed to update image cost for world {world_id}: {str(e)}")
 
                 # Get the image URL
                 image_url = images[0].imageURL
-                logger.info(f"Generated image at URL: {image_url}")
+                # logger.info(f"Generated image at URL: {image_url}")
 
                 # Upload image to media service
                 if not self.service_client:
-                    logger.warning("Service client not available, cannot upload image")
+                    # logger.warning("Service client not available, cannot upload image")
                     return {
                         "image_url": image_url,
                         "width": width,
                         "height": height
                     }
 
-                logger.info("Getting presigned URL for upload")
+                # logger.info("Getting presigned URL for upload")
                 # Get presigned URL for upload
                 media_id, upload_url, expires_at = await self.service_client.get_presigned_upload_url(
                     world_id=world_id,
@@ -248,7 +254,7 @@ class ImageGenerator:
                 if not media_id or not upload_url:
                     raise Exception("Failed to get presigned upload URL")
 
-                logger.info(f"Got presigned URL with media_id: {media_id}")
+                # logger.info(f"Got presigned URL with media_id: {media_id}")
 
                 # Скачиваем и загружаем изображение
                 image_data, upload_result = await download_and_upload_image(
@@ -264,7 +270,7 @@ class ImageGenerator:
                 if image_data is None:
                     raise Exception("Image download failed")
 
-                logger.info(f"Successfully uploaded image, confirming upload with media_id: {media_id}")
+                # logger.info(f"Successfully uploaded image, confirming upload with media_id: {media_id}")
 
                 # Confirm upload
                 success = await self.service_client.confirm_upload(
@@ -307,10 +313,10 @@ class ImageGenerator:
                     )
                     await self.db_manager.log_api_request(log_entry)
 
-                logger.info(
-                    f"Image generation completed in {duration_ms}ms. "
-                    f"Media ID: {media_id}, TaskID: {task_id or 'manual'}"
-                )
+                # logger.info(
+                #     f"Image generation completed in {duration_ms}ms. "
+                #     f"Media ID: {media_id}, TaskID: {task_id or 'manual'}"
+                # )
 
                 return result
 
@@ -332,5 +338,5 @@ class ImageGenerator:
                     )
                     await self.db_manager.log_api_request(log_entry)
 
-                logger.error(f"Image generation error: {str(e)}")
+                # logger.error(f"Image generation error: {str(e)}")
                 raise
