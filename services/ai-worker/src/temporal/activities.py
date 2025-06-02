@@ -8,7 +8,7 @@ from temporalio import activity
 from datetime import datetime, timezone
 import uuid
 
-from ..utils.logger import logger
+
 from ..constants import GenerationStatus, GenerationStage
 from ..schemas.world_description import WorldDescription
 from ..db.models import Task
@@ -217,7 +217,7 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
         async with resource_manager.db_semaphore:
             try:
                 info = activity.info()
-                # # logger.debug(f"Activity {info.activity_type} - Incrementing {field} by {increment} for world {world_id}")
+                activity.logger.debug(f"Activity {info.activity_type} - Incrementing {field} by {increment} for world {world_id}")
                 
                 updated_status = await resource_manager.db_manager.increment_world_generation_counter(
                     world_id=world_id,
@@ -353,7 +353,8 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
         prompt: str,
         world_id: str,
         image_type: str,
-        enhance_prompt: bool = True
+        enhance_prompt: bool = True,
+        character_id: str = ""
     ) -> Dict[str, Any]:
         """
         Генерирует изображение по промпту
@@ -381,6 +382,7 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
                     prompt=prompt,
                     world_id=world_id,
                     media_type_enum=media_type_enum,
+                    character_id=character_id,
                     enhance_prompt=enhance_prompt
                 )
                 
@@ -477,14 +479,17 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
                 info = activity.info()
                 # # logger.info(f"Activity {info.activity_type} - Creating post for character {character_id}")
                 
-                post_id, _ = await resource_manager.service_client.create_ai_post(
+                media_id = post_data.get("media_id", "")
+                
+                result = await resource_manager.service_client.create_ai_post(
                     character_id=character_id,
                     caption=post_data.get("content", ""),
-                    media_id=post_data.get("media_id", ""),
+                    media_id=media_id,
                     world_id=world_id,
                     tags=post_data.get("hashtags", []),
                     task_id=info.activity_id
                 )
+                post_id = result["post_id"]
                 
                 # # logger.info(f"Successfully created post {post_id}")
                 
@@ -498,7 +503,7 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
     @activity.defn(name="update_character_avatar")
     async def update_character_avatar(
         character_id: str,
-        avatar_url: str
+        avatar_media_id: str
     ) -> Dict[str, Any]:
         """
         Обновляет аватар персонажа
@@ -508,14 +513,14 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
                 info = activity.info()
                 # # logger.info(f"Activity {info.activity_type} - Updating avatar for character {character_id}")
                 
-                await resource_manager.service_client.update_character_avatar(
+                result = await resource_manager.service_client.update_character(
                     character_id=character_id,
-                    avatar_url=avatar_url
+                    avatar_media_id=avatar_media_id
                 )
                 
                 # # logger.info(f"Successfully updated character avatar")
                 
-                return {"character_id": character_id, "avatar_url": avatar_url}
+                return result
                 
             except Exception as e:
                 error_msg = f"Error updating character avatar: {str(e)}"
@@ -640,6 +645,44 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
                 # logger.error(f"Activity failed: {error_msg}")
                 raise
 
+    # ==================== FORMATTING ACTIVITIES ====================
+
+    @activity.defn(name="format_world_description")
+    async def format_world_description(
+        world_params: Dict[str, Any]
+    ) -> str:
+        """
+        Форматирует описание мира для использования в промптах
+        
+        Args:
+            world_params: Параметры мира в виде словаря
+            
+        Returns:
+            Отформатированное описание мира
+        """
+        try:
+            info = activity.info()
+            # logger.debug(f"Activity {info.activity_type} - Formatting world description")
+            
+            # Импортируем функцию форматирования
+            from ..utils.format_world import format_world_description as format_func
+            
+            # Создаем объект WorldDescription из параметров
+            from ..schemas.world_description import WorldDescription
+            world_description = WorldDescription(**world_params)
+            
+            # Форматируем описание
+            formatted_description = format_func(world_description)
+            
+            # logger.debug(f"Successfully formatted world description")
+            
+            return formatted_description
+            
+        except Exception as e:
+            error_msg = f"Error formatting world description: {str(e)}"
+            # logger.error(f"Activity failed: {error_msg}")
+            raise
+
 
     return {
         'load_prompt': load_prompt,
@@ -660,4 +703,5 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
         'create_task': create_task,
         'get_task': get_task,
         'update_task': update_task,
+        'format_world_description': format_world_description,
     }

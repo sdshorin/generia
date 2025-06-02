@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 

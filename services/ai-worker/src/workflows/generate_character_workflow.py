@@ -6,9 +6,8 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput, TaskRef
+from ..temporal.task_base import TaskInput, TaskRef
 from ..constants import GenerationStage, GenerationStatus
-from ..utils.format_world import format_world_description
 from ..utils.model_to_template import model_to_template
 from ..prompts import CHARACTER_DETAIL_PROMPT
 from ..schemas.character import CharacterDetailResponse
@@ -98,6 +97,14 @@ class GenerateCharacterWorkflow(BaseWorkflow):
             )
             
             workflow.logger.info(f"Created character {character_id} in Character Service")
+
+            await workflow.execute_activity(
+                "increment_counter",
+                args=[input.world_id, "users_created", 1],
+                task_queue="ai-worker-progress",
+                start_to_close_timeout=timedelta(seconds=30),
+                retry_policy=RetryPolicy(maximum_attempts=3)
+            )
             
             # Создаем и запускаем генерацию аватара персонажа (параллельно с постами)
             from .generate_character_avatar_workflow import GenerateCharacterAvatarInput
@@ -129,7 +136,7 @@ class GenerateCharacterWorkflow(BaseWorkflow):
             posts_input = GeneratePostBatchInput(
                 world_id=input.world_id,
                 character_id=character_id,
-                posts_count=input.posts_per_character,
+                posts_count=input.character_data.get("posts_count", input.posts_per_character),
                 character_detail=character_detail
             )
             posts_task_ref = await self.save_task_data(posts_input, input.world_id)
@@ -169,8 +176,8 @@ class GenerateCharacterWorkflow(BaseWorkflow):
         except Exception as e:
             error_msg = f"Error generating character: {str(e)}"
             workflow.logger.error(f"Workflow failed for character {character_concept}: {error_msg}")
-            
-            return WorkflowResult(success=False, error=error_msg)
+            raise
+            # return WorkflowResult(success=False, error=error_msg)
     
     async def _build_character_detail_prompt(
         self, 
@@ -210,7 +217,13 @@ class GenerateCharacterWorkflow(BaseWorkflow):
         structure_description = model_to_template(CharacterDetailResponse)
         
         # Форматируем промпт с параметрами
-        world_description = format_world_description(world_params)
+        world_description = await workflow.execute_activity(
+            "format_world_description",
+            args=[world_params],
+            task_queue="ai-worker-main",
+            start_to_close_timeout=timedelta(seconds=30),
+            retry_policy=RetryPolicy(maximum_attempts=3)
+        )
         prompt = prompt_template.format(
             world_description=world_description,
             character_concept=character_concept,

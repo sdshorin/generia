@@ -7,7 +7,7 @@ from pymongo.errors import DuplicateKeyError
 
 from ..config import MONGODB_URI, MONGODB_DATABASE
 from ..constants import Collections, GenerationStatus, GenerationStage
-from ..utils.logger import logger
+
 from .models import Task, WorldGenerationStatus, ApiRequestHistory
 from ..schemas.world_description import WorldDescription
 

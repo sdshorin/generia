@@ -546,8 +546,13 @@ func (s *WorldService) GetGenerationStatus(ctx context.Context, req *worldpb.Get
 		}
 	}
 
+	status := generationStatus.Status
+	// if int32(generationStatus.PostsCreated) == int32(generationStatus.PostsPredicted) {
+	// 	status = "completed"
+	// }
+
 	return &worldpb.GetGenerationStatusResponse{
-		Status:              generationStatus.Status,
+		Status:              status, //generationStatus.Status,
 		CurrentStage:        generationStatus.CurrentStage,
 		Stages:              stages,
 		TasksTotal:          int32(generationStatus.TasksTotal),

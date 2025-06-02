@@ -3,7 +3,7 @@ import time
 from functools import wraps
 from typing import Callable, Any, TypeVar, Optional
 
-from .logger import logger
+
 from ..constants import CircuitBreakerState
 
 T = TypeVar('T')
@@ -41,6 +41,7 @@ class CircuitBreaker:
         self.failure_count = 0
         self.success_count = 0
         self.last_failure_time = 0
+        self.last_failure_error = None
         self._lock = asyncio.Lock()
     
     async def __call__(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
@@ -65,7 +66,8 @@ class CircuitBreaker:
                     self.state = CircuitBreakerState.HALF_OPEN
                     self.success_count = 0
                 else:
-                    raise Exception(f"Circuit Breaker '{self.name}' is open")
+                    error_details = f" (last error: {self.last_failure_error})" if self.last_failure_error else ""
+                    raise Exception(f"Circuit Breaker '{self.name}' is open{error_details}")
         
         try:
             # Execute function with timeout
@@ -87,6 +89,7 @@ class CircuitBreaker:
         except Exception as e:
             async with self._lock:
                 self.last_failure_time = time.time()
+                self.last_failure_error = str(e)
                 
                 if self.state == CircuitBreakerState.CLOSED:
                     self.failure_count += 1

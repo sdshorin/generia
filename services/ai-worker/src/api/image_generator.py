@@ -15,7 +15,7 @@ import requests
 from PIL import Image
 
 from ..config import RUNWARE_API_KEY
-from ..utils.logger import logger
+
 from ..utils.circuit_breaker import circuit_breaker
 from ..utils.retries import with_retries
 from ..db.models import ApiRequestHistory

@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 from typing import Dict, Any, Optional, Tuple
-from ..utils.logger import logger
+
 
 async def download_and_upload_image(
     download_url: str,
@@ -33,7 +33,7 @@ async def download_and_upload_image(
                 async with session.get(download_url, timeout=timeout) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        logger.error(f"Failed to download image. Status: {response.status}, Response: {error_text}")
+                        # logger.error(f"Failed to download image. Status: {response.status}, Response: {error_text}")
                         return None, {
                             "success": False,
                             "status": response.status,
@@ -44,7 +44,7 @@ async def download_and_upload_image(
                     # logger.info(f"Successfully downloaded image ({len(image_data)} bytes)")
             
             except Exception as e:
-                logger.error(f"Error downloading image: {str(e)}")
+                # logger.error(f"Error downloading image: {str(e)}")
                 return None, {
                     "success": False,
                     "error": f"Download error: {str(e)}"
@@ -64,7 +64,7 @@ async def download_and_upload_image(
                     ) as response:
                         if response.status not in (200, 201, 204):
                             error_text = await response.text()
-                            logger.error(f"Failed to upload image. Status: {response.status}, Response: {error_text}")
+                            # logger.error(f"Failed to upload image. Status: {response.status}, Response: {error_text}")
                             return image_data, {
                                 "success": False,
                                 "status": response.status,
@@ -78,7 +78,7 @@ async def download_and_upload_image(
                         }
                         
                 except Exception as e:
-                    logger.error(f"Error uploading image: {str(e)}")
+                    # logger.error(f"Error uploading image: {str(e)}")
                     return image_data, {
                         "success": False,
                         "error": f"Upload error: {str(e)}"
@@ -87,7 +87,7 @@ async def download_and_upload_image(
         return None, {"success": False, "error": "Unknown error"}
         
     except Exception as e:
-        logger.error(f"Unexpected error in download_and_upload_image: {str(e)}")
+        # logger.error(f"Unexpected error in download_and_upload_image: {str(e)}")
         return None, {
             "success": False,
             "error": f"Unexpected error: {str(e)}"

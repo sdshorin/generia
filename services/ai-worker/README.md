@@ -384,8 +384,6 @@ async def shutdown():
     # 2. Close resource pools
     await resource_manager.close()  # Closes MongoDB, HTTP, gRPC
     
-    # 3. Close Temporal client
-    await temporal_client.close()
 ```
 
 ### 4. Semaphore-Based Rate Limiting

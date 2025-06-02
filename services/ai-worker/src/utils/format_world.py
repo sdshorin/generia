@@ -3,7 +3,9 @@
 """
 import re
 from typing import Any, Dict, List, Type
-from pydantic import BaseModel
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from pydantic import BaseModel
 
 from ..schemas.world_description import WorldDescription, WorldDescriptionResponse
 
@@ -96,4 +98,5 @@ def format_world_description(world_params: WorldDescription) -> str:
     Returns:
         Отформатированное описание мира для вставки в промпт
     """
+    return str(world_params) # temp
     return format_model_to_text(world_params, WorldDescriptionResponse)

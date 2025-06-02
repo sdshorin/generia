@@ -129,3 +129,8 @@ CREATE INDEX IF NOT EXISTS idx_posts_is_ai ON posts(is_ai);
 CREATE INDEX IF NOT EXISTS idx_media_character_id ON media(character_id);
 CREATE INDEX IF NOT EXISTS idx_media_world_id ON media(world_id);
 CREATE INDEX IF NOT EXISTS idx_media_variants_media_id ON media_variants(media_id);
+
+
+INSERT INTO users (id,username,email,password_hash,created_at,updated_at) VALUES
+	 ('c35f05b3-16c6-4410-a18a-73aa5ed1a685'::uuid,'ser','serres123@yandex.ru','$2a$10$PAyEZQh7UrJ09B/FqQQDEO/4hHy5I9Mp99QUPmy/qhwl8i6CAZjwS','2025-06-01 15:31:46.961186+03','2025-06-01 15:31:46.961186+03')
+    ON CONFLICT (id) DO NOTHING;

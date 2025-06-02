@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime
 from google.protobuf.json_format import MessageToDict
 
-from ..utils.logger import logger
+
 from ..utils.circuit_breaker import circuit_breaker
 from ..utils.retries import with_retries
 from ..db.models import ApiRequestHistory
@@ -182,7 +182,7 @@ class ServiceClient:
 
             return self.character_stub
         except Exception as e:
-            logger.error(f"Failed to initialize character stub: {str(e)}")
+            # logger.error(f"Failed to initialize character stub: {str(e)}")
             raise
 
     async def _init_media_stub(self):
@@ -198,7 +198,7 @@ class ServiceClient:
 
             return self.media_stub
         except Exception as e:
-            logger.error(f"Failed to initialize media stub: {str(e)}")
+            # logger.error(f"Failed to initialize media stub: {str(e)}")
             raise
 
     async def _init_post_stub(self):
@@ -214,7 +214,7 @@ class ServiceClient:
 
             return self.post_stub
         except Exception as e:
-            logger.error(f"Failed to initialize post stub: {str(e)}")
+            # logger.error(f"Failed to initialize post stub: {str(e)}")
             raise
 
     async def _init_world_stub(self):
@@ -230,7 +230,7 @@ class ServiceClient:
 
             return self.world_stub
         except Exception as e:
-            logger.error(f"Failed to initialize world stub: {str(e)}")
+            # logger.error(f"Failed to initialize world stub: {str(e)}")
             raise
 
     async def _ensure_character_stub(self):
@@ -321,7 +321,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for create_character in {world_id} with display name {display_name} and meta {meta} and avatar media id {avatar_media_id}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -388,7 +388,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for get_character with character id {character_id}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -465,7 +465,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for update_character with character id {character_id}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -548,7 +548,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for "
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -616,7 +616,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for confirm_upload with media id {media_id}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -700,7 +700,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for create_ai_post with character id {character_id} with caption {caption} and media id {media_id} and world id {world_id} and tags {tags}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -770,7 +770,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for get_world with world id {world_id}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
@@ -838,7 +838,7 @@ class ServiceClient:
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
             error_message = f"gRPC error: {str(e)} for update_world_image with world id {world_id}, image uuid {image_uuid}, and icon uuid {icon_uuid}"
-            logger.error(error_message)
+            # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(

@@ -3,9 +3,11 @@ import signal
 import sys
 from datetime import timedelta
 from typing import List
+import logging
+
 
 from temporalio.client import Client
-from temporalio.worker import Worker
+from temporalio.worker import Worker, UnsandboxedWorkflowRunner
 from temporalio.common import RetryPolicy
 
 from .config import (
@@ -30,9 +32,9 @@ from .workflows import (
     GenerateCharacterWorkflow,
     GenerateCharacterAvatarWorkflow,
     GeneratePostBatchWorkflow,
-    GeneratePostWorkflow
+    GeneratePostWorkflow,
+    GeneratePostImageWorkflow
 )
-from .utils import logger
 
 # Application state
 resource_manager = None
@@ -43,14 +45,31 @@ async def initialize_components():
     """Initializes all application components with proper resource pooling"""
     global resource_manager, temporal_client
 
+
+    # LOG_FMT = (
+    #     "%(asctime)s | %(levelname)-7s | %(name)s | "
+    #     "wf=%(temporal_workflow_id)s run=%(temporal_run_id)s "
+    #     "act=%(temporal_activity_id)s | %(message)s"
+    # )
+
+    # Configure logging for both main application and Temporal workflows
+    logging.basicConfig(
+        level=logging.DEBUG,  # Enable DEBUG level to see all workflow.logger messages - or use INFO
+        stream=sys.stdout,
+        format='%(asctime)s | %(levelname)-7s | %(name)s | %(message)s'
+    )
+    
+    # Ensure Temporal workflow logger is properly configured
+    temporal_logger = logging.getLogger('temporalio.workflow')
+    temporal_logger.setLevel(logging.DEBUG)
+
     # Initialize shared resources manager with proper connection pools
     resource_manager = SharedResourcesManager()
     await resource_manager.initialize()
-    logger.info("Shared resources manager initialized with connection pools")
 
     # Initialize Temporal client
     temporal_client = await Client.connect(TEMPORAL_HOST, namespace=TEMPORAL_NAMESPACE)
-    logger.info(f"Temporal client connected to {TEMPORAL_HOST} namespace {TEMPORAL_NAMESPACE}")
+    # logger.info(f"Temporal client connected to {TEMPORAL_HOST} namespace {TEMPORAL_NAMESPACE}")
 
 async def create_workers():
     """Creates and configures Temporal workers with injected resources"""
@@ -84,6 +103,7 @@ async def create_workers():
             activities['update_character_avatar'],
             activities['create_task'],
             activities['get_task'],
+            activities['format_world_description'],
         ],
         workflows=[
             InitWorldCreationWorkflow,
@@ -98,6 +118,7 @@ async def create_workers():
         ],
         max_concurrent_activities=MAX_ACTIVITIES_PER_WORKER,
         max_concurrent_workflow_tasks=MAX_WORKFLOW_TASKS_PER_WORKER,
+        workflow_runner=UnsandboxedWorkflowRunner(), # AGENT_LIMITS
     )
     
     # Specialized LLM worker
@@ -109,6 +130,7 @@ async def create_workers():
             activities['enhance_prompt'],
         ],
         max_concurrent_activities=MAX_CONCURRENT_LLM_REQUESTS,
+        workflow_runner=UnsandboxedWorkflowRunner(), # AGENT_LIMITS
     )
     
     # Specialized image worker
@@ -120,6 +142,7 @@ async def create_workers():
             activities['upload_image_to_media_service'],
         ],
         max_concurrent_activities=MAX_CONCURRENT_IMAGE_REQUESTS,
+        workflow_runner=UnsandboxedWorkflowRunner(), # AGENT_LIMITS
     )
     
     # Specialized progress worker
@@ -136,6 +159,7 @@ async def create_workers():
             activities['get_task'],
         ],
         max_concurrent_activities=MAX_CONCURRENT_DB_OPERATIONS,
+        workflow_runner=UnsandboxedWorkflowRunner(), # AGENT_LIMITS
     )
     
     # Service worker for gRPC calls
@@ -149,6 +173,7 @@ async def create_workers():
             
         ],
         max_concurrent_activities=MAX_CONCURRENT_GRPC_CALLS,
+        workflow_runner=UnsandboxedWorkflowRunner(), # AGENT_LIMITS
     )
     
     workers = [
@@ -162,7 +187,7 @@ async def create_workers():
 
 async def shutdown():
     """Closes all application components gracefully"""
-    logger.info("Shutting down...")
+    # logger.info("Shutting down...")
 
     # Stop all workers
     for i, worker in enumerate(workers):
@@ -179,11 +204,11 @@ async def shutdown():
         # logger.info("Shared resources manager closed")
 
     # Close temporal client
-    if temporal_client:
-        await temporal_client.close()
-        # logger.info("Temporal client closed")
+    # if temporal_client:
+    #     await temporal_client.close()
+    #     # logger.info("Temporal client closed")
 
-    logger.info("Shutdown complete")
+    # logger.info("Shutdown complete")
 
 async def main():
     """Main application function"""
@@ -239,7 +264,7 @@ async def main():
             await asyncio.gather(*worker_tasks, return_exceptions=True)
         
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
+        # logger.error(f"Unexpected error: {str(e)}")
         raise
     finally:
         await shutdown()

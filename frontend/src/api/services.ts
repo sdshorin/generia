@@ -68,6 +68,9 @@ export const worldsAPI = {
   createWorldStatusEventSource: (worldId: string): EventSource => {
     const token = localStorage.getItem('token');
     const url = new URL(`${axiosInstance.defaults.baseURL}/worlds/${worldId}/status/stream`);
+
+    // const baseURL = window.location.origin;
+    // const url = new URL(`${baseURL}/api/v1/worlds/${worldId}/status/stream`);
     if (token) {
       url.searchParams.append('token', token);
     }

@@ -5,9 +5,8 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput, TaskRef
+from ..temporal.task_base import TaskInput, TaskRef
 from ..constants import GenerationStage, GenerationStatus, MediaType
-from ..utils.format_world import format_world_description
 from ..utils.model_to_template import model_to_template
 from ..prompts import CHARACTER_AVATAR_PROMPT
 from ..schemas.character_avatar import CharacterAvatarPromptResponse
@@ -122,7 +121,8 @@ class GenerateCharacterAvatarWorkflow(BaseWorkflow):
                     optimized_avatar_prompt,
                     input.world_id,
                     "character_avatar",
-                    True  # enhance_prompt
+                    True,  # enhance_prompt
+                    input.character_id  # character_id
                 ],
                 task_queue="ai-worker-images",
                 start_to_close_timeout=timedelta(minutes=5),
@@ -165,8 +165,8 @@ class GenerateCharacterAvatarWorkflow(BaseWorkflow):
         except Exception as e:
             error_msg = f"Error generating character avatar: {str(e)}"
             workflow.logger.error(f"Workflow failed for character {input.character_id}: {error_msg}")
-            
-            return WorkflowResult(success=False, error=error_msg)
+            raise
+            # return WorkflowResult(success=False, error=error_msg)
     
     async def _build_avatar_prompt(
         self, 
@@ -204,7 +204,13 @@ class GenerateCharacterAvatarWorkflow(BaseWorkflow):
         structure_description = model_to_template(CharacterAvatarPromptResponse)
         
         # Форматируем промпт с параметрами
-        world_description = format_world_description(world_params)
+        world_description = await workflow.execute_activity(
+            "format_world_description",
+            args=[world_params],
+            task_queue="ai-worker-main",
+            start_to_close_timeout=timedelta(seconds=30),
+            retry_policy=RetryPolicy(maximum_attempts=3)
+        )
         prompt = prompt_template.format(
             world_description=world_description,
             character_name=character_name,

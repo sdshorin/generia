@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 from temporalio import activity
 
-from ..utils.logger import logger
+
 
 
 @dataclass

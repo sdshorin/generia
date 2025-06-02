@@ -7,8 +7,8 @@ from temporalio.common import RetryPolicy
 
 from ..db.models import Task
 from ..schemas.world_description import WorldDescription
-from ..schemas.task_base import TaskInput, TaskRef, get_task_type_from_class
-from ..utils.logger import logger
+from ..temporal.task_base import TaskInput, TaskRef, get_task_type_from_class
+
 
 # Generic type для TaskInput классов
 T = TypeVar('T', bound=TaskInput)

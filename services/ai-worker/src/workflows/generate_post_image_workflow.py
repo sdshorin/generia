@@ -5,9 +5,8 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput, TaskRef
+from ..temporal.task_base import TaskInput, TaskRef
 from ..constants import GenerationStage, GenerationStatus, MediaType
-from ..utils.format_world import format_world_description
 from ..utils.model_to_template import model_to_template
 from ..prompts import POST_IMAGE_PROMPT
 from ..schemas.post_image import PostImagePromptResponse
@@ -122,7 +121,8 @@ class GeneratePostImageWorkflow(BaseWorkflow):
                     optimized_image_prompt,
                     input.world_id,
                     "post_image",
-                    True  # enhance_prompt
+                    True,  # enhance_prompt
+                    input.character_id  # character_id
                 ],
                 task_queue="ai-worker-images",
                 start_to_close_timeout=timedelta(minutes=5),
@@ -143,13 +143,16 @@ class GeneratePostImageWorkflow(BaseWorkflow):
             media_id = image_result.get("media_id")
             
             # Создаем пост через API
+            post_data = {
+                "content": post_content,
+                "media_id": media_id,
+                "hashtags": hashtags
+            }
             post_id = await workflow.execute_activity(
-                "create_post_with_image",
+                "create_post",
                 args=[
+                    post_data,
                     input.character_id,
-                    post_content,
-                    media_id,
-                    hashtags,
                     input.world_id
                 ],
                 task_queue="ai-worker-services",
@@ -189,8 +192,8 @@ class GeneratePostImageWorkflow(BaseWorkflow):
         except Exception as e:
             error_msg = f"Error generating post image: {str(e)}"
             workflow.logger.error(f"Workflow failed for character {input.character_id}: {error_msg}")
-            
-            return WorkflowResult(success=False, error=error_msg)
+            raise 
+            # return WorkflowResult(success=False, error=error_msg)
     
     async def _build_post_image_prompt(
         self, 
@@ -229,7 +232,13 @@ class GeneratePostImageWorkflow(BaseWorkflow):
         structure_description = model_to_template(PostImagePromptResponse)
         
         # Форматируем промпт с параметрами
-        world_description = format_world_description(world_params)
+        world_description = await workflow.execute_activity(
+            "format_world_description",
+            args=[world_params],
+            task_queue="ai-worker-main",
+            start_to_close_timeout=timedelta(seconds=30),
+            retry_policy=RetryPolicy(maximum_attempts=3)
+        )
         prompt = prompt_template.format(
             world_description=world_description,
             character_name=character_name,

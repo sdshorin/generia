@@ -5,12 +5,14 @@ Shared resources manager для Temporal workers
 import asyncio
 import os
 from typing import Dict, Any, Optional, Type
-from pydantic import BaseModel
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from pydantic import BaseModel, Field
 import motor.motor_asyncio as motor
 import grpc.aio
 import httpx
 
-from ..utils.logger import logger
+
 
 
 class SharedResourcesManager:
@@ -127,6 +129,10 @@ class SharedResourcesManager:
             from ..schemas.post_batch import PostBatchResponse
             from ..schemas.post import PostDetailResponse
             from ..schemas.image_prompts import ImagePromptResponse
+            from ..schemas.post_image import PostImagePromptResponse
+            from ..schemas.character_avatar import CharacterAvatarPromptResponse
+
+            CharacterAvatarPromptResponse
             
             self.schema_mapping = {
                 'WorldDescriptionResponse': WorldDescriptionResponse,
@@ -136,7 +142,9 @@ class SharedResourcesManager:
                 'PostBatchResponse': PostBatchResponse,
                 'PostResponse': PostDetailResponse,
                 'PostDetailResponse': PostDetailResponse,
-                'ImagePromptResponse': ImagePromptResponse
+                'ImagePromptResponse': ImagePromptResponse,
+                'PostImagePromptResponse': PostImagePromptResponse,
+                'CharacterAvatarPromptResponse': CharacterAvatarPromptResponse
             }
             # logger.info("Schema mapping initialized")
         except ImportError as e:

@@ -1,7 +1,9 @@
 """
 Базовые классы для работы с задачами в Temporal workflows
 """
-from pydantic import BaseModel
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from pydantic import BaseModel, Field
 from typing import Optional, Type, TypeVar, Any, Dict
 
 # Generic type для TaskInput классов

@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import get_origin, get_args, Union, List, Any
-from pydantic import BaseModel
-
+from temporalio import workflow
+with workflow.unsafe.imports_passed_through():
+    from pydantic import BaseModel
 def model_to_template(
     model_cls: type[BaseModel],
     indent: int = 0,

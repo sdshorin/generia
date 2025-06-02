@@ -6,7 +6,7 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput
+from ..temporal.task_base import TaskInput
 from ..constants import GenerationStage, GenerationStatus, DEFAULT_VALUES
 
 
@@ -134,26 +134,26 @@ class InitWorldCreationWorkflow(BaseWorkflow):
         except Exception as e:
             error_msg = f"Error initializing world creation: {str(e)}"
             workflow.logger.error(f"Workflow failed for world {input.world_id}: {error_msg}")
-            
-            # Обновляем статус инициализации на "Ошибка"
-            try:
-                await workflow.execute_activity(
-                    "update_stage",
-                    args=[input.world_id, GenerationStage.INITIALIZING, GenerationStatus.FAILED],
-                    task_queue="ai-worker-progress",
-                    start_to_close_timeout=timedelta(seconds=30),
-                    retry_policy=RetryPolicy(maximum_attempts=3)
-                )
+            raise
+            # # Обновляем статус инициализации на "Ошибка"
+            # try:
+            #     await workflow.execute_activity(
+            #         "update_stage",
+            #         args=[input.world_id, GenerationStage.INITIALIZING, GenerationStatus.FAILED],
+            #         task_queue="ai-worker-progress",
+            #         start_to_close_timeout=timedelta(seconds=30),
+            #         retry_policy=RetryPolicy(maximum_attempts=3)
+            #     )
                 
-                # Устанавливаем общий статус генерации как неудачный
-                await workflow.execute_activity(
-                    "update_progress",
-                    args=[input.world_id, {"status": GenerationStatus.FAILED}],
-                    task_queue="ai-worker-progress",
-                    start_to_close_timeout=timedelta(seconds=30),
-                    retry_policy=RetryPolicy(maximum_attempts=3)
-                )
-            except Exception as update_error:
-                workflow.logger.error(f"Failed to update failure status: {str(update_error)}")
+            #     # Устанавливаем общий статус генерации как неудачный
+            #     await workflow.execute_activity(
+            #         "update_progress",
+            #         args=[input.world_id, {"status": GenerationStatus.FAILED}],
+            #         task_queue="ai-worker-progress",
+            #         start_to_close_timeout=timedelta(seconds=30),
+            #         retry_policy=RetryPolicy(maximum_attempts=3)
+            #     )
+            # except Exception as update_error:
+            #     workflow.logger.error(f"Failed to update failure status: {str(update_error)}")
             
-            return WorkflowResult(success=False, error=error_msg)
+            # return WorkflowResult(success=False, error=error_msg)

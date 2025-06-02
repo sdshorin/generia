@@ -7,9 +7,8 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput, TaskRef
+from ..temporal.task_base import TaskInput, TaskRef
 from ..constants import GenerationStage, GenerationStatus
-from ..utils.format_world import format_world_description
 from ..utils.model_to_template import model_to_template
 from ..prompts import CHARACTER_BATCH_PROMPT, PREVIOUS_CHARACTERS_PROMPT, FIRST_BATCH_CHARACTERS_PROMPT
 from ..schemas.character_batch import CharacterBatchResponse
@@ -106,6 +105,7 @@ class GenerateCharacterBatchWorkflow(BaseWorkflow):
                 retry_policy=RetryPolicy(maximum_attempts=3)
             )
             
+            workflow.logger.info(f"get_world_parameters: {world_params}")
             # Формируем промпт
             prompt = await self._build_character_batch_prompt(input, world_params, current_batch_size, posts_count_for_batch)
             
@@ -214,16 +214,17 @@ class GenerateCharacterBatchWorkflow(BaseWorkflow):
             new_generated_count = input.generated_count + actual_characters_generated
             remaining_users = input.users_count - actual_characters_generated
             
-            await workflow.execute_activity(
-                "increment_counter",
-                args=[input.world_id, "users_created", actual_characters_generated],
-                task_queue="ai-worker-progress",
-                start_to_close_timeout=timedelta(seconds=30),
-                retry_policy=RetryPolicy(maximum_attempts=3)
-            )
             
             # Если нужно сгенерировать еще персонажей, запускаем следующий пакет
             if remaining_users > 0:
+                # Вычисляем количество постов, которые уже распределены среди персонажей
+                posts_distributed_in_batch = sum(character.get("posts_count", 0) for character in characters)
+                new_remaining_posts_count = input.remaining_posts_count - posts_distributed_in_batch
+                
+                workflow.logger.info(f"Posts distribution: batch={posts_distributed_in_batch}, "
+                                   f"remaining_before={input.remaining_posts_count}, "
+                                   f"remaining_after={new_remaining_posts_count}")
+                
                 next_batch_workflow_id = self.get_workflow_id(
                     input.world_id,
                     "generate-character-batch",
@@ -234,7 +235,7 @@ class GenerateCharacterBatchWorkflow(BaseWorkflow):
                     world_id=input.world_id,
                     users_count=remaining_users,
                     posts_count=input.posts_count,
-                    remaining_posts_count=input.remaining_posts_count,
+                    remaining_posts_count=new_remaining_posts_count,
                     total_users_count=input.total_users_count,
                     generated_characters_description=generated_characters_description,
                     generated_count=new_generated_count,
@@ -285,19 +286,19 @@ class GenerateCharacterBatchWorkflow(BaseWorkflow):
             error_msg = f"Error generating character batch: {str(e)}"
             workflow.logger.error(f"Workflow failed for world {input.world_id}: {error_msg}")
             raise e
-            # Обновляем статус этапа на "Ошибка"
-            try:
-                await workflow.execute_activity(
-                    "update_stage",
-                    args=[input.world_id, GenerationStage.CHARACTERS, GenerationStatus.FAILED],
-                    task_queue="ai-worker-progress",
-                    start_to_close_timeout=timedelta(seconds=30),
-                    retry_policy=RetryPolicy(maximum_attempts=3)
-                )
-            except Exception as update_error:
-                workflow.logger.error(f"Failed to update failure status: {str(update_error)}")
+            # # Обновляем статус этапа на "Ошибка"
+            # try:
+            #     await workflow.execute_activity(
+            #         "update_stage",
+            #         args=[input.world_id, GenerationStage.CHARACTERS, GenerationStatus.FAILED],
+            #         task_queue="ai-worker-progress",
+            #         start_to_close_timeout=timedelta(seconds=30),
+            #         retry_policy=RetryPolicy(maximum_attempts=3)
+            #     )
+            # except Exception as update_error:
+            #     workflow.logger.error(f"Failed to update failure status: {str(update_error)}")
             
-            return WorkflowResult(success=False, error=error_msg)
+            # return WorkflowResult(success=False, error=error_msg)
     
     async def _build_character_batch_prompt(
         self, 
@@ -362,8 +363,17 @@ class GenerateCharacterBatchWorkflow(BaseWorkflow):
                 future_users_count=future_users_count
             )
         
-        # Формируем описание мира
-        world_description = format_world_description(world_params)
+        # Формируем описание мира через activity
+        workflow.logger.info(f"world_params: {world_params}")
+        world_description = await workflow.execute_activity(
+            "format_world_description",
+            args=[world_params],
+            task_queue="ai-worker-main",
+            start_to_close_timeout=timedelta(seconds=30),
+            retry_policy=RetryPolicy(maximum_attempts=3)
+        )
+        workflow.logger.info(f"world_description: {world_description}")
+
         structure_description = model_to_template(CharacterBatchResponse)
         # print(prompt_template)
         # Формируем итоговый промпт
@@ -493,6 +503,10 @@ class GenerateCharacterBatchWorkflow(BaseWorkflow):
         # Проверяем результат
         new_sum = sum(character.get("posts_count", 1) for character in characters)
         workflow.logger.info(f"Adjusted posts count: {new_sum} (target: {target_posts_count})")
+        
+        # Логируем распределение постов по персонажам
+        posts_distribution = [character.get("posts_count", 1) for character in characters]
+        workflow.logger.debug(f"Posts per character: {posts_distribution}")
         
         # Проверяем, что у всех персонажей минимум 1 пост
         for character in characters:

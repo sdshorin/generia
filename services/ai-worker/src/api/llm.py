@@ -6,10 +6,11 @@ import requests
 from typing import Dict, Any, Optional, Type, List, TypeVar, Union
 from datetime import datetime
 
+
 from pydantic import BaseModel
 
 from ..config import OPENROUTER_API_KEY
-from ..utils.logger import logger
+
 from ..utils.circuit_breaker import circuit_breaker
 from ..utils.retries import with_retries
 from ..db.models import ApiRequestHistory

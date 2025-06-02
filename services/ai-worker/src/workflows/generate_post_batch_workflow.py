@@ -7,8 +7,7 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput, TaskRef
-from ..utils.format_world import format_world_description
+from ..temporal.task_base import TaskInput, TaskRef
 from ..utils.model_to_template import model_to_template
 from ..prompts import POST_BATCH_PROMPT, PREVIOUS_POSTS_PROMPT, FIRST_BATCH_POSTS_PROMPT
 from ..schemas.post_batch import PostBatchResponse
@@ -244,14 +243,7 @@ class GeneratePostBatchWorkflow(BaseWorkflow):
             new_generated_count = input.generated_posts_count + actual_posts_generated
             remaining_posts = input.posts_count - new_generated_count
             
-            await workflow.execute_activity(
-                "increment_counter",
-                args=[input.world_id, "posts_created", actual_posts_generated],
-                task_queue="ai-worker-progress",
-                start_to_close_timeout=timedelta(seconds=30),
-                retry_policy=RetryPolicy(maximum_attempts=3)
-            )
-            
+
             # Если нужно сгенерировать еще посты, запускаем следующий пакет
             if remaining_posts > 0:
                 next_batch_input = GeneratePostBatchInput(
@@ -301,8 +293,8 @@ class GeneratePostBatchWorkflow(BaseWorkflow):
         except Exception as e:
             error_msg = f"Error generating post batch: {str(e)}"
             workflow.logger.error(f"Workflow failed for character {input.character_id}: {error_msg}")
-            
-            return WorkflowResult(success=False, error=error_msg)
+            raise 
+            # return WorkflowResult(success=False, error=error_msg)
     
     async def _build_post_batch_prompt(
         self, 
@@ -378,7 +370,13 @@ class GeneratePostBatchWorkflow(BaseWorkflow):
             )
         
         # Формируем описание мира
-        world_description = format_world_description(world_params)
+        world_description = await workflow.execute_activity(
+            "format_world_description",
+            args=[world_params],
+            task_queue="ai-worker-main",
+            start_to_close_timeout=timedelta(seconds=30),
+            retry_policy=RetryPolicy(maximum_attempts=3)
+        )
         structure_description = model_to_template(PostBatchResponse)
         
         # Формируем итоговый промпт

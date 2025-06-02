@@ -6,7 +6,7 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
 from ..temporal.base_workflow import BaseWorkflow, WorkflowResult
-from ..schemas.task_base import TaskInput, TaskRef
+from ..temporal.task_base import TaskInput, TaskRef
 from ..constants import GenerationStage, GenerationStatus, MediaType
 from ..utils.format_world import format_world_description
 from ..utils.model_to_template import model_to_template
@@ -64,7 +64,13 @@ class GenerateWorldImageWorkflow(BaseWorkflow):
             structure_description = model_to_template(ImagePromptResponse)
             
             # Подготавливаем переменные для промпта
-            world_description = format_world_description(world_params)
+            world_description = await workflow.execute_activity(
+                "format_world_description",
+                args=[world_params],
+                task_queue="ai-worker-main",
+                start_to_close_timeout=timedelta(seconds=30),
+                retry_policy=RetryPolicy(maximum_attempts=3)
+            )
             prompt = prompt_template.format(
                 world_description=world_description,
                 structure_description=structure_description
@@ -117,7 +123,8 @@ class GenerateWorldImageWorkflow(BaseWorkflow):
                     image_prompts["header_prompt"],
                     input.world_id,
                     "world_header",
-                    True  # enhance_prompt
+                    True,  # enhance_prompt
+                    ""  # character_id (empty for world-level images)
                 ],
                 task_queue="ai-worker-images",
                 start_to_close_timeout=timedelta(minutes=5),
@@ -134,7 +141,8 @@ class GenerateWorldImageWorkflow(BaseWorkflow):
                     image_prompts["icon_prompt"],
                     input.world_id,
                     "world_icon",
-                    True  # enhance_prompt
+                    True,  # enhance_prompt
+                    ""  # character_id (empty for world-level images)
                 ],
                 task_queue="ai-worker-images",
                 start_to_close_timeout=timedelta(minutes=5),
@@ -181,17 +189,17 @@ class GenerateWorldImageWorkflow(BaseWorkflow):
         except Exception as e:
             error_msg = f"Error generating world images: {str(e)}"
             workflow.logger.error(f"Workflow failed for world {input.world_id}: {error_msg}")
+            raise
+            # # Обновляем статус этапа на "Ошибка"
+            # try:
+            #     await workflow.execute_activity(
+            #         "update_stage",
+            #         args=[input.world_id, GenerationStage.WORLD_IMAGE, GenerationStatus.FAILED],
+            #         task_queue="ai-worker-progress",
+            #         start_to_close_timeout=timedelta(seconds=30),
+            #         retry_policy=RetryPolicy(maximum_attempts=3)
+            #     )
+            # except Exception as update_error:
+            #     workflow.logger.error(f"Failed to update failure status: {str(update_error)}")
             
-            # Обновляем статус этапа на "Ошибка"
-            try:
-                await workflow.execute_activity(
-                    "update_stage",
-                    args=[input.world_id, GenerationStage.WORLD_IMAGE, GenerationStatus.FAILED],
-                    task_queue="ai-worker-progress",
-                    start_to_close_timeout=timedelta(seconds=30),
-                    retry_policy=RetryPolicy(maximum_attempts=3)
-                )
-            except Exception as update_error:
-                workflow.logger.error(f"Failed to update failure status: {str(update_error)}")
-            
-            return WorkflowResult(success=False, error=error_msg)
+            # return WorkflowResult(success=False, error=error_msg)

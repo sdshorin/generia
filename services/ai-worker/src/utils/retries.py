@@ -3,7 +3,6 @@ import random
 from functools import wraps
 from typing import Callable, TypeVar, Any, List, Optional, Type
 
-from .logger import logger
 
 T = TypeVar('T')
 
@@ -44,17 +43,17 @@ async def retry_async(
             return await func(*args, **kwargs)
         except tuple(retry_exceptions) as e:
             if attempt >= max_retries:
-                logger.error(f"All attempts exhausted ({max_retries + 1}). Last error: {str(e)}")
+                # logger.error(f"All attempts exhausted ({max_retries + 1}). Last error: {str(e)}")
                 raise e
             
             # Add random jitter (±10%)
             jitter = random.uniform(0.9, 1.1)
             sleep_time = min(delay * jitter, max_delay)
             
-            logger.warning(
-                f"Attempt {attempt + 1}/{max_retries + 1} failed: {str(e)}. "
-                f"Retrying in {sleep_time:.2f} sec."
-            )
+            # logger.warning(
+            #     f"Attempt {attempt + 1}/{max_retries + 1} failed: {str(e)}. "
+            #     f"Retrying in {sleep_time:.2f} sec."
+            # )
             
             await asyncio.sleep(sleep_time)
             delay = min(delay * backoff_factor, max_delay)
