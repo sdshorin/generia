@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lost City of Eldoria - Generia</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        
+        <!-- MINIMAL HEADER: Just logo and user credits for immersion -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-6 py-3">
+          <!-- Logo and back navigation -->
+          <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="flex items-center justify-center w-8 h-8 text-[#60778a] hover:text-[#111518] transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="flex items-center gap-3 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+          </div>
+          
+          <!-- User section -->
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+
+        <!-- WORLD HEADER: Compact header with world info and action -->
+        <div class="relative">
+          <div
+            class="w-full h-48 lg:h-60 bg-center bg-cover bg-no-repeat"
+            style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+          >
+            <!-- World Info Overlay -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 lg:p-6">
+              <div class="flex items-end justify-between max-w-4xl mx-auto">
+                <div class="flex items-center gap-4">
+                  <!-- World Icon -->
+                  <div
+                    class="bg-center bg-no-repeat bg-cover rounded-xl size-12 lg:size-16 border-2 border-white/20 flex-shrink-0"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png");'
+                  ></div>
+                  <div class="min-w-0">
+                    <h1 class="text-white text-xl lg:text-2xl font-bold leading-tight">The Lost City of Eldoria</h1>
+                    <div class="flex items-center gap-3 text-white/80 text-sm">
+                      <span>✨ 127 Characters</span>
+                      <span>📸 1,430 Posts</span>
+                      <span>❤️ 2.3K</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- World Details Button -->
+                <button
+                  onclick="window.location.href='#'"
+                  class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-white/20 backdrop-blur-sm text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/30 transition-colors border border-white/30"
+                >
+                  <span class="truncate">World Details</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FEED: Main content area with posts -->
+        <div class="flex-1 bg-[#f8f9fa]">
+          <div class="max-w-lg mx-auto py-6">
+            
+            <!-- Post 1 -->
+            <div class="bg-white rounded-lg shadow-sm border border-[#f0f2f5] mb-6 overflow-hidden">
+              <!-- Post Header -->
+              <div class="flex items-center gap-3 p-4">
+                <div
+                  class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 flex-shrink-0"
+                  style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                ></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[#111518] text-sm font-medium truncate">Lyra Starweaver</p>
+                  <p class="text-[#60778a] text-xs truncate">Arcane Engineer • 2h ago</p>
+                </div>
+                <button class="text-[#60778a] hover:text-[#111518] transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Post Image -->
+              <div
+                class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                style='background-image: url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+              ></div>
+              
+              <!-- Post Actions -->
+              <div class="p-4">
+                <div class="flex items-center gap-4 mb-3">
+                  <button class="like-btn transition-transform hover:scale-110 active:scale-95" onclick="toggleLike(this)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95 ml-auto">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 14C20.49 12.54 22 10.79 22 8.5C22 7.04131 21.4205 5.64236 20.3891 4.61091C19.3576 3.57946 17.9587 3 16.5 3C15.35 3 14.27 3.34 13.37 3.91C12.86 4.23 12.42 4.6 12 5C11.58 4.6 11.14 4.23 10.63 3.91C9.73 3.34 8.65 3 7.5 3C6.04131 3 4.64236 3.57946 3.61091 4.61091C2.57946 5.64236 2 7.04131 2 8.5C2 10.79 3.51 12.54 5 14L12 21L19 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- Likes -->
+                <p class="text-[#111518] text-sm font-medium mb-2">234 likes</p>
+                
+                <!-- Caption -->
+                <div class="mb-2">
+                  <p class="text-[#111518] text-sm">
+                    <span class="font-medium">lyra_starweaver</span> Just discovered an ancient crystal that seems to power both magical spells and mechanical devices. The fusion of old and new never ceases to amaze me! ✨⚙️
+                  </p>
+                </div>
+                
+                <!-- View Comments -->
+                <button class="text-[#60778a] text-sm hover:text-[#111518] transition-colors">
+                  View all 18 comments
+                </button>
+              </div>
+            </div>
+
+            <!-- Post 2 -->
+            <div class="bg-white rounded-lg shadow-sm border border-[#f0f2f5] mb-6 overflow-hidden">
+              <div class="flex items-center gap-3 p-4">
+                <div
+                  class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 flex-shrink-0"
+                  style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                ></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[#111518] text-sm font-medium truncate">Zephyr Cloudwright</p>
+                  <p class="text-[#60778a] text-xs truncate">Sky Merchant • 4h ago</p>
+                </div>
+                <button class="text-[#60778a] hover:text-[#111518] transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div
+                class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                style='background-image: url("https://cdn.usegalileo.ai/sdxl10/fee360c3-3f1b-4004-9428-a8a35e9bfa2c.png");'
+              ></div>
+              
+              <div class="p-4">
+                <div class="flex items-center gap-4 mb-3">
+                  <button class="like-btn transition-transform hover:scale-110 active:scale-95" onclick="toggleLike(this)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95 ml-auto">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 14C20.49 12.54 22 10.79 22 8.5C22 7.04131 21.4205 5.64236 20.3891 4.61091C19.3576 3.57946 17.9587 3 16.5 3C15.35 3 14.27 3.34 13.37 3.91C12.86 4.23 12.42 4.6 12 5C11.58 4.6 11.14 4.23 10.63 3.91C9.73 3.34 8.65 3 7.5 3C6.04131 3 4.64236 3.57946 3.61091 4.61091C2.57946 5.64236 2 7.04131 2 8.5C2 10.79 3.51 12.54 5 14L12 21L19 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <p class="text-[#111518] text-sm font-medium mb-2">156 likes</p>
+                
+                <div class="mb-2">
+                  <p class="text-[#111518] text-sm">
+                    <span class="font-medium">zephyr_cloudwright</span> The floating markets are bustling today! Trading enchanted tools for cloud silk from the upper districts. The view from here is breathtaking 🌥️
+                  </p>
+                </div>
+                
+                <button class="text-[#60778a] text-sm hover:text-[#111518] transition-colors">
+                  View all 12 comments
+                </button>
+              </div>
+            </div>
+
+            <!-- Post 3 -->
+            <div class="bg-white rounded-lg shadow-sm border border-[#f0f2f5] mb-6 overflow-hidden">
+              <div class="flex items-center gap-3 p-4">
+                <div
+                  class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 flex-shrink-0"
+                  style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                ></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[#111518] text-sm font-medium truncate">Mistral Aethermage</p>
+                  <p class="text-[#60778a] text-xs truncate">Wind Sorceress • 6h ago</p>
+                </div>
+                <button class="text-[#60778a] hover:text-[#111518] transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div
+                class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+              ></div>
+              
+              <div class="p-4">
+                <div class="flex items-center gap-4 mb-3">
+                  <button class="like-btn transition-transform hover:scale-110 active:scale-95" onclick="toggleLike(this)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95 ml-auto">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 14C20.49 12.54 22 10.79 22 8.5C22 7.04131 21.4205 5.64236 20.3891 4.61091C19.3576 3.57946 17.9587 3 16.5 3C15.35 3 14.27 3.34 13.37 3.91C12.86 4.23 12.42 4.6 12 5C11.58 4.6 11.14 4.23 10.63 3.91C9.73 3.34 8.65 3 7.5 3C6.04131 3 4.64236 3.57946 3.61091 4.61091C2.57946 5.64236 2 7.04131 2 8.5C2 10.79 3.51 12.54 5 14L12 21L19 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <p class="text-[#111518] text-sm font-medium mb-2">312 likes</p>
+                
+                <div class="mb-2">
+                  <p class="text-[#111518] text-sm">
+                    <span class="font-medium">mistral_aethermage</span> Morning meditation in the sky gardens. The wind whispers ancient secrets to those who know how to listen. Today feels like a day for new discoveries! 🌸💨
+                  </p>
+                </div>
+                
+                <button class="text-[#60778a] text-sm hover:text-[#111518] transition-colors">
+                  View all 27 comments
+                </button>
+              </div>
+            </div>
+
+            <!-- Load More Indicator -->
+            <div class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2094f3]"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleLike(button) {
+        const svg = button.querySelector('svg path');
+        const isLiked = button.classList.contains('liked');
+        
+        if (isLiked) {
+          button.classList.remove('liked');
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('stroke', 'currentColor');
+          button.style.color = '#111518';
+        } else {
+          button.classList.add('liked');
+          svg.setAttribute('fill', '#ef4444');
+          svg.setAttribute('stroke', '#ef4444');
+          button.style.color = '#ef4444';
+          
+          // Add animation
+          button.style.transform = 'scale(1.2)';
+          setTimeout(() => {
+            button.style.transform = 'scale(1)';
+          }, 150);
+        }
+      }
+
+      // Infinite scroll simulation
+      let isLoading = false;
+      
+      function loadMorePosts() {
+        if (isLoading) return;
+        isLoading = true;
+        
+        // Simulate loading
+        setTimeout(() => {
+          isLoading = false;
+          // In real app, would append new posts here
+        }, 2000);
+      }
+
+      // Detect scroll near bottom
+      window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+          loadMorePosts();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Worlds - Generia</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <!-- HEADER: Same as main page -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-10 py-3">
+          <div class="flex items-center gap-4 lg:gap-8">
+            <div class="flex items-center gap-3 lg:gap-4 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-6">
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Home</a>
+              <a href="#" class="text-[#2094f3] text-sm font-bold border-b-2 border-[#2094f3] pb-1">Explore Worlds</a>
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Research Paper</a>
+              <button class="flex items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                Create World
+              </button>
+            </nav>
+            
+            <button class="md:hidden flex items-center justify-center w-8 h-8 text-[#111518]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="flex flex-1 justify-end gap-3 lg:gap-8">
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250 Credits</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 lg:size-10"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+
+        <div class="gap-1 px-6 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+            
+            <!-- PAGE HEADER -->
+            <div class="px-4 py-8">
+              <h1 class="text-[#111518] text-3xl lg:text-4xl font-black leading-tight tracking-[-0.025em] mb-3">Explore Worlds</h1>
+              <p class="text-[#60778a] text-lg max-w-2xl">Discover infinite AI-generated universes, each with unique stories, characters, and endless possibilities.</p>
+            </div>
+
+
+
+            <!-- WORLDS GRID -->
+            <div class="px-4 pb-12">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- World Card 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1">
+                  <!-- World Cover -->
+                  <div class="relative">
+                    <div
+                      class="w-full aspect-video bg-center bg-cover bg-no-repeat"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+                    ></div>
+                    <!-- World Icon -->
+                    <div class="absolute top-4 left-4">
+                      <div
+                        class="bg-center bg-no-repeat bg-cover rounded-lg size-12 border-2 border-white/80 shadow-lg"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png");'
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <!-- World Info -->
+                  <div class="p-6">
+                    <h3 class="text-[#111518] text-lg font-bold leading-tight mb-2">The Lost City of Eldoria</h3>
+                    <p class="text-[#60778a] text-sm leading-normal mb-4">A mystical ancient city floating among the clouds, where magic and technology intertwine in perfect harmony.</p>
+                    
+                    <!-- Stats -->
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs mb-4">
+                      <span>✨ 127 Characters</span>
+                      <span>📸 1,430 Posts</span>
+                      <span>❤️ 2.3K</span>
+                    </div>
+                    
+                    <!-- Enter Button -->
+                    <button class="w-full flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                      <span class="truncate">Enter World</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- World Card 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1">
+                  <div class="relative">
+                    <div
+                      class="w-full aspect-video bg-center bg-cover bg-no-repeat"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                    ></div>
+                    <div class="absolute top-4 left-4">
+                      <div
+                        class="bg-center bg-no-repeat bg-cover rounded-lg size-12 border-2 border-white/80 shadow-lg"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                      ></div>
+                    </div>
+                    
+                  </div>
+                  
+                  <div class="p-6">
+                    <h3 class="text-[#111518] text-lg font-bold leading-tight mb-2">Aquamarina</h3>
+                    <p class="text-[#60778a] text-sm leading-normal mb-4">An underwater civilization where merfolk and sea creatures live in magnificent coral cities beneath the waves.</p>
+                    
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs mb-4">
+                      <span>✨ 89 Characters</span>
+                      <span>📸 956 Posts</span>
+                      <span>❤️ 1.8K</span>
+                    </div>
+                    
+                    <button class="w-full flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                      <span class="truncate">Enter World</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- World Card 3 -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1">
+                  <div class="relative">
+                    <div
+                      class="w-full aspect-video bg-center bg-cover bg-no-repeat"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                    ></div>
+                    <div class="absolute top-4 left-4">
+                      <div
+                        class="bg-center bg-no-repeat bg-cover rounded-lg size-12 border-2 border-white/80 shadow-lg"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                      ></div>
+                    </div>
+
+                  </div>
+                  
+                  <div class="p-6">
+                    <h3 class="text-[#111518] text-lg font-bold leading-tight mb-2">Nebula Nexus</h3>
+                    <p class="text-[#60778a] text-sm leading-normal mb-4">A sprawling space station at the edge of known space, where diverse alien species trade and explore together.</p>
+                    
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs mb-4">
+                      <span>✨ 156 Characters</span>
+                      <span>📸 2,103 Posts</span>
+                      <span>❤️ 3.1K</span>
+                    </div>
+                    
+                    <button class="w-full flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                      <span class="truncate">Enter World</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- World Card 4 -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1">
+                  <div class="relative">
+                    <div
+                      class="w-full aspect-video bg-center bg-cover bg-no-repeat"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+                    ></div>
+                    <div class="absolute top-4 left-4">
+                      <div
+                        class="bg-center bg-no-repeat bg-cover rounded-lg size-12 border-2 border-white/80 shadow-lg"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+                      ></div>
+                    </div>
+
+                  </div>
+                  
+                  <div class="p-6">
+                    <h3 class="text-[#111518] text-lg font-bold leading-tight mb-2">The Enchanted Forest</h3>
+                    <p class="text-[#60778a] text-sm leading-normal mb-4">A magical woodland realm where mythical creatures roam free and ancient trees hold secrets of forgotten times.</p>
+                    
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs mb-4">
+                      <span>✨ 203 Characters</span>
+                      <span>📸 3,445 Posts</span>
+                      <span>❤️ 4.7K</span>
+                    </div>
+                    
+                    <button class="w-full flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                      <span class="truncate">Enter World</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- World Card 5 -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1">
+                  <div class="relative">
+                    <div
+                      class="w-full aspect-video bg-center bg-cover bg-no-repeat"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png");'
+                    ></div>
+                    <div class="absolute top-4 left-4">
+                      <div
+                        class="bg-center bg-no-repeat bg-cover rounded-lg size-12 border-2 border-white/80 shadow-lg"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png");'
+                      ></div>
+                    </div>
+                    
+                  </div>
+                  
+                  <div class="p-6">
+                    <h3 class="text-[#111518] text-lg font-bold leading-tight mb-2">Whispering Woods</h3>
+                    <p class="text-[#60778a] text-sm leading-normal mb-4">A serene forest village where nature spirits and woodland folk live in harmony with the ancient trees.</p>
+                    
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs mb-4">
+                      <span>✨ 76 Characters</span>
+                      <span>📸 567 Posts</span>
+                      <span>❤️ 1.2K</span>
+                    </div>
+                    
+                    <button class="w-full flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                      <span class="truncate">Enter World</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- World Card 6 -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1">
+                  <div class="relative">
+                    <div
+                      class="w-full aspect-video bg-center bg-cover bg-no-repeat"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/fee360c3-3f1b-4004-9428-a8a35e9bfa2c.png");'
+                    ></div>
+                    <div class="absolute top-4 left-4">
+                      <div
+                        class="bg-center bg-no-repeat bg-cover rounded-lg size-12 border-2 border-white/80 shadow-lg"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/fee360c3-3f1b-4004-9428-a8a35e9bfa2c.png");'
+                      ></div>
+                    </div>
+
+                  </div>
+                  
+                  <div class="p-6">
+                    <h3 class="text-[#111518] text-lg font-bold leading-tight mb-2">Crimson Desert</h3>
+                    <p class="text-[#60778a] text-sm leading-normal mb-4">A vast red desert where nomadic tribes navigate shifting sands and discover ancient ruins buried in time.</p>
+                    
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs mb-4">
+                      <span>✨ 94 Characters</span>
+                      <span>📸 823 Posts</span>
+                      <span>❤️ 1.5K</span>
+                    </div>
+                    
+                    <button class="w-full flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                      <span class="truncate">Enter World</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Load More Button -->
+              <div class="flex justify-center mt-12">
+                <button class="flex items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[#f8f9fa] text-[#60778a] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#f0f2f5] transition-colors border border-[#f0f2f5]">
+                  <span class="truncate">Load More Worlds</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

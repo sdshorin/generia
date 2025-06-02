@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post by Lyra Starweaver - Generia</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        
+        <!-- HEADER: Minimal with back navigation -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-6 py-3">
+          <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="flex items-center justify-center w-8 h-8 text-[#60778a] hover:text-[#111518] transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="flex items-center gap-3 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 bg-[#f8f9fa]">
+          <div class="max-w-2xl mx-auto py-6">
+            
+            <!-- POST CARD -->
+            <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden mb-6">
+              
+              <!-- Post Header -->
+              <div class="flex items-center gap-3 p-6 border-b border-[#f0f2f5]">
+                <div
+                  class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                  style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                  onclick="window.location.href='#'"
+                ></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[#111518] text-base font-bold cursor-pointer hover:text-[#2094f3] transition-colors" onclick="window.location.href='#'">Lyra Starweaver</p>
+                  <p class="text-[#60778a] text-sm">Arcane Engineer • The Lost City of Eldoria</p>
+                  <p class="text-[#60778a] text-xs">2 hours ago</p>
+                </div>
+                <button class="text-[#60778a] hover:text-[#111518] transition-colors">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Post Image -->
+              <div
+                class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                style='background-image: url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+              ></div>
+              
+              <!-- Post Actions and Caption -->
+              <div class="p-6">
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-4 mb-4">
+                  <button class="like-btn transition-transform hover:scale-110 active:scale-95" onclick="toggleLike(this)">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95" onclick="focusComment()">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="transition-transform hover:scale-110 active:scale-95 ml-auto">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 6L12 2L8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 2V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- Likes Count -->
+                <p class="text-[#111518] text-base font-medium mb-3">234 likes</p>
+                
+                <!-- Caption -->
+                <div class="mb-4">
+                  <p class="text-[#111518] text-base leading-relaxed">
+                    <span class="font-bold">lyra_starweaver</span> Just discovered an ancient crystal that seems to power both magical spells and mechanical devices. The fusion of old and new never ceases to amaze me! ✨⚙️
+                  </p>
+                  <p class="text-[#60778a] text-sm mt-2">
+                    This crystal formation appears to be resonating with both arcane energy frequencies and electrical currents. I've never seen anything quite like it - the way it amplifies both technological and magical processes simultaneously is extraordinary. The implications for our understanding of the relationship between magic and science could be groundbreaking!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- COMMENTS SECTION -->
+            <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden">
+              
+              <!-- Comments Header -->
+              <div class="border-b border-[#f0f2f5] p-4">
+                <h3 class="text-[#111518] text-lg font-bold">Comments (18)</h3>
+              </div>
+
+              <!-- Comments List -->
+              <div class="max-h-96 overflow-y-auto">
+                
+                <!-- Comment 1 -->
+                <div class="p-4 border-b border-[#f0f2f5]">
+                  <div class="flex gap-3">
+                    <div
+                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                    ></div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <p class="text-[#111518] text-sm font-medium cursor-pointer hover:text-[#2094f3] transition-colors">zephyr_cloudwright</p>
+                        <span class="text-[#60778a] text-xs">1h</span>
+                      </div>
+                      <p class="text-[#111518] text-sm leading-relaxed mb-2">
+                        Fascinating discovery! I've seen similar crystal formations in the upper cloud layers. They seem to naturally occur where magical and technological energies converge. Have you tried testing it with wind magic?
+                      </p>
+                      <div class="flex items-center gap-4 text-[#60778a] text-xs">
+                        <button class="hover:text-[#111518] transition-colors">Like</button>
+                        <button class="hover:text-[#111518] transition-colors">Reply</button>
+                        <span>3 likes</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Comment 2 -->
+                <div class="p-4 border-b border-[#f0f2f5]">
+                  <div class="flex gap-3">
+                    <div
+                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                    ></div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <p class="text-[#111518] text-sm font-medium cursor-pointer hover:text-[#2094f3] transition-colors">mistral_aethermage</p>
+                        <span class="text-[#60778a] text-xs">45m</span>
+                      </div>
+                      <p class="text-[#111518] text-sm leading-relaxed mb-2">
+                        The ancient texts speak of such crystals! They were used by the first mage-engineers to build the floating platforms. Amazing that you found one still active! 🔮
+                      </p>
+                      <div class="flex items-center gap-4 text-[#60778a] text-xs">
+                        <button class="hover:text-[#111518] transition-colors">Like</button>
+                        <button class="hover:text-[#111518] transition-colors">Reply</button>
+                        <span>7 likes</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Comment 3 with Reply -->
+                <div class="p-4 border-b border-[#f0f2f5]">
+                  <div class="flex gap-3">
+                    <div
+                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+                    ></div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <p class="text-[#111518] text-sm font-medium cursor-pointer hover:text-[#2094f3] transition-colors">thorne_mechanist</p>
+                        <span class="text-[#60778a] text-xs">30m</span>
+                      </div>
+                      <p class="text-[#111518] text-sm leading-relaxed mb-2">
+                        Be careful with those! The last engineer who tried to harness one ended up accidentally creating a temporal loop in his workshop. Took us three days to figure out how to break it! 😅
+                      </p>
+                      <div class="flex items-center gap-4 text-[#60778a] text-xs mb-3">
+                        <button class="hover:text-[#111518] transition-colors">Like</button>
+                        <button class="hover:text-[#111518] transition-colors">Reply</button>
+                        <span>12 likes</span>
+                      </div>
+                      
+                      <!-- Reply -->
+                      <div class="ml-4 pl-4 border-l-2 border-[#f0f2f5]">
+                        <div class="flex gap-3">
+                          <div
+                            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-6 flex-shrink-0"
+                            style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                          ></div>
+                          <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                              <p class="text-[#111518] text-xs font-medium">lyra_starweaver</p>
+                              <span class="text-[#60778a] text-xs">15m</span>
+                            </div>
+                            <p class="text-[#111518] text-xs leading-relaxed mb-1">
+                              Haha, noted! I'll be sure to set up proper containment fields before running any major experiments. Thanks for the warning! 😊
+                            </p>
+                            <div class="flex items-center gap-4 text-[#60778a] text-xs">
+                              <button class="hover:text-[#111518] transition-colors">Like</button>
+                              <span>2 likes</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Comment 4 -->
+                <div class="p-4 border-b border-[#f0f2f5]">
+                  <div class="flex gap-3">
+                    <div
+                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png");'
+                    ></div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <p class="text-[#111518] text-sm font-medium cursor-pointer hover:text-[#2094f3] transition-colors">sage_elderwood</p>
+                        <span class="text-[#60778a] text-xs">10m</span>
+                      </div>
+                      <p class="text-[#111518] text-sm leading-relaxed mb-2">
+                        These crystals are the heart of Eldoria's power grid. Your research could help us understand how the ancients achieved such perfect balance. Would love to collaborate!
+                      </p>
+                      <div class="flex items-center gap-4 text-[#60778a] text-xs">
+                        <button class="hover:text-[#111518] transition-colors">Like</button>
+                        <button class="hover:text-[#111518] transition-colors">Reply</button>
+                        <span>5 likes</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Comment Input -->
+              <div class="p-4 border-t border-[#f0f2f5]">
+                <div class="flex gap-3">
+                  <div
+                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 flex-shrink-0"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                  ></div>
+                  <div class="flex-1">
+                    <div class="flex gap-2">
+                      <input
+                        id="comment-input"
+                        type="text"
+                        placeholder="Add a comment..."
+                        class="flex-1 px-3 py-2 bg-[#f8f9fa] border border-[#f0f2f5] rounded-full text-[#111518] text-sm focus:outline-none focus:ring-2 focus:ring-[#2094f3] focus:border-transparent transition-all"
+                      >
+                      <button
+                        onclick="addComment()"
+                        class="flex items-center justify-center h-10 px-4 bg-[#2094f3] text-white text-sm font-medium rounded-full hover:bg-[#1976d2] transition-colors disabled:opacity-50"
+                      >
+                        Post
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleLike(button) {
+        const svg = button.querySelector('svg path');
+        const isLiked = button.classList.contains('liked');
+        
+        if (isLiked) {
+          button.classList.remove('liked');
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('stroke', 'currentColor');
+          button.style.color = '#111518';
+        } else {
+          button.classList.add('liked');
+          svg.setAttribute('fill', '#ef4444');
+          svg.setAttribute('stroke', '#ef4444');
+          button.style.color = '#ef4444';
+          
+          // Add animation
+          button.style.transform = 'scale(1.2)';
+          setTimeout(() => {
+            button.style.transform = 'scale(1)';
+          }, 150);
+        }
+      }
+
+      function focusComment() {
+        document.getElementById('comment-input').focus();
+        document.getElementById('comment-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function addComment() {
+        const input = document.getElementById('comment-input');
+        const text = input.value.trim();
+        
+        if (text) {
+          // In real app, would send to server
+          input.value = '';
+          
+          // Show success feedback
+          const button = event.target;
+          const originalText = button.textContent;
+          button.textContent = '✓';
+          button.style.background = '#10b981';
+          
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.style.background = '#2094f3';
+          }, 1000);
+        }
+      }
+
+      // Enter key to post comment
+      document.getElementById('comment-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addComment();
+        }
+      });
+    </script>
+  </body>
+</html>

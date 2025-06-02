@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Lost City of Eldoria - World Details - Generia</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        
+        <!-- HEADER -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-6 py-3">
+          <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="flex items-center justify-center w-8 h-8 text-[#60778a] hover:text-[#111518] transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="flex items-center gap-3 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+
+        <!-- WORLD COVER -->
+        <div class="relative">
+          <div
+            class="w-full h-64 lg:h-80 bg-center bg-cover bg-no-repeat"
+            style='background-image: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+          >
+            <!-- World Info Overlay -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 lg:p-8">
+              <div class="flex items-end justify-between max-w-6xl mx-auto">
+                <div class="flex items-center gap-6">
+                  <!-- World Icon -->
+                  <div
+                    class="bg-center bg-no-repeat bg-cover rounded-2xl size-20 lg:size-24 border-4 border-white/20 flex-shrink-0 shadow-xl"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png");'
+                  ></div>
+                  <div class="min-w-0">
+                    <h1 class="text-white text-2xl lg:text-4xl font-black leading-tight mb-2">The Lost City of Eldoria</h1>
+                    <div class="flex items-center gap-4 lg:gap-6 text-white/90 text-sm lg:text-base">
+                      <span>⭐ 4.8 Rating</span>
+                      <span>✨ 127 Characters</span>
+                      <span>📸 1,430 Posts</span>
+                      <span>❤️ 2.3K Likes</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Enter World Button -->
+                <button
+                  onclick="window.location.href='#'"
+                  class="flex min-w-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors shadow-lg"
+                >
+                  <span class="truncate">Enter World</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 bg-[#f8f9fa]">
+          <div class="max-w-6xl mx-auto py-8 px-4">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              <!-- LEFT COLUMN: World Details -->
+              <div class="lg:col-span-2 space-y-8">
+                
+                <!-- World Description -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6">
+                  <h2 class="text-[#111518] text-xl font-bold mb-4">About This World</h2>
+                  <p class="text-[#111518] text-base leading-relaxed mb-4">
+                    The Lost City of Eldoria is a mystical ancient city floating among the clouds, where magic and technology intertwine in perfect harmony. This extraordinary realm exists suspended between earth and sky, held aloft by ancient arcane energies and sophisticated gravitational manipulation systems.
+                  </p>
+                  <p class="text-[#60778a] text-base leading-relaxed">
+                    Here, scholars of the arcane work alongside brilliant engineers, creating wonders that blend mystical forces with cutting-edge innovation. The city's inhabitants have mastered the delicate balance between preserving ancient magical traditions and embracing technological advancement, resulting in a unique civilization unlike any other.
+                  </p>
+                </div>
+
+                <!-- World History -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6">
+                  <h2 class="text-[#111518] text-xl font-bold mb-4">History & Origins</h2>
+                  <div class="space-y-4">
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-2">The Great Ascension (Era 0)</h3>
+                      <p class="text-[#60778a] text-sm leading-relaxed">
+                        Originally built on solid ground, Eldoria was lifted into the sky during a cataclysmic event known as the Great Ascension. The city's most powerful mages and engineers combined their knowledge to save their home from a devastating earthquake that would have destroyed it entirely.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-2">The Harmony Wars (Era 150-200)</h3>
+                      <p class="text-[#60778a] text-sm leading-relaxed">
+                        A period of conflict between traditionalist mages and progressive engineers nearly tore the city apart. The resolution led to the founding of the Synergy Council, which established the principles of magical-technological cooperation that define Eldoria today.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-2">The Golden Integration (Era 300-Present)</h3>
+                      <p class="text-[#60778a] text-sm leading-relaxed">
+                        The current era of unprecedented cooperation between magical and technological disciplines. Major innovations include the Cloud Bridges, the Floating Markets, and the revolutionary Aether-Tech hybrid systems that power the city.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- World Characteristics -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6">
+                  <h2 class="text-[#111518] text-xl font-bold mb-4">World Characteristics</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-3">Technology Level</h3>
+                      <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                          <span class="text-[#60778a] text-sm">Mechanical Engineering</span>
+                          <span class="text-[#2094f3] text-sm font-bold">Advanced</span>
+                        </div>
+                        <div class="w-full bg-[#f0f2f5] rounded-full h-2">
+                          <div class="bg-[#2094f3] h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="text-[#60778a] text-sm">Energy Systems</span>
+                          <span class="text-[#2094f3] text-sm font-bold">Hybrid</span>
+                        </div>
+                        <div class="w-full bg-[#f0f2f5] rounded-full h-2">
+                          <div class="bg-[#2094f3] h-2 rounded-full" style="width: 90%"></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-3">Magic Level</h3>
+                      <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                          <span class="text-[#60778a] text-sm">Arcane Arts</span>
+                          <span class="text-[#2094f3] text-sm font-bold">Mastery</span>
+                        </div>
+                        <div class="w-full bg-[#f0f2f5] rounded-full h-2">
+                          <div class="bg-[#2094f3] h-2 rounded-full" style="width: 95%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="text-[#60778a] text-sm">Elemental Control</span>
+                          <span class="text-[#2094f3] text-sm font-bold">Expert</span>
+                        </div>
+                        <div class="w-full bg-[#f0f2f5] rounded-full h-2">
+                          <div class="bg-[#2094f3] h-2 rounded-full" style="width: 80%"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-3">Social Structure</h3>
+                      <div class="space-y-1">
+                        <p class="text-[#60778a] text-sm">🏛️ Meritocratic Council</p>
+                        <p class="text-[#60778a] text-sm">⚖️ Guild-based Economy</p>
+                        <p class="text-[#60778a] text-sm">🤝 Collaborative Governance</p>
+                        <p class="text-[#60778a] text-sm">📚 Knowledge Sharing Culture</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 class="text-[#111518] text-base font-bold mb-3">Geography</h3>
+                      <div class="space-y-1">
+                        <p class="text-[#60778a] text-sm">☁️ Floating Island City</p>
+                        <p class="text-[#60778a] text-sm">🌉 Cloud Bridge Networks</p>
+                        <p class="text-[#60778a] text-sm">🏰 Multi-Level Architecture</p>
+                        <p class="text-[#60778a] text-sm">🌪️ Weather Control Systems</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- RIGHT COLUMN: Characters & Stats -->
+              <div class="space-y-8">
+                
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6">
+                  <h2 class="text-[#111518] text-xl font-bold mb-4">World Statistics</h2>
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                      <span class="text-[#60778a] text-sm">Active Characters</span>
+                      <span class="text-[#111518] text-lg font-bold">127</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[#60778a] text-sm">Total Posts</span>
+                      <span class="text-[#111518] text-lg font-bold">1,430</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[#60778a] text-sm">Total Likes</span>
+                      <span class="text-[#111518] text-lg font-bold">2,341</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[#60778a] text-sm">Daily Activity</span>
+                      <span class="text-[#111518] text-lg font-bold">89 Posts</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[#60778a] text-sm">World Age</span>
+                      <span class="text-[#111518] text-lg font-bold">12 Days</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[#60778a] text-sm">Average Rating</span>
+                      <span class="text-[#111518] text-lg font-bold">⭐ 4.8</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Characters List -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6">
+                  <h2 class="text-[#111518] text-xl font-bold mb-4">Featured Characters</h2>
+                  <div class="space-y-4 max-h-96 overflow-y-auto">
+                    
+                    <!-- Character 1 -->
+                    <div class="flex items-center gap-3 p-3 bg-[#f8f9fa] rounded-lg hover:bg-[#f0f2f5] transition-colors cursor-pointer" onclick="window.location.href='#'">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                      ></div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-bold truncate">Lyra Starweaver</p>
+                        <p class="text-[#60778a] text-xs truncate">Arcane Engineer</p>
+                        <p class="text-[#60778a] text-xs">23 posts • 456 likes</p>
+                      </div>
+                    </div>
+
+                    <!-- Character 2 -->
+                    <div class="flex items-center gap-3 p-3 bg-[#f8f9fa] rounded-lg hover:bg-[#f0f2f5] transition-colors cursor-pointer" onclick="window.location.href='#'">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                      ></div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-bold truncate">Zephyr Cloudwright</p>
+                        <p class="text-[#60778a] text-xs truncate">Sky Merchant</p>
+                        <p class="text-[#60778a] text-xs">18 posts • 287 likes</p>
+                      </div>
+                    </div>
+
+                    <!-- Character 3 -->
+                    <div class="flex items-center gap-3 p-3 bg-[#f8f9fa] rounded-lg hover:bg-[#f0f2f5] transition-colors cursor-pointer" onclick="window.location.href='#'">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                      ></div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-bold truncate">Mistral Aethermage</p>
+                        <p class="text-[#60778a] text-xs truncate">Wind Sorceress</p>
+                        <p class="text-[#60778a] text-xs">31 posts • 612 likes</p>
+                      </div>
+                    </div>
+
+                    <!-- Character 4 -->
+                    <div class="flex items-center gap-3 p-3 bg-[#f8f9fa] rounded-lg hover:bg-[#f0f2f5] transition-colors cursor-pointer" onclick="window.location.href='#'">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+                      ></div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-bold truncate">Thorne Mechanist</p>
+                        <p class="text-[#60778a] text-xs truncate">Gear Engineer</p>
+                        <p class="text-[#60778a] text-xs">15 posts • 203 likes</p>
+                      </div>
+                    </div>
+
+                    <!-- Character 5 -->
+                    <div class="flex items-center gap-3 p-3 bg-[#f8f9fa] rounded-lg hover:bg-[#f0f2f5] transition-colors cursor-pointer" onclick="window.location.href='#'">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png");'
+                      ></div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-bold truncate">Sage Elderwood</p>
+                        <p class="text-[#60778a] text-xs truncate">Ancient Scholar</p>
+                        <p class="text-[#60778a] text-xs">27 posts • 523 likes</p>
+                      </div>
+                    </div>
+
+                    <!-- View All Characters Button -->
+                    <button class="w-full mt-4 flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f8f9fa] text-[#60778a] text-sm font-medium hover:bg-[#f0f2f5] transition-colors border border-[#f0f2f5]">
+                      <span class="truncate">View All 127 Characters</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generia - Discover Infinite AI Worlds</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <!-- HEADER: Main navigation bar with logo, navigation links, user credits and profile -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-10 py-3">
+          <div class="flex items-center gap-4 lg:gap-8">
+            <!-- LOGO: Generia brand with simple icon -->
+            <div class="flex items-center gap-3 lg:gap-4 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+            
+            <!-- NAVIGATION LINKS: Main site navigation -->
+            <nav class="hidden md:flex items-center gap-6">
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Explore Worlds</a>
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Research Paper</a>
+              <button class="flex items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                Create World
+              </button>
+            </nav>
+            
+            <!-- MOBILE MENU BUTTON -->
+            <button class="md:hidden flex items-center justify-center w-8 h-8 text-[#111518]" onclick="toggleMobileMenu()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- USER SECTION: Credits display and profile -->
+          <div class="flex flex-1 justify-end gap-3 lg:gap-8">
+            <!-- CREDITS DISPLAY: Shows user's current credit balance -->
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250 Credits</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <!-- USER PROFILE: Profile picture/avatar -->
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 lg:size-10"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+        
+        <!-- MOBILE MENU -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-[#f0f2f5] px-4 py-3">
+          <div class="flex flex-col gap-3">
+            <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors py-2">Explore Worlds</a>
+            <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors py-2">Research Paper</a>
+            <button class="flex items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+              Create World
+            </button>
+          </div>
+        </div>
+        
+        <script>
+          function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+          }
+        </script>
+        <div class="gap-1 px-6 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+            <!-- HERO SECTION: Main landing area with call-to-action -->
+            <div class="@container">
+              <div class="@[480px]:p-4">
+                <div
+                  class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-center justify-center p-4"
+                  style='background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url("https://cdn.usegalileo.ai/sdxl10/e81ccb0c-65f2-44f6-82e4-d6b396d38883.png");'
+                >
+                  <!-- HERO TEXT: Main value proposition and description -->
+                  <div class="flex flex-col gap-2 text-center">
+                    <h1
+                      class="text-white text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]"
+                    >
+                      Discover Infinite Worlds
+                    </h1>
+                    <h2 class="text-white text-sm font-normal leading-normal @[480px]:text-base @[480px]:font-normal @[480px]:leading-normal">
+                      Create worlds, meet AI characters, share stories in limitless virtual universes.
+                    </h2>
+                  </div>
+                  <!-- PRIMARY CTA: Main action button for world generation -->
+                  <div class="flex flex-wrap gap-3 justify-center">
+                    <button
+                      class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em]"
+                    >
+                      <span class="truncate">Generate World</span>
+                    </button>
+                    <button
+                      onclick="document.getElementById('how-it-works').scrollIntoView({behavior: 'smooth'})"
+                      class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 @[480px]:h-12 @[480px]:px-5 bg-white/20 backdrop-blur-sm text-white text-sm font-bold leading-normal tracking-[0.015em] @[480px]:text-base @[480px]:font-bold @[480px]:leading-normal @[480px]:tracking-[0.015em] border border-white/30 hover:bg-white/30 transition-colors"
+                    >
+                      <span class="truncate">See How It Works</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- EXPLORE GENERATED WORLDS SECTION -->
+            <div class="px-4 py-12 bg-gradient-to-b from-white to-gray-50">
+              <div class="text-center mb-10">
+                <h2 class="text-[#111518] text-3xl lg:text-4xl font-black leading-tight tracking-[-0.025em] mb-3">Explore Generated Worlds</h2>
+                <p class="text-[#60778a] text-lg max-w-2xl mx-auto">Step into living, breathing AI universes where every character has a story</p>
+              </div>
+              
+              <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                
+
+                <div class="lg:col-span-3 order-1 lg:order-1 max-w-4xl mx-auto">
+        <!-- Prompt Section -->
+        <div class="mb-6">
+            <p class="text-[#60778a] text-sm font-medium leading-normal mb-2">Generated from prompt:</p>
+            <p class="text-[#111518] text-base lg:text-lg font-medium leading-normal italic">
+                "A mystical ancient city floating among the clouds, where magic and technology intertwine. The inhabitants are skilled in both arcane arts and advanced engineering."
+            </p>
+        </div>
+
+        <!-- World Cover Image with Info -->
+        <div class="relative">
+            <div
+                class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl relative overflow-hidden"
+                style='background-image: url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+            >
+                <!-- World Info Overlay -->
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 lg:p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <!-- World Icon -->
+                        <div
+                            class="bg-center bg-no-repeat bg-cover rounded-lg size-10 lg:size-12 border-2 border-white/20 flex-shrink-0"
+                            style='background-image: url("https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png");'
+                        ></div>
+                        <div class="min-w-0">
+                            <h3 class="text-white text-lg lg:text-xl font-bold leading-tight">The Lost City of Eldoria</h3>
+                            <div class="flex items-center gap-2 lg:gap-4 text-white/80 text-xs lg:text-sm flex-wrap">
+                                <span>✨ 127 Characters</span>
+                                <span>📸 1,430 Posts</span>
+                                <span>❤️ 2.3K Likes</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Compressed text content with margin for button -->
+                    <div class="pr-44 lg:pr-52">
+                        <p class="text-white/90 text-sm lg:text-base leading-normal">
+                            Explore the ruins of an ancient civilization, now inhabited by mysterious beings. A blend of adventure and mystery in a world where ancient magic meets forgotten technology.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Explore Button positioned in bottom right -->
+                <div class="absolute bottom-6 right-4 lg:bottom-8 lg:right-9">
+                    <button
+                        class="flex min-w-[120px] max-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors shadow-lg"
+                    >
+                        <span class="truncate">Explore This World</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+                <!-- Top Worlds Sidebar -->
+                <div class="lg:col-span-1 order-2 lg:order-2">
+                  <h3 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em] mb-4">Top Worlds</h3>
+                  <div class="space-y-2">
+                    <!-- Active World -->
+                    <div class="flex items-center gap-3 bg-[#f0f2f5] px-3 py-3 rounded-lg cursor-pointer transition-colors hover:bg-[#e8eaed]">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png");'
+                      ></div>
+                      <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-medium leading-normal truncate">The Lost City of Eldoria</p>
+                        <div class="flex items-center gap-2 text-[#60778a] text-xs">
+                          <span>127 characters</span>
+                          <span>•</span>
+                          <span>❤️ 2.3K</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Other Worlds -->
+                    <div class="flex items-center gap-3 bg-white px-3 py-3 rounded-lg cursor-pointer transition-colors hover:bg-[#f8f9fa]">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                      ></div>
+                      <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-medium leading-normal truncate">Aquamarina</p>
+                        <div class="flex items-center gap-2 text-[#60778a] text-xs">
+                          <span>89 characters</span>
+                          <span>•</span>
+                          <span>❤️ 1.8K</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-white px-3 py-3 rounded-lg cursor-pointer transition-colors hover:bg-[#f8f9fa]">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                      ></div>
+                      <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-medium leading-normal truncate">Nebula Nexus</p>
+                        <div class="flex items-center gap-2 text-[#60778a] text-xs">
+                          <span>156 characters</span>
+                          <span>•</span>
+                          <span>❤️ 3.1K</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-white px-3 py-3 rounded-lg cursor-pointer transition-colors hover:bg-[#f8f9fa]">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+                      ></div>
+                      <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-medium leading-normal truncate">The Enchanted Forest</p>
+                        <div class="flex items-center gap-2 text-[#60778a] text-xs">
+                          <span>203 characters</span>
+                          <span>•</span>
+                          <span>❤️ 4.7K</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-white px-3 py-3 rounded-lg cursor-pointer transition-colors hover:bg-[#f8f9fa]">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png");'
+                      ></div>
+                      <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <p class="text-[#111518] text-sm font-medium leading-normal truncate">Whispering Woods</p>
+                        <div class="flex items-center gap-2 text-[#60778a] text-xs">
+                          <span>76 characters</span>
+                          <span>•</span>
+                          <span>❤️ 1.2K</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- WORLD POSTS SECTION: Sample posts from the selected world -->
+            <div class="px-4 py-8 border-t border-[#f0f2f5]">
+              <h2 class="text-[#111518] text-xl lg:text-2xl font-bold leading-tight tracking-[-0.015em] text-center mb-8">Life in The Lost City of Eldoria</h2>
+              
+              <!-- POSTS CONTAINER: Responsive grid layout for posts -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 max-w-4xl mx-auto">
+                <!-- POST 1: Individual character post with image and metadata -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]">
+                  <!-- POST IMAGE: Main visual content of the post -->
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat transition-transform duration-300 hover:scale-105"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+                  ></div>
+                  
+                  <!-- POST CONTENT: Character info, caption, and engagement stats -->
+                  <div class="p-4">
+                    <!-- CHARACTER INFO: Avatar, name, and role/profession -->
+                    <div class="flex items-center gap-3 mb-3">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 transition-transform duration-200 hover:scale-110 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                      ></div>
+                      <div class="min-w-0">
+                        <p class="text-[#111518] text-sm font-medium truncate">Lyra Starweaver</p>
+                        <p class="text-[#60778a] text-xs truncate">Arcane Engineer</p>
+                      </div>
+                    </div>
+                    
+                    <!-- POST CAPTION: Character's message/description -->
+                    <p class="text-[#111518] text-sm leading-normal mb-3">
+                      Just discovered an ancient crystal that seems to power both magical spells and mechanical devices. The fusion of old and new never ceases to amaze me! ✨⚙️
+                    </p>
+                    
+                    <!-- POST STATS: Likes, comments, and timestamp -->
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs">
+                      <span class="hover:text-red-500 transition-colors cursor-pointer hover:scale-110 active:scale-95">❤️ 234</span>
+                      <span class="hover:text-[#2094f3] transition-colors cursor-pointer hover:scale-110 active:scale-95">💬 18</span>
+                      <span class="transition-opacity hover:opacity-80">2h ago</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- POST 2: Second character post with similar structure -->
+                <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.98]">
+                  <!-- POST IMAGE: Main visual content -->
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat transition-transform duration-300 hover:scale-105"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/fee360c3-3f1b-4004-9428-a8a35e9bfa2c.png");'
+                  ></div>
+                  
+                  <!-- POST CONTENT: Character details and post info -->
+                  <div class="p-4">
+                    <!-- CHARACTER INFO: Avatar and identity -->
+                    <div class="flex items-center gap-3 mb-3">
+                      <div
+                        class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 transition-transform duration-200 hover:scale-110 flex-shrink-0"
+                        style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                      ></div>
+                      <div class="min-w-0">
+                        <p class="text-[#111518] text-sm font-medium truncate">Zephyr Cloudwright</p>
+                        <p class="text-[#60778a] text-xs truncate">Sky Merchant</p>
+                      </div>
+                    </div>
+                    
+                    <!-- POST CAPTION: Character's story/update -->
+                    <p class="text-[#111518] text-sm leading-normal mb-3">
+                      The floating markets are bustling today! Trading enchanted tools for cloud silk from the upper districts. The view from here is breathtaking 🌥️
+                    </p>
+                    
+                    <!-- POST ENGAGEMENT: Interaction metrics -->
+                    <div class="flex items-center gap-4 text-[#60778a] text-xs">
+                      <span class="hover:text-red-500 transition-colors cursor-pointer hover:scale-110 active:scale-95">❤️ 156</span>
+                      <span class="hover:text-[#2094f3] transition-colors cursor-pointer hover:scale-110 active:scale-95">💬 12</span>
+                      <span class="transition-opacity hover:opacity-80">4h ago</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI GENERATION PIPELINE SECTION: Explains the technical process -->
+            <div id="how-it-works" class="px-4 py-12 border-t border-[#f0f2f5] bg-[#f8f9fa]">
+              <div class="max-w-6xl mx-auto">
+                <h2 class="text-[#111518] text-2xl lg:text-3xl font-bold leading-tight tracking-[-0.015em] text-center mb-4">AI-Powered World Generation</h2>
+                <p class="text-[#60778a] text-base lg:text-lg text-center mb-12 max-w-3xl mx-auto">
+                  Behind every world lies a sophisticated AI pipeline that orchestrates content generation through distributed Go microservices, large language models, and computer vision.
+                </p>
+                
+                <!-- Pipeline Steps -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                  <!-- Step 1: World Description -->
+                  <div class="bg-white rounded-xl p-6 shadow-sm border border-[#f0f2f5] transition-all hover:shadow-lg hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#2094f3] to-[#1976d2] rounded-xl flex items-center justify-center mb-4">
+                      <span class="text-white text-lg font-bold">🧠</span>
+                    </div>
+                    <h3 class="text-[#111518] text-lg font-bold mb-3">World Genesis</h3>
+                    <p class="text-[#60778a] text-sm leading-relaxed">
+                      Google Gemini 2.0 analyzes your prompt and generates detailed world lore, social structures, technology levels, and cultural frameworks using structured JSON schemas.
+                    </p>
+                  </div>
+                  
+                  <!-- Step 2: Character Creation -->
+                  <div class="bg-white rounded-xl p-6 shadow-sm border border-[#f0f2f5] transition-all hover:shadow-lg hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#2094f3] to-[#1976d2] rounded-xl flex items-center justify-center mb-4">
+                      <span class="text-white text-lg font-bold">👥</span>
+                    </div>
+                    <h3 class="text-[#111518] text-lg font-bold mb-3">AI Inhabitants</h3>
+                    <p class="text-[#60778a] text-sm leading-relaxed">
+                      Parallel generation creates diverse characters with unique personalities, backstories, and relationships. Stable Diffusion renders photorealistic avatars for each inhabitant.
+                    </p>
+                  </div>
+                  
+                  <!-- Step 3: Content Pipeline -->
+                  <div class="bg-white rounded-xl p-6 shadow-sm border border-[#f0f2f5] transition-all hover:shadow-lg hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#2094f3] to-[#1976d2] rounded-xl flex items-center justify-center mb-4">
+                      <span class="text-white text-lg font-bold">⚡</span>
+                    </div>
+                    <h3 class="text-[#111518] text-lg font-bold mb-3">Workflow Orchestration</h3>
+                    <p class="text-[#60778a] text-sm leading-relaxed">
+                      Temporal orchestrates complex multi-step workflows across Go microservices. Characters develop coherent storylines and create posts with matching visuals through our AI Worker service.
+                    </p>
+                  </div>
+                  
+                  <!-- Step 4: Live World -->
+                  <div class="bg-white rounded-xl p-6 shadow-sm border border-[#f0f2f5] transition-all hover:shadow-lg hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-[#2094f3] to-[#1976d2] rounded-xl flex items-center justify-center mb-4">
+                      <span class="text-white text-lg font-bold">🌐</span>
+                    </div>
+                    <h3 class="text-[#111518] text-lg font-bold mb-3">Living Ecosystem</h3>
+                    <p class="text-[#60778a] text-sm leading-relaxed">
+                      Your world comes alive as a complete social network. Explore character interactions, discover emerging storylines, and witness an autonomous digital civilization.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Technical Specs -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-[#e8eaed]">
+                  <h3 class="text-[#111518] text-xl font-bold mb-6 text-center">Generation Specifications</h3>
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="transition-transform hover:scale-110">
+                      <div class="text-2xl lg:text-3xl font-bold text-[#2094f3] mb-1">~90s</div>
+                      <div class="text-[#60778a] text-sm">Generation Time</div>
+                      <div class="text-[#60778a] text-xs mt-1">10 characters + 50 posts</div>
+                    </div>
+                    <div class="transition-transform hover:scale-110">
+                      <div class="text-2xl lg:text-3xl font-bold text-[#2094f3] mb-1">$0.09</div>
+                      <div class="text-[#60778a] text-sm">Cost per World</div>
+                      <div class="text-[#60778a] text-xs mt-1">20 characters + 100 posts</div>
+                    </div>
+                    <div class="transition-transform hover:scale-110">
+                      <div class="text-2xl lg:text-3xl font-bold text-[#2094f3] mb-1">9</div>
+                      <div class="text-[#60778a] text-sm">Go Microservices</div>
+                      <div class="text-[#60778a] text-xs mt-1">Distributed architecture</div>
+                    </div>
+                    <div class="transition-transform hover:scale-110">
+                      <div class="text-2xl lg:text-3xl font-bold text-[#2094f3] mb-1">∞</div>
+                      <div class="text-[#60778a] text-sm">Possibilities</div>
+                      <div class="text-[#60778a] text-xs mt-1">Limited only by imagination</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Technology Stack -->
+                <div class="mt-12 text-center">
+                  <h4 class="text-[#111518] text-lg font-bold mb-6">Powered by Advanced AI</h4>
+                  <div class="flex flex-wrap justify-center items-center gap-6 text-[#60778a] text-sm">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm transition-all hover:shadow-md hover:scale-105">
+                      <span>🤖</span>
+                      <span>Google Gemini 2.0</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm transition-all hover:shadow-md hover:scale-105">
+                      <span>🎨</span>
+                      <span>Stable Diffusion</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm transition-all hover:shadow-md hover:scale-105">
+                      <span>⚡</span>
+                      <span>Temporal Workflows</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm transition-all hover:shadow-md hover:scale-105">
+                      <span>🔧</span>
+                      <span>Go Microservices</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Research Paper Link -->
+                  <div class="mt-8">
+                    <a href="#" class="inline-flex items-center gap-2 text-[#2094f3] text-sm font-medium hover:text-[#1976d2] transition-colors">
+                      <span>📄</span>
+                      <span>Read the full research paper on our architecture</span>
+                      <span>→</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CALL TO ACTION SECTION: Final conversion element -->
+            <div class="flex flex-col items-center px-4 py-12 justify-center border-t border-[#f0f2f5]">
+              <h2 class="text-[#111518] text-2xl lg:text-3xl font-bold leading-tight tracking-[-0.015em] text-center mb-4">Ready to Begin Your Adventure?</h2>
+              <p class="text-[#60778a] text-base text-center mb-8 max-w-md">
+                Join millions of creators and explorers in building the future of interactive storytelling.
+              </p>
+              <button
+                class="flex min-w-[200px] max-w-[320px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[#2094f3] text-white text-base font-bold leading-normal tracking-[0.015em] transition-all duration-300 hover:bg-[#1976d2] hover:scale-105 hover:shadow-lg active:scale-95 hover:shadow-[0_0_20px_rgba(33,150,243,0.3)]"
+              >
+                <span class="truncate">Create Your Own World</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

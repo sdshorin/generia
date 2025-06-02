@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create World - Generia</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <!-- HEADER -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-10 py-3">
+          <div class="flex items-center gap-4 lg:gap-8">
+            <div class="flex items-center gap-3 lg:gap-4 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-6">
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Home</a>
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Explore Worlds</a>
+              <a href="#" class="text-[#111518] text-sm font-medium hover:text-[#2094f3] transition-colors">Research Paper</a>
+              <button class="flex items-center justify-center overflow-hidden rounded-full h-9 px-4 bg-[#2094f3] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-colors">
+                Create World
+              </button>
+            </nav>
+          </div>
+          
+          <div class="flex flex-1 justify-end gap-3 lg:gap-8">
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250 Credits</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 lg:size-10"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+
+        <div class="gap-1 px-6 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[800px] flex-1">
+            
+            <!-- CREATE FORM (Initial State) -->
+            <div id="create-form" class="px-4 py-8">
+              <!-- Page Header -->
+              <div class="text-center mb-12">
+                <h1 class="text-[#111518] text-3xl lg:text-4xl font-black leading-tight tracking-[-0.025em] mb-3">Create Your World</h1>
+                <p class="text-[#60778a] text-lg">Describe your vision and watch our AI bring it to life with characters, stories, and endless possibilities.</p>
+              </div>
+
+              <!-- Main Form Card -->
+              <div class="bg-white rounded-2xl shadow-lg border border-[#f0f2f5] p-8 mb-8">
+                
+                <!-- Prompt Input -->
+                <div class="mb-8">
+                  <label class="block text-[#111518] text-sm font-medium mb-3">Describe Your World</label>
+                  <textarea
+                    id="world-prompt"
+                    placeholder="A mystical ancient city floating among the clouds, where magic and technology intertwine..."
+                    rows="6"
+                    class="w-full p-4 bg-[#f8f9fa] border border-[#f0f2f5] rounded-xl text-[#111518] text-base leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#2094f3] focus:border-transparent transition-all resize-none"
+                  ></textarea>
+                  <p class="text-[#60778a] text-xs mt-2">Be specific about the setting, culture, technology level, and atmosphere you envision.</p>
+                </div>
+
+                <!-- Character Count Slider -->
+                <div class="mb-8">
+                  <div class="flex justify-between items-center mb-3">
+                    <label class="text-[#111518] text-sm font-medium">Number of Characters</label>
+                    <span id="character-count" class="text-[#2094f3] text-sm font-bold">15</span>
+                  </div>
+                  <div class="relative">
+                    <input
+                      type="range"
+                      id="character-slider"
+                      min="5"
+                      max="50"
+                      value="15"
+                      class="w-full h-2 bg-[#f0f2f5] rounded-full appearance-none cursor-pointer slider"
+                      style="background: linear-gradient(to right, #2094f3 0%, #2094f3 20%, #f0f2f5 20%, #f0f2f5 100%);"
+                    >
+                  </div>
+                  <div class="flex justify-between text-[#60778a] text-xs mt-2">
+                    <span>5 characters</span>
+                    <span>50 characters</span>
+                  </div>
+                </div>
+
+                <!-- Total Posts Slider -->
+                <div class="mb-8">
+                  <div class="flex justify-between items-center mb-3">
+                    <label class="text-[#111518] text-sm font-medium">Total Posts</label>
+                    <span id="posts-count" class="text-[#2094f3] text-sm font-bold">45</span>
+                  </div>
+                  <div class="relative">
+                    <input
+                      type="range"
+                      id="posts-slider"
+                      min="20"
+                      max="150"
+                      value="45"
+                      class="w-full h-2 bg-[#f0f2f5] rounded-full appearance-none cursor-pointer slider"
+                      style="background: linear-gradient(to right, #2094f3 0%, #2094f3 20%, #f0f2f5 20%, #f0f2f5 100%);"
+                    >
+                  </div>
+                  <div class="flex justify-between text-[#60778a] text-xs mt-2">
+                    <span>20 posts</span>
+                    <span>150 posts</span>
+                  </div>
+                </div>
+
+                <!-- Cost Display -->
+                <div class="bg-gradient-to-r from-[#f8f9fa] to-[#f0f2f5] rounded-xl p-6 mb-8">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <h3 class="text-[#111518] text-lg font-bold mb-1">Generation Cost</h3>
+                      <p class="text-[#60778a] text-sm">
+                        <span id="total-characters">15</span> characters + <span id="total-posts">45</span> total posts
+                      </p>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-[#2094f3] text-2xl font-black" id="cost-display">150 💎</div>
+                      <p class="text-[#60778a] text-xs">~90 seconds</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Generate Button -->
+                <button
+                  id="generate-btn"
+                  onclick="startGeneration()"
+                  class="w-full flex items-center justify-center overflow-hidden rounded-full h-14 px-8 bg-[#2094f3] text-white text-lg font-bold leading-normal tracking-[0.015em] hover:bg-[#1976d2] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span class="truncate">Generate World ✨</span>
+                </button>
+              </div>
+
+              <!-- Examples -->
+              <div class="text-center">
+                <p class="text-[#60778a] text-sm mb-4">Need inspiration? Try these prompts:</p>
+                <div class="flex flex-wrap justify-center gap-3">
+                  <button onclick="fillPrompt('underwater')" class="px-4 py-2 bg-[#f8f9fa] text-[#60778a] text-sm rounded-full hover:bg-[#f0f2f5] transition-colors border border-[#f0f2f5]">🌊 Underwater civilization</button>
+                  <button onclick="fillPrompt('space')" class="px-4 py-2 bg-[#f8f9fa] text-[#60778a] text-sm rounded-full hover:bg-[#f0f2f5] transition-colors border border-[#f0f2f5]">🚀 Space station colony</button>
+                  <button onclick="fillPrompt('medieval')" class="px-4 py-2 bg-[#f8f9fa] text-[#60778a] text-sm rounded-full hover:bg-[#f0f2f5] transition-colors border border-[#f0f2f5]">🏰 Medieval fantasy kingdom</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- GENERATION PROGRESS (Enhanced) -->
+<div id="generation-progress" class="hidden px-4 py-8">
+  <!-- Progress Header -->
+  <div class="text-center mb-12">
+    <h1 class="text-[#111518] text-3xl lg:text-4xl font-black leading-tight tracking-[-0.025em] mb-3">Creating Your World</h1>
+    <p class="text-[#60778a] text-lg">Our AI is working its magic to bring your vision to life...</p>
+  </div>
+
+  <!-- Main Progress Card -->
+  <div class="bg-white rounded-2xl shadow-lg border border-[#f0f2f5] p-8 mb-8">
+    
+    <!-- Stepper -->
+    <div class="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10">
+      <!-- Step Item -->
+      <div class="flex flex-col items-center text-center">
+        <div class="w-10 h-10 bg-[#2094f3] rounded-full text-white flex items-center justify-center">✓</div>
+        <p class="mt-2 text-sm font-semibold text-[#111518]">Concept</p>
+      </div>
+      <div class="w-5 h-px bg-[#d0d6dc] lg:w-px lg:h-5"></div>
+
+      <div class="flex flex-col items-center text-center animate-pulse">
+        <div class="w-10 h-10 bg-[#2094f3] rounded-full text-white flex items-center justify-center">⚡</div>
+        <p class="mt-2 text-sm font-semibold text-[#111518]">Lore</p>
+      </div>
+      <div class="w-5 h-px bg-[#d0d6dc] lg:w-px lg:h-5"></div>
+
+      <div class="flex flex-col items-center text-center">
+        <div class="w-10 h-10 bg-[#f0f2f5] text-[#60778a] rounded-full flex items-center justify-center">3</div>
+        <p class="mt-2 text-sm text-[#60778a]">Characters</p>
+      </div>
+      <div class="w-5 h-px bg-[#d0d6dc] lg:w-px lg:h-5"></div>
+
+      <div class="flex flex-col items-center text-center">
+        <div class="w-10 h-10 bg-[#f0f2f5] text-[#60778a] rounded-full flex items-center justify-center">4</div>
+        <p class="mt-2 text-sm text-[#60778a]">Avatars</p>
+      </div>
+      <div class="w-5 h-px bg-[#d0d6dc] lg:w-px lg:h-5"></div>
+
+      <div class="flex flex-col items-center text-center">
+        <div class="w-10 h-10 bg-[#f0f2f5] text-[#60778a] rounded-full flex items-center justify-center">5</div>
+        <p class="mt-2 text-sm text-[#60778a]">Posts</p>
+      </div>
+      <div class="w-5 h-px bg-[#d0d6dc] lg:w-px lg:h-5"></div>
+
+      <div class="flex flex-col items-center text-center">
+        <div class="w-10 h-10 bg-[#f0f2f5] text-[#60778a] rounded-full flex items-center justify-center">6</div>
+        <p class="mt-2 text-sm text-[#60778a]">Finalization</p>
+      </div>
+    </div>
+
+    <!-- Overall Progress -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-[#111518] text-lg font-bold">Generation Progress</h3>
+        <span id="overall-progress" class="text-[#2094f3] text-sm font-bold">Step 2 of 6</span>
+      </div>
+      <div class="w-full bg-[#f0f2f5] rounded-full h-3 mb-4">
+        <div id="overall-bar" class="bg-gradient-to-r from-[#2094f3] to-[#1976d2] h-3 rounded-full transition-all duration-1000" style="width: 33%"></div>
+      </div>
+    </div>
+
+    <!-- Current Stage -->
+    <div class="mb-8">
+      <h4 id="current-stage" class="text-[#111518] text-base font-bold mb-2">📜 Generating world lore and setting...</h4>
+      <p id="stage-description" class="text-[#60778a] text-sm">Creating the fundamental rules, history, and characteristics that will define your world.</p>
+    </div>
+
+    <!-- Content Progress Bars -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Characters Progress -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-[#111518] text-sm font-medium">Characters Created</h4>
+          <span id="characters-progress" class="text-[#2094f3] text-sm font-bold">0 / 15</span>
+        </div>
+        <div class="w-full bg-[#f0f2f5] rounded-full h-2">
+          <div id="characters-bar" class="bg-gradient-to-r from-[#2094f3] to-[#1976d2] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Posts Progress -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-[#111518] text-sm font-medium">Posts Generated</h4>
+          <span id="posts-progress" class="text-[#2094f3] text-sm font-bold">0 / 45</span>
+        </div>
+        <div class="w-full bg-[#f0f2f5] rounded-full h-2">
+          <div id="posts-bar" class="bg-gradient-to-r from-[#2094f3] to-[#1976d2] h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fun Fact Section -->
+  <div class="bg-gradient-to-r from-[#f8f9fa] to-[#f0f2f5] rounded-xl p-6 text-center">
+    <h4 class="text-[#111518] text-lg font-bold mb-2">Did you know? 🤔</h4>
+    <p id="fun-fact" class="text-[#60778a] text-sm">
+      Our AI uses advanced language models to create consistent character personalities and relationships within your world's unique context.
+    </p>
+  </div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Slider Updates
+      function updateSliders() {
+        const characterSlider = document.getElementById('character-slider');
+        const postsSlider = document.getElementById('posts-slider');
+        const characterCount = document.getElementById('character-count');
+        const postsCount = document.getElementById('posts-count');
+        const totalCharacters = document.getElementById('total-characters');
+        const totalPosts = document.getElementById('total-posts');
+        const totalContent = document.getElementById('total-content');
+        const costDisplay = document.getElementById('cost-display');
+
+        function updateValues() {
+          const chars = parseInt(characterSlider.value);
+          const posts = parseInt(postsSlider.value);
+          const cost = 20 + (chars * 4) + (posts * 2); // New formula: 20 + characters*4 + posts*2
+
+          characterCount.textContent = chars;
+          postsCount.textContent = posts;
+          totalCharacters.textContent = chars;
+          totalPosts.textContent = posts;
+          costDisplay.textContent = cost + ' 💎';
+
+          // Update slider backgrounds
+          const charPercent = ((chars - 5) / (50 - 5)) * 100;
+          const postsPercent = ((posts - 20) / (150 - 20)) * 100;
+          
+          characterSlider.style.background = `linear-gradient(to right, #2094f3 0%, #2094f3 ${charPercent}%, #f0f2f5 ${charPercent}%, #f0f2f5 100%)`;
+          postsSlider.style.background = `linear-gradient(to right, #2094f3 0%, #2094f3 ${postsPercent}%, #f0f2f5 ${postsPercent}%, #f0f2f5 100%)`;
+        }
+
+        characterSlider.addEventListener('input', updateValues);
+        postsSlider.addEventListener('input', updateValues);
+        updateValues();
+      }
+
+      // Fill example prompts
+      function fillPrompt(type) {
+        const prompts = {
+          underwater: "A vast underwater civilization where merfolk, sea creatures, and coral cities thrive in the deep ocean. Ancient magic flows through the currents, and bioluminescent technology lights the abyssal depths.",
+          space: "A massive space station at the edge of known space, where diverse alien species trade, explore, and live together. Advanced technology meets ancient wisdom as cultures blend in this cosmic melting pot.",
+          medieval: "A sprawling medieval kingdom where knights, wizards, and mythical creatures coexist. Ancient castles dot the landscape, magic flows through enchanted forests, and political intrigue shapes the realm."
+        };
+        document.getElementById('world-prompt').value = prompts[type];
+      }
+
+      // Start generation process
+      function startGeneration() {
+        const totalChars = parseInt(document.getElementById('character-slider').value);
+        const totalPosts = parseInt(document.getElementById('posts-slider').value);
+        
+        // Update progress displays with current values
+        document.getElementById('characters-progress').textContent = `0 / ${totalChars}`;
+        document.getElementById('posts-progress').textContent = `0 / ${totalPosts}`;
+        
+        document.getElementById('create-form').classList.add('hidden');
+        document.getElementById('generation-progress').classList.remove('hidden');
+        simulateGeneration();
+      }
+
+      // Simulate generation process
+      function simulateGeneration() {
+        const stages = [
+          { name: "🧠 Analyzing your prompt...", desc: "Understanding the core concepts and themes of your world." },
+          { name: "🌍 Generating world lore...", desc: "Creating the fundamental rules, history, and characteristics that will define your world." },
+          { name: "👥 Creating characters...", desc: "Designing unique personalities, backgrounds, and relationships for your world's inhabitants." },
+          { name: "🎨 Generating avatars...", desc: "Creating photorealistic portraits for each character using advanced AI image generation." },
+          { name: "📸 Creating posts...", desc: "Generating authentic content and stories from each character's perspective." },
+          { name: "✨ Finalizing world...", desc: "Putting the finishing touches and ensuring everything works together harmoniously." }
+        ];
+
+        let currentStage = 0;
+        let charactersCreated = 0;
+        let postsCreated = 0;
+        const totalChars = parseInt(document.getElementById('character-slider').value);
+        const totalPosts = parseInt(document.getElementById('posts-slider').value);
+
+        function nextStage() {
+          if (currentStage < stages.length) {
+            // Update stage
+            document.getElementById('current-stage').textContent = stages[currentStage].name;
+            document.getElementById('stage-description').textContent = stages[currentStage].desc;
+            document.getElementById('overall-progress').textContent = `Step ${currentStage + 1} of 6`;
+            
+            // Update overall progress bar
+            const overallPercent = ((currentStage + 1) / 6) * 100;
+            document.getElementById('overall-bar').style.width = overallPercent + '%';
+
+            // Update stage indicators
+            for (let i = 1; i <= 6; i++) {
+              const stageEl = document.getElementById(`stage-${i}`);
+              const circle = stageEl.querySelector('div');
+              const text = stageEl.querySelector('p');
+              const description = stageEl.querySelectorAll('p')[1];
+              
+              if (i <= currentStage) {
+                if (i === currentStage) {
+                  stageEl.className = 'stage-item active flex items-center';
+                  circle.innerHTML = '<span class="text-white text-sm font-bold">⚡</span>';
+                  circle.className = 'w-10 h-10 bg-[#2094f3] rounded-full flex items-center justify-center mr-4 flex-shrink-0 animate-pulse';
+                  text.className = 'text-[#111518] text-sm font-bold';
+                  description.className = 'text-[#60778a] text-xs';
+                } else {
+                  stageEl.className = 'stage-item completed flex items-center';
+                  circle.innerHTML = '<span class="text-white text-sm font-bold">✓</span>';
+                  circle.className = 'w-10 h-10 bg-[#2094f3] rounded-full flex items-center justify-center mr-4 flex-shrink-0';
+                  text.className = 'text-[#111518] text-sm font-bold';
+                  description.className = 'text-[#60778a] text-xs';
+                }
+              } else {
+                stageEl.className = 'stage-item pending flex items-center';
+                circle.innerHTML = `<span class="text-[#60778a] text-sm font-bold">${i}</span>`;
+                circle.className = 'w-10 h-10 bg-[#f0f2f5] rounded-full flex items-center justify-center mr-4 flex-shrink-0';
+                text.className = 'text-[#60778a] text-sm font-medium';
+                description.className = 'text-[#60778a] text-xs';
+              }
+            }
+            
+            // Update arrows
+            const arrows = document.querySelectorAll('svg');
+            arrows.forEach((arrow, index) => {
+              if (index < currentStage - 1) {
+                arrow.className = 'text-[#2094f3]';
+              } else {
+                arrow.className = 'text-[#f0f2f5]';
+              }
+            });
+
+            currentStage++;
+            
+            // Simulate content creation progress
+            if (currentStage >= 3) {
+              const charInterval = setInterval(() => {
+                if (charactersCreated < totalChars) {
+                  charactersCreated++;
+                  document.getElementById('characters-progress').textContent = `${charactersCreated} / ${totalChars}`;
+                  document.getElementById('characters-bar').style.width = (charactersCreated / totalChars) * 100 + '%';
+                } else {
+                  clearInterval(charInterval);
+                }
+              }, 200);
+            }
+
+            if (currentStage >= 5) {
+              const postsInterval = setInterval(() => {
+                if (postsCreated < totalPosts) {
+                  postsCreated += Math.random() < 0.7 ? 1 : 2;
+                  if (postsCreated > totalPosts) postsCreated = totalPosts;
+                  document.getElementById('posts-progress').textContent = `${postsCreated} / ${totalPosts}`;
+                  document.getElementById('posts-bar').style.width = (postsCreated / totalPosts) * 100 + '%';
+                } else {
+                  clearInterval(postsInterval);
+                }
+              }, 150);
+            }
+
+            if (currentStage < stages.length) {
+              setTimeout(nextStage, Math.random() * 3000 + 8000); // 8-11 seconds per stage
+            } else {
+              // Generation complete
+              setTimeout(() => {
+                document.getElementById('current-stage').textContent = "🎉 Your world is ready!";
+                document.getElementById('stage-description').textContent = "Redirecting you to your newly created world...";
+                
+                setTimeout(() => {
+                  alert("Generation complete! Redirecting to your world...");
+                }, 2000);
+              }, 3000);
+            }
+          }
+        }
+
+        nextStage();
+      }
+
+      // Initialize sliders on page load
+      updateSliders();
+    </script>
+
+    <style>
+      .slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #2094f3;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      }
+
+      .slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #2094f3;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      }
+
+      .stage-item {
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+    </style>
+  </body>
+</html>

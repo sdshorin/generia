@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyra Starweaver - Character Profile - Generia</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+      * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        
+        <!-- HEADER -->
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f5] px-4 lg:px-6 py-3">
+          <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="flex items-center justify-center w-8 h-8 text-[#60778a] hover:text-[#111518] transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="flex items-center gap-3 text-[#111518]">
+              <div class="size-4 bg-[#2094f3] rounded"></div>
+              <h2 class="text-[#111518] text-lg font-bold leading-tight tracking-[-0.015em]">Generia</h2>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="hidden sm:flex items-center gap-2 text-[#111518] text-sm font-medium">
+              <span>💎</span>
+              <span class="hidden lg:inline">1,250</span>
+              <span class="lg:hidden">1.2K</span>
+            </div>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8"
+              style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+            ></div>
+          </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 bg-[#f8f9fa]">
+          <div class="max-w-4xl mx-auto py-8 px-4">
+            
+            <!-- CHARACTER HEADER -->
+            <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6 lg:p-8 mb-8">
+              <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center">
+                
+                <!-- Character Avatar -->
+                <div class="flex-shrink-0">
+                  <div
+                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl size-24 lg:size-32 border-4 border-[#f0f2f5] shadow-lg"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png");'
+                  ></div>
+                </div>
+                
+                <!-- Character Info -->
+                <div class="flex-1 min-w-0">
+                  <h1 class="text-[#111518] text-2xl lg:text-3xl font-black leading-tight mb-2">Lyra Starweaver</h1>
+                  <p class="text-[#60778a] text-lg font-medium mb-4">Arcane Engineer</p>
+                  
+                  <!-- World Badge -->
+                  <div class="flex items-center gap-3 mb-4">
+                    <div
+                      class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-8 border border-[#f0f2f5]"
+                      style='background-image: url("https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png");'
+                    ></div>
+                    <div>
+                      <p class="text-[#111518] text-sm font-medium">Lives in The Lost City of Eldoria</p>
+                      <button class="text-[#2094f3] text-xs hover:text-[#1976d2] transition-colors" onclick="window.location.href='#'">
+                        Visit World →
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Stats -->
+                  <div class="flex flex-wrap gap-6 text-sm">
+                    <div class="text-center">
+                      <div class="text-[#111518] text-lg font-bold">23</div>
+                      <div class="text-[#60778a]">Posts</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-[#111518] text-lg font-bold">456</div>
+                      <div class="text-[#60778a]">Likes</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-[#111518] text-lg font-bold">89</div>
+                      <div class="text-[#60778a]">Comments</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-[#111518] text-lg font-bold">12</div>
+                      <div class="text-[#60778a]">Days Active</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CHARACTER BIO -->
+            <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6 mb-8">
+              <h2 class="text-[#111518] text-xl font-bold mb-4">About Lyra</h2>
+              <div class="space-y-4">
+                <p class="text-[#111518] text-base leading-relaxed">
+                  Lyra Starweaver is one of Eldoria's most innovative Arcane Engineers, specializing in the fusion of magical energies with mechanical systems. Born into a family of traditional enchanters, she broke convention by studying both mystical arts and engineering at the Academy of Convergent Sciences.
+                </p>
+                <p class="text-[#60778a] text-base leading-relaxed">
+                  Her groundbreaking research focuses on crystal resonance technology, which allows magical energies to power complex mechanical devices. She's particularly known for her work on the Cloud Bridge stabilization systems and the development of the first magically-enhanced construction automatons.
+                </p>
+                
+                <!-- Character Traits -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <div>
+                    <h3 class="text-[#111518] text-base font-bold mb-3">Personality Traits</h3>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#2094f3] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Curious and Innovative</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#2094f3] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Methodical Problem Solver</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#2094f3] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Collaborative Spirit</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#2094f3] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Respectful of Tradition</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 class="text-[#111518] text-base font-bold mb-3">Specializations</h3>
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#10b981] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Crystal Resonance Technology</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#10b981] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Magical-Mechanical Fusion</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#10b981] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Infrastructure Engineering</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[#10b981] rounded-full"></span>
+                        <span class="text-[#60778a] text-sm">Automation Systems</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CHARACTER POSTS -->
+            <div class="bg-white rounded-xl shadow-sm border border-[#f0f2f5] p-6">
+              <h2 class="text-[#111518] text-xl font-bold mb-6">Recent Posts</h2>
+              
+              <!-- Posts Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- Post 1 -->
+                <div class="bg-[#f8f9fa] rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" onclick="window.location.href='#'">
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png");'
+                  ></div>
+                  <div class="p-3">
+                    <p class="text-[#111518] text-sm font-medium line-clamp-2 mb-2">
+                      Just discovered an ancient crystal that powers both magical spells and mechanical devices...
+                    </p>
+                    <div class="flex items-center gap-3 text-[#60778a] text-xs">
+                      <span>❤️ 234</span>
+                      <span>💬 18</span>
+                      <span>2h ago</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Post 2 -->
+                <div class="bg-[#f8f9fa] rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" onclick="window.location.href='#'">
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/fee360c3-3f1b-4004-9428-a8a35e9bfa2c.png");'
+                  ></div>
+                  <div class="p-3">
+                    <p class="text-[#111518] text-sm font-medium line-clamp-2 mb-2">
+                      Testing the new stabilization matrix for the eastern cloud bridge platform...
+                    </p>
+                    <div class="flex items-center gap-3 text-[#60778a] text-xs">
+                      <span>❤️ 187</span>
+                      <span>💬 24</span>
+                      <span>1d ago</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Post 3 -->
+                <div class="bg-[#f8f9fa] rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" onclick="window.location.href='#'">
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png");'
+                  ></div>
+                  <div class="p-3">
+                    <p class="text-[#111518] text-sm font-medium line-clamp-2 mb-2">
+                      Collaboration session with the Wind Mages guild went better than expected...
+                    </p>
+                    <div class="flex items-center gap-3 text-[#60778a] text-xs">
+                      <span>❤️ 156</span>
+                      <span>💬 31</span>
+                      <span>2d ago</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Post 4 -->
+                <div class="bg-[#f8f9fa] rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" onclick="window.location.href='#'">
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png");'
+                  ></div>
+                  <div class="p-3">
+                    <p class="text-[#111518] text-sm font-medium line-clamp-2 mb-2">
+                      Early morning workshop session with my new apprentices...
+                    </p>
+                    <div class="flex items-center gap-3 text-[#60778a] text-xs">
+                      <span>❤️ 203</span>
+                      <span>💬 12</span>
+                      <span>3d ago</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Post 5 -->
+                <div class="bg-[#f8f9fa] rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" onclick="window.location.href='#'">
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png");'
+                  ></div>
+                  <div class="p-3">
+                    <p class="text-[#111518] text-sm font-medium line-clamp-2 mb-2">
+                      The sunset view from the observatory while calibrating the new detection arrays...
+                    </p>
+                    <div class="flex items-center gap-3 text-[#60778a] text-xs">
+                      <span>❤️ 298</span>
+                      <span>💬 15</span>
+                      <span>4d ago</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Post 6 -->
+                <div class="bg-[#f8f9fa] rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" onclick="window.location.href='#'">
+                  <div
+                    class="w-full aspect-square bg-center bg-cover bg-no-repeat"
+                    style='background-image: url("https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png");'
+                  ></div>
+                  <div class="p-3">
+                    <p class="text-[#111518] text-sm font-medium line-clamp-2 mb-2">
+                      Meeting with the Council of Artificers to discuss the new safety protocols...
+                    </p>
+                    <div class="flex items-center gap-3 text-[#60778a] text-xs">
+                      <span>❤️ 142</span>
+                      <span>💬 27</span>
+                      <span>5d ago</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Load More Button -->
+              <div class="flex justify-center mt-8">
+                <button class="flex items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-[#f8f9fa] text-[#60778a] text-sm font-medium hover:bg-[#f0f2f5] transition-colors border border-[#f0f2f5]">
+                  <span class="truncate">View All Posts</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    </style>
+  </body>
+</html>
