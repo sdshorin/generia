@@ -19,6 +19,8 @@ service WorldService {
   
   // Update world image
   rpc UpdateWorldImage(UpdateWorldImageRequest) returns (UpdateWorldImageResponse) {}
+  // Update generated world parameters
+  rpc UpdateWorldParams(UpdateWorldParamsRequest) returns (UpdateWorldParamsResponse) {}
   
   // Get world generation status
   rpc GetGenerationStatus(GetGenerationStatusRequest) returns (GetGenerationStatusResponse) {}
@@ -53,6 +55,7 @@ message WorldResponse {
   bool is_joined = 12;
   string image_url = 13;
   string icon_url = 14;
+  optional string params = 15; // JSON string with full world description
 }
 
 // GetWorldRequest is the request for getting a world by ID
@@ -131,6 +134,18 @@ message UpdateWorldImageRequest {
 
 // UpdateWorldImageResponse is the response for updating a world's image
 message UpdateWorldImageResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// UpdateWorldParamsRequest is the request for saving world parameters
+message UpdateWorldParamsRequest {
+  string world_id = 1;
+  string params = 2; // JSON string with generated parameters
+}
+
+// UpdateWorldParamsResponse is the response for updating world params
+message UpdateWorldParamsResponse {
   bool success = 1;
   string message = 2;
 }

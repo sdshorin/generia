@@ -5,7 +5,7 @@ import warnings
 
 from world import world_pb2 as world_dot_world__pb2
 
-GRPC_GENERATED_VERSION = '1.71.0'
+GRPC_GENERATED_VERSION = '1.72.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -59,6 +59,16 @@ class WorldServiceStub(object):
                 request_serializer=world_dot_world__pb2.UpdateWorldImageRequest.SerializeToString,
                 response_deserializer=world_dot_world__pb2.UpdateWorldImageResponse.FromString,
                 _registered_method=True)
+        self.UpdateWorldParams = channel.unary_unary(
+                '/world.WorldService/UpdateWorldParams',
+                request_serializer=world_dot_world__pb2.UpdateWorldParamsRequest.SerializeToString,
+                response_deserializer=world_dot_world__pb2.UpdateWorldParamsResponse.FromString,
+                _registered_method=True)
+        self.GetGenerationStatus = channel.unary_unary(
+                '/world.WorldService/GetGenerationStatus',
+                request_serializer=world_dot_world__pb2.GetGenerationStatusRequest.SerializeToString,
+                response_deserializer=world_dot_world__pb2.GetGenerationStatusResponse.FromString,
+                _registered_method=True)
         self.HealthCheck = channel.unary_unary(
                 '/world.WorldService/HealthCheck',
                 request_serializer=world_dot_world__pb2.HealthCheckRequest.SerializeToString,
@@ -104,6 +114,20 @@ class WorldServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def UpdateWorldParams(self, request, context):
+        """Update generated world parameters
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetGenerationStatus(self, request, context):
+        """Get world generation status
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def HealthCheck(self, request, context):
         """Health check
         """
@@ -138,6 +162,16 @@ def add_WorldServiceServicer_to_server(servicer, server):
                     servicer.UpdateWorldImage,
                     request_deserializer=world_dot_world__pb2.UpdateWorldImageRequest.FromString,
                     response_serializer=world_dot_world__pb2.UpdateWorldImageResponse.SerializeToString,
+            ),
+            'UpdateWorldParams': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateWorldParams,
+                    request_deserializer=world_dot_world__pb2.UpdateWorldParamsRequest.FromString,
+                    response_serializer=world_dot_world__pb2.UpdateWorldParamsResponse.SerializeToString,
+            ),
+            'GetGenerationStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetGenerationStatus,
+                    request_deserializer=world_dot_world__pb2.GetGenerationStatusRequest.FromString,
+                    response_serializer=world_dot_world__pb2.GetGenerationStatusResponse.SerializeToString,
             ),
             'HealthCheck': grpc.unary_unary_rpc_method_handler(
                     servicer.HealthCheck,
@@ -280,6 +314,60 @@ class WorldService(object):
             '/world.WorldService/UpdateWorldImage',
             world_dot_world__pb2.UpdateWorldImageRequest.SerializeToString,
             world_dot_world__pb2.UpdateWorldImageResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateWorldParams(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/world.WorldService/UpdateWorldParams',
+            world_dot_world__pb2.UpdateWorldParamsRequest.SerializeToString,
+            world_dot_world__pb2.UpdateWorldParamsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetGenerationStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/world.WorldService/GetGenerationStatus',
+            world_dot_world__pb2.GetGenerationStatusRequest.SerializeToString,
+            world_dot_world__pb2.GetGenerationStatusResponse.FromString,
             options,
             channel_credentials,
             insecure,

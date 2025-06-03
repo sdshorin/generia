@@ -220,6 +220,7 @@ CREATE TABLE worlds (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     prompt TEXT NOT NULL,
+    params JSONB,
     creator_id UUID NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'active',
     generation_status VARCHAR(255) NOT NULL DEFAULT '',
