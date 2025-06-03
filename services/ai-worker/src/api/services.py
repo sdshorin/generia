@@ -746,7 +746,7 @@ class ServiceClient:
         try:
             # Prepare request
             request = world_pb2.GetWorldRequest(
-                id=world_id
+                world_id=world_id
             )
 
             # Call gRPC method
@@ -776,7 +776,7 @@ class ServiceClient:
             await self._log_grpc_request(
                 service_name="world-service",
                 method_name="GetWorld",
-                request_data={"id": world_id},
+                request_data={"world_id": world_id},
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,

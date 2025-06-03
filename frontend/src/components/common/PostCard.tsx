@@ -1,150 +1,15 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { formatDistanceToNow } from 'date-fns';
-import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Post } from '../../types';
 import { interactionsAPI } from '../../api/services';
-import { Avatar } from '../ui/Avatar';
+import '../../styles/components.css';
 
 interface PostCardProps {
   post: Post;
   currentWorldId: string;
   onLike?: (postId: string, isLiked: boolean) => void;
 }
-
-// Properly type the motion.div component
-const Card = styled(motion.div)<HTMLMotionProps<'div'>>`
-  background-color: var(--color-card);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: var(--space-6);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-`;
-
-const CardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: var(--space-4);
-`;
-
-const UserInfo = styled.div`
-  margin-left: var(--space-3);
-  flex: 1;
-`;
-
-const Username = styled(Link)`
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: var(--color-text);
-
-  &:hover {
-    color: var(--color-accent);
-  }
-
-  .ai-badge {
-    margin-left: var(--space-2);
-    font-size: var(--font-xs);
-    background-color: var(--color-secondary);
-    color: var(--color-text);
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-  }
-`;
-
-const Timestamp = styled.div`
-  font-size: var(--font-xs);
-  color: var(--color-text);
-  font-weight: 500;
-`;
-
-const PostContent = styled.div`
-  padding: ${props => props.children ? 'var(--space-4)' : '0'};
-  padding-top: 0;
-  font-size: var(--font-md);
-  line-height: 1.5;
-  color: var(--color-text);
-  white-space: pre-wrap;
-  overflow: visible;
-`;
-
-const PostImage = styled.img`
-  width: 100%;
-  max-height: 500px;
-  object-fit: contain;
-  background-color: var(--color-background);
-`;
-
-const CardFooter = styled.div`
-  display: flex;
-  align-items: center;
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
-`;
-
-const LikeButton = styled.button<{ $isLiked: boolean }>`
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  color: ${props => props.$isLiked ? 'var(--color-accent)' : 'var(--color-text-light)'};
-  font-size: var(--font-sm);
-  cursor: pointer;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-
-  &:hover {
-    background-color: rgba(239, 118, 122, 0.1);
-  }
-
-  svg {
-    margin-right: var(--space-2);
-  }
-`;
-
-const CommentButton = styled(Link)`
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  color: var(--color-text-light);
-  font-size: var(--font-sm);
-  cursor: pointer;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  margin-left: var(--space-4);
-  text-decoration: none;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: var(--color-text);
-  }
-
-  svg {
-    margin-right: var(--space-2);
-  }
-`;
-
-const HeartIcon = ({ filled }: { filled: boolean }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-  </svg>
-);
-
-const CommentIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-  </svg>
-);
 
 export const PostCard: React.FC<PostCardProps> = ({
   post,
@@ -155,7 +20,10 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [isLiked, setIsLiked] = useState(post.user_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count);
 
-  const handleLike = async () => {
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isLiking) return;
 
     setIsLiking(true);
@@ -180,67 +48,108 @@ export const PostCard: React.FC<PostCardProps> = ({
     }
   };
 
+  const handlePostClick = () => {
+    window.location.href = `/worlds/${currentWorldId}/posts/${post.id}`;
+  };
+
+  const handleCharacterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = `/characters/${post.character_id}`;
+  };
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // TODO: Implement menu functionality
+  };
+
   // Format timestamp to relative time (e.g., "2 hours ago")
   const formattedTime = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
-  console.log(post);
+  
+  // Get author name and role
+  const authorName = post.display_name || 'Unknown';
+  const authorRole = post.is_ai ? 'AI Character' : 'User';
+
   return (
-    <Card
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <CardHeader>
-        <Avatar
-          src={post.avatar_url}
-          name={post.display_name || ''}
-          isAi={post.is_ai}
-          size="md"
+    <div className="post-card">
+      {/* Post Header */}
+      <div className="post-header">
+        <div 
+          className="post-avatar" 
+          style={{
+            backgroundImage: `url(${post.avatar_url || '/no-image.jpg'})`
+          }}
+          onClick={handleCharacterClick}
         />
-        <UserInfo>
-          <Username
-            to={`/characters/${post.character_id}`}
-            state={{ worldId: currentWorldId }}
-          >
-            {post.display_name}
-            {post.is_ai && <span className="ai-badge">AI</span>}
-          </Username>
-          <Timestamp>{formattedTime}</Timestamp>
-        </UserInfo>
-      </CardHeader>
-
-      {post.caption && (
-        <PostContent>{post.caption}</PostContent>
-      )}
-
+        <div className="post-author-info">
+          <p className="post-author-name" onClick={handleCharacterClick}>
+            {authorName}
+          </p>
+          <p className="post-author-meta">
+            {authorRole} • {formattedTime}
+          </p>
+        </div>
+        <button className="post-menu-btn" onClick={handleMenuClick}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      
+      {/* Post Image */}
       {(post.media_url || post.image_url) && (
-        <PostImage src={post.media_url || post.image_url} alt="Post image" loading="lazy" />
+        <div 
+          className="post-image" 
+          style={{
+            backgroundImage: `url(${post.media_url || post.image_url})`
+          }}
+          onClick={handlePostClick}
+        />
       )}
-
-      <CardFooter>
-        <AnimatePresence initial={false}>
-          <LikeButton
-            $isLiked={isLiked}
+      
+      {/* Post Content */}
+      <div className="post-content">
+        {/* Action Buttons */}
+        <div className="post-actions">
+          <button 
+            className={`post-action-btn like-btn ${isLiked ? 'liked' : ''}`} 
             onClick={handleLike}
             disabled={isLiking}
           >
-            <motion.div
-              key={isLiked ? 'liked' : 'unliked'}
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <HeartIcon filled={isLiked} />
-            </motion.div>
-            {likesCount}
-          </LikeButton>
-        </AnimatePresence>
-
-        <CommentButton to={`/worlds/${currentWorldId}/posts/${post.id}`}>
-          <CommentIcon />
-          {post.comments_count}
-        </CommentButton>
-      </CardFooter>
-    </Card>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <button className="post-action-btn" onClick={handlePostClick}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        
+        {/* Likes */}
+        <p className="post-likes">{likesCount} likes</p>
+        
+        {/* Caption */}
+        {post.caption && (
+          <div className="post-caption">
+            <p className="post-caption-text">
+              <span className="post-caption-author">{authorName.toLowerCase().replace(/\s+/g, '_')}</span> {post.caption.length > 250 ? post.caption.substring(0, 250) + '...' : post.caption}
+            </p>
+          </div>
+        )}
+        
+        {/* View Comments */}
+        <Link 
+          to={`/worlds/${currentWorldId}/posts/${post.id}`} 
+          className="post-comments-link"
+        >
+          View all {post.comments_count} comments
+        </Link>
+      </div>
+    </div>
   );
 };

@@ -1,441 +1,397 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { BiPlus } from 'react-icons/bi';
-import styled from 'styled-components';
-import { motion, HTMLMotionProps } from 'framer-motion';
-import { Layout } from '../components/layout/Layout';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Avatar } from '../components/ui/Avatar';
-import { Loader } from '../components/ui/Loader';
-import { PostCard } from '../components/common/PostCard';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useWorld } from '../hooks/useWorld';
+import { Layout } from '../components/layout/Layout';
+import { PostCard } from '../components/common/PostCard';
+import { Loader } from '../components/ui/Loader';
 import { World, Post } from '../types';
 import { worldsAPI, postsAPI } from '../api/services';
-
-const HeroSection = styled.section`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 50vh;
-  padding: var(--space-16) var(--space-4);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at center, rgba(213, 184, 152, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
-    z-index: -1;
-  }
-`;
-
-const HeroTitle = styled(motion.h1)<HTMLMotionProps<'h1'>>`
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  margin-bottom: var(--space-4);
-  background: linear-gradient(135deg, #D5B898, #A78BFA);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  line-height: 1.2;
-  font-weight: 700;
-`;
-
-const HeroSubtitle = styled(motion.h2)<HTMLMotionProps<'h2'>>`
-  font-size: clamp(1.125rem, 2vw, 1.5rem);
-  color: var(--color-text);
-  font-weight: 400;
-  margin-bottom: var(--space-8);
-  max-width: 600px;
-`;
-
-const MainContent = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 350px;
-  gap: var(--space-6);
-  margin-top: var(--space-10);
-
-  @media (max-width: 968px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const WorldsPanel = styled.div`
-  order: 2;
-
-  @media (max-width: 968px) {
-    order: 2;
-  }
-`;
-
-const FeedPanel = styled.div`
-  order: 1;
-
-  @media (max-width: 968px) {
-    order: 1;
-  }
-`;
-
-const PanelTitle = styled.h3`
-  font-size: var(--font-xl);
-  margin-bottom: var(--space-4);
-  color: var(--color-text);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const CreatePostButton = styled(Link)`
-  font-size: var(--font-sm);
-  background-color: var(--color-primary);
-  color: var(--color-text);
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: var(--color-primary-hover);
-    transform: translateY(-1px);
-    color: var(--color-text);
-  }
-`;
-
-const WorldsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-`;
-
-const WorldItem = styled(Card)<{ $isActive?: boolean }>`
-  display: flex;
-  align-items: center;
-  padding: var(--space-4);
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border-left: ${props => props.$isActive ? '4px solid var(--color-primary)' : '4px solid transparent'};
-  background-color: ${props => props.$isActive ? 'rgba(213, 184, 152, 0.2)' : 'var(--color-card)'};
-  position: relative;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-
-  &:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 4px;
-    background-color: ${props => props.$isActive ? 'var(--color-primary)' : 'transparent'};
-  }
-`;
-
-const WorldInfo = styled.div`
-  margin-left: var(--space-3);
-  flex: 1;
-`;
-
-const WorldName = styled.h4`
-  font-size: var(--font-md);
-  margin-bottom: var(--space-1);
-`;
-
-const WorldDescription = styled.p`
-  font-size: var(--font-sm);
-  color: var(--color-text);
-  margin-bottom: var(--space-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-`;
-
-const PortalCircle = styled.div<{ $index: number; $iconUrl?: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: ${props => props.$iconUrl
-    ? `url(${props.$iconUrl}) center/cover no-repeat`
-    : `linear-gradient(135deg,
-        ${(() => {
-          const colors = [
-            'var(--color-primary), #FF9900',
-            '#A78BFA, var(--color-secondary)',
-            'var(--color-accent), #FB7185',
-            '#6EE7B7, #34D399',
-            '#60A5FA, #3B82F6'
-          ];
-          return colors[props.$index % colors.length];
-        })()}
-      )`
-  };
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 50%;
-    opacity: ${props => props.$iconUrl ? 0.3 : 0};
-  }
-`;
-
-const PostsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const NoPostsMessage = styled.div`
-  text-align: center;
-  padding: var(--space-8) var(--space-4);
-  color: var(--color-text);
-
-  h4 {
-    margin-bottom: var(--space-2);
-  }
-
-  p {
-    margin-bottom: var(--space-6);
-  }
-`;
-
-const heroVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut"
-    }
-  }
-};
+import '../styles/pages/main.css';
 
 export const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const { worlds, currentWorld, loadWorlds, loadCurrentWorld } = useWorld();
+  const { currentWorld, loadCurrentWorld } = useWorld();
   const [popularWorlds, setPopularWorlds] = useState<World[]>([]);
+  const [selectedWorld, setSelectedWorld] = useState<World | null>(null);
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const navigate = useNavigate();
 
+  // Default world data for demo
+  const defaultWorlds = [
+    {
+      id: 'eldoria',
+      name: '',
+      description: '',
+      prompt: '',
+      creator_id: 'demo',
+      generation_status: 'completed',
+      status: 'active',
+      users_count: 0,
+      posts_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      image_url: '/no-image.jpg',
+      icon_url: '/no-image.jpg'
+    },
+    
+  ];
+
   useEffect(() => {
     const fetchPopularWorlds = async () => {
-      if (!isAuthenticated) return;
-
       try {
         setIsLoading(true);
-        const data = await worldsAPI.getWorlds(5, '');
-        setPopularWorlds(data.worlds || []);
-
-        // If we have worlds but no current world, load the first one
-        if (data.worlds?.length > 0 && !currentWorld) {
-          loadCurrentWorld(data.worlds[0].id);
+        if (isAuthenticated) {
+          const data = await worldsAPI.getWorlds(5, '');
+          setPopularWorlds(data.worlds || defaultWorlds);
+        } else {
+          setPopularWorlds(defaultWorlds);
         }
       } catch (error) {
         console.error('Failed to fetch popular worlds:', error);
+        setPopularWorlds(defaultWorlds);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPopularWorlds();
-  }, [isAuthenticated, loadCurrentWorld]);
+  }, [isAuthenticated]);
 
-  const currentWorldRef = useRef<string | null>(null);
+  // Separate effect to set first world as selected after worlds are loaded
+  useEffect(() => {
+    if (popularWorlds.length > 0 && !selectedWorld) {
+      setSelectedWorld(popularWorlds[0]);
+    }
+  }, [popularWorlds, selectedWorld]);
 
   useEffect(() => {
     const fetchRecentPosts = async () => {
-      if (!isAuthenticated || !currentWorld) return;
-
-      // Skip if we've already loaded posts for this world
-      if (currentWorldRef.current === currentWorld.id) return;
-      currentWorldRef.current = currentWorld.id;
+      if (!selectedWorld) return;
 
       try {
         setIsLoadingPosts(true);
-        setRecentPosts([]); // Очистить прежние посты во время загрузки
-        const data = await postsAPI.getFeed(currentWorld.id, 6, '');
-        setRecentPosts(data.posts || []);
+        if (isAuthenticated) {
+          const data = await postsAPI.getFeed(selectedWorld.id, 2, '');
+          setRecentPosts(data.posts || []);
+        } else {
+          // Mock posts for demo
+          setRecentPosts([]);
+        }
       } catch (error) {
         console.error('Failed to fetch recent posts:', error);
+        setRecentPosts([]);
       } finally {
         setIsLoadingPosts(false);
       }
     };
 
-    if (currentWorld) {
-      fetchRecentPosts();
-    }
-  }, [isAuthenticated, currentWorld]); // Зависит от всего объекта currentWorld, чтобы реагировать на его изменения
-
-  // Navigate directly to world feed instead of switching
+    fetchRecentPosts();
+  }, [selectedWorld, isAuthenticated]);
 
   const handleCreateWorld = () => {
     navigate('/create-world');
   };
 
+  const handleSelectWorld = (worldId: string) => {
+    const world = popularWorlds.find(w => w.id === worldId);
+    if (world) {
+      setSelectedWorld(world);
+    }
+  };
+
+  const handleExploreWorld = (worldId: string) => {
+    if (isAuthenticated) {
+      navigate(`/worlds/${worldId}/feed`);
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <Layout>
-      <HeroSection>
-        <HeroTitle
-          variants={heroVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          Create Your Own Synthetic World
-        </HeroTitle>
-        <HeroSubtitle
-          variants={heroVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.2 }}
-        >
-          Use a simple prompt to open the portal. Watch life unfold.
-        </HeroSubtitle>
-        <motion.div
-          variants={heroVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.4 }}
-        >
-          <Button
-            onClick={handleCreateWorld}
-            size="large"
-          >
-            Generate a World
-          </Button>
-        </motion.div>
-      </HeroSection>
+      <div className="min-h-screen flex flex-col bg-white">
+        {/* MAIN CONTENT */}
+        <main className="flex-1">
+          <div className="container">
+            
+            {/* HERO SECTION */}
+            <section className="hero" style={{backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url('/no-image.jpg')"}}>
+              <div className="hero-content">
+                <h1 className="hero-title">Discover Infinite Worlds</h1>
+                <p className="hero-subtitle">Create worlds, meet AI characters, share stories in limitless virtual universes.</p>
+              </div>
+              <div className="hero-actions">
+                <button className="hero-btn-primary" onClick={handleCreateWorld}>
+                  Generate World
+                </button>
+                <button className="hero-btn-secondary" onClick={() => scrollToSection('how-it-works')}>
+                  See How It Works
+                </button>
+              </div>
+            </section>
+            
+            {/* EXPLORE SECTION */}
+            <section className="explore-section">
+              <div className="explore-header">
+                <h2 className="explore-title">Explore Generated Worlds</h2>
+                <p className="explore-subtitle">Step into living, breathing AI universes where every character has a story</p>
+              </div>
+              
+              <div className="world-showcase">
+                
+                {/* World Preview */}
+                <div className="world-preview">
+                  {selectedWorld && (
+                    <>
+                      {/* Prompt Section */}
+                      <div className="world-preview-prompt">
+                        <p className="world-preview-prompt-label">Generated from prompt:</p>
+                        <p className="world-preview-prompt-text">
+                          "{selectedWorld.prompt?.length > 300 ? selectedWorld.prompt.substring(0, 300) + '...' : selectedWorld.prompt}"
+                        </p>
+                      </div>
 
-      {isAuthenticated && (
-        <MainContent>
-          <WorldsPanel>
-            <PanelTitle>Popular Worlds</PanelTitle>
-            <WorldsList>
-              {popularWorlds.map((world, index) => (
-                <WorldItem
-                  key={world.id}
-                  variant="elevated"
-                  animateHover
-                  $isActive={currentWorld?.id === world.id}
-                  onClick={() => {
-                    loadCurrentWorld(world.id);
-                    currentWorldRef.current = null; // Сбросить для загрузки постов нового мира
-                  }}
-                >
-                  <PortalCircle $index={index} $iconUrl={world.icon_url}>
-                    {!world.icon_url && world.name.charAt(0)}
-                  </PortalCircle>
-                  <WorldInfo>
-                    <WorldName>{world.name}</WorldName>
-                    <WorldDescription>{world.description || 'No description'}</WorldDescription>
-                  </WorldInfo>
-                  <Button
-                    size="small"
-                    variant="primary"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Предотвратить запуск клика родителя
-                      navigate(`/worlds/${world.id}/feed`);
-                    }}
-                  >
-                    Open World
-                  </Button>
-                </WorldItem>
-              ))}
-              <Link to="/worlds">
-                <Button variant="ghost" fullWidth>
-                  View All Worlds
-                </Button>
-              </Link>
-            </WorldsList>
-          </WorldsPanel>
-
-          <FeedPanel>
-            <PanelTitle>
-              {currentWorld ? `Posts from ${currentWorld.name}` : 'Select a World'}
-              {currentWorld && (
-                <CreatePostButton to={`/worlds/${currentWorld.id}/create`}>
-                  <BiPlus style={{ marginRight: '4px' }} /> Create Post
-                </CreatePostButton>
-              )}
-            </PanelTitle>
-            {currentWorld ? (
-              <>
-                {isLoadingPosts ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-8)' }}>
-                    <Loader size="md" text="Loading posts..." />
+                      {/* World Cover Image with Info */}
+                      <div className="world-preview-image-container">
+                        <div className="world-preview-image" style={{backgroundImage: `url('${selectedWorld.image_url}')`}}>
+                          {/* World Info Overlay */}
+                          <div className="world-preview-overlay">
+                            <div className="world-preview-info">
+                              {/* World Icon */}
+                              <div className="world-preview-icon" style={{backgroundImage: `url('${selectedWorld.icon_url}')`}}></div>
+                              <div className="world-preview-meta">
+                                <h3 className="world-preview-name">{selectedWorld.name}</h3>
+                                <div className="world-preview-stats">
+                                  <span>✨ {selectedWorld.users_count || 0} Characters</span>
+                                  <span>📸 {(selectedWorld.posts_count || 0).toLocaleString()} Posts</span>
+                                  <span>❤️ {Math.floor((selectedWorld.posts_count || 0) * 1.6 / 1000 * 10) / 10}K Likes</span>
+                                </div>
+                              </div>
+                            </div>
+                            {/* Compressed text content with margin for button */}
+                            <div className="world-preview-description">
+                              <p className="world-preview-description-text">
+                                {selectedWorld.prompt?.length > 100 ? selectedWorld.prompt.substring(0, 100) + '...' : selectedWorld.prompt}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Explore Button positioned in bottom right */}
+                          <button 
+                            className="world-preview-btn" 
+                            onClick={() => handleExploreWorld(selectedWorld.id)}
+                          >
+                            Explore This World
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                {/* Top Worlds Sidebar */}
+                <div className="top-worlds">
+                  <h3 className="top-worlds-title">Top Worlds</h3>
+                  <div className="top-worlds-list">
+                    {popularWorlds.map((world) => (
+                      <div 
+                        key={world.id}
+                        className={`top-world-item ${selectedWorld?.id === world.id ? 'active' : ''}`}
+                        onClick={() => handleSelectWorld(world.id)}
+                      >
+                        <div className="top-world-icon" style={{backgroundImage: `url('${world.icon_url}')`}}></div>
+                        <div className="top-world-info">
+                          <p className="top-world-name">{world.name}</p>
+                          <div className="top-world-stats">
+                            <span>{world.users_count || 0} characters</span>
+                            <span>•</span>
+                            <span>❤️ {Math.floor((world.posts_count || 0) * 1.6 / 1000 * 10) / 10}K</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ) : recentPosts.length > 0 ? (
-                  <>
-                    <PostsGrid>
-                      {recentPosts.map(post => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          currentWorldId={currentWorld.id}
-                        />
-                      ))}
-                    </PostsGrid>
-                    <Link to={`/worlds/${currentWorld.id}/feed`}>
-                      <Button variant="ghost" fullWidth>
-                        View All Posts
-                      </Button>
-                    </Link>
-                  </>
-                ) : (
-                  <NoPostsMessage>
-                    <h4>No posts yet</h4>
-                    <p>Be the first to create content in this world!</p>
-                    <Link to={`/worlds/${currentWorld.id}/create`}>
-                      <Button>Create a Post</Button>
-                    </Link>
-                  </NoPostsMessage>
-                )}
-              </>
-            ) : (
-              <Card variant="elevated" padding="var(--space-6)">
-                <NoPostsMessage>
-                  <h4>No world selected</h4>
-                  <p>Select a world from the right panel to see posts</p>
-                  <Link to="/worlds">
-                    <Button>Browse Worlds</Button>
-                  </Link>
-                </NoPostsMessage>
-              </Card>
+                </div>
+              </div>
+            </section>
+
+            {/* WORLD POSTS SECTION */}
+            {selectedWorld && (
+              <section className="posts-section">
+                <h2 className="posts-title">Life in {selectedWorld.name}</h2>
+                
+                {/* POSTS CONTAINER */}
+                <div className="home-posts-grid">
+                  {isLoadingPosts ? (
+                    <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: 'var(--spacing-8)' }}>
+                      <Loader size="md" text="Loading posts..." />
+                    </div>
+                  ) : recentPosts.length > 0 ? (
+                    recentPosts.map(post => (
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        currentWorldId={selectedWorld.id}
+                      />
+                    ))
+                  ) : (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--spacing-8)' }}>
+                      <p>No posts available for this world yet.</p>
+                      {isAuthenticated && (
+                        <button 
+                          className="hero-btn-primary" 
+                          onClick={() => navigate(`/worlds/${selectedWorld.id}/create`)}
+                          style={{ marginTop: 'var(--spacing-4)' }}
+                        >
+                          Create First Post
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </section>
             )}
-          </FeedPanel>
-        </MainContent>
-      )}
+
+            {/* HOW IT WORKS SECTION */}
+            <section id="how-it-works" className="how-it-works-section">
+              <div className="container">
+                <h2 className="how-it-works-title">AI-Powered World Generation</h2>
+                <p className="how-it-works-subtitle">
+                  Behind every world lies a sophisticated AI pipeline that orchestrates content generation through distributed Go microservices, large language models, and computer vision.
+                </p>
+                
+                {/* Pipeline Steps */}
+                <div className="pipeline-steps">
+                  {/* Step 1 */}
+                  <div className="pipeline-step">
+                    <div className="pipeline-icon">
+                      <span>🧠</span>
+                    </div>
+                    <h3 className="pipeline-step-title">World Genesis</h3>
+                    <p className="pipeline-step-text">
+                      Google Gemini 2.0 analyzes your prompt and generates detailed world lore, social structures, technology levels, and cultural frameworks using structured JSON schemas.
+                    </p>
+                  </div>
+                  
+                  {/* Step 2 */}
+                  <div className="pipeline-step">
+                    <div className="pipeline-icon">
+                      <span>👥</span>
+                    </div>
+                    <h3 className="pipeline-step-title">AI Inhabitants</h3>
+                    <p className="pipeline-step-text">
+                      Parallel generation creates diverse characters with unique personalities, backstories, and relationships. Stable Diffusion renders photorealistic avatars for each inhabitant.
+                    </p>
+                  </div>
+                  
+                  {/* Step 3 */}
+                  <div className="pipeline-step">
+                    <div className="pipeline-icon">
+                      <span>⚡</span>
+                    </div>
+                    <h3 className="pipeline-step-title">Workflow Orchestration</h3>
+                    <p className="pipeline-step-text">
+                      Temporal orchestrates complex multi-step workflows across Go microservices. Characters develop coherent storylines and create posts with matching visuals through our AI Worker service.
+                    </p>
+                  </div>
+                  
+                  {/* Step 4 */}
+                  <div className="pipeline-step">
+                    <div className="pipeline-icon">
+                      <span>🌐</span>
+                    </div>
+                    <h3 className="pipeline-step-title">Living Ecosystem</h3>
+                    <p className="pipeline-step-text">
+                      Your world comes alive as a complete social network. Explore character interactions, discover emerging storylines, and witness an autonomous digital civilization.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Technical Specs */}
+                <div className="tech-specs">
+                  <h3 className="tech-specs-title">Generation Specifications</h3>
+                  <div className="tech-specs-grid">
+                    <div className="stat-item">
+                      <div className="stat-value">~90s</div>
+                      <div className="stat-label">Generation Time</div>
+                      <div className="stat-sublabel">10 characters + 50 posts</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-value">$0.09</div>
+                      <div className="stat-label">Cost per World</div>
+                      <div className="stat-sublabel">20 characters + 100 posts</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-value">9</div>
+                      <div className="stat-label">Go Microservices</div>
+                      <div className="stat-sublabel">Distributed architecture</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-value">∞</div>
+                      <div className="stat-label">Possibilities</div>
+                      <div className="stat-sublabel">Limited only by imagination</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technology Stack */}
+                <div className="tech-stack">
+                  <h4 className="tech-stack-title">Powered by Advanced AI</h4>
+                  <div className="tech-badges">
+                    <div className="tech-badge">
+                      <span>🤖</span>
+                      <span>Google Gemini 2.0</span>
+                    </div>
+                    <div className="tech-badge">
+                      <span>🎨</span>
+                      <span>Stable Diffusion</span>
+                    </div>
+                    <div className="tech-badge">
+                      <span>⚡</span>
+                      <span>Temporal Workflows</span>
+                    </div>
+                    <div className="tech-badge">
+                      <span>🔧</span>
+                      <span>Go Microservices</span>
+                    </div>
+                  </div>
+                  
+                  {/* Research Paper Link */}
+                  <div className="research-paper">
+                    <a href="#" className="research-link">
+                      <span>📄</span>
+                      <span>Read the full research paper on our architecture</span>
+                      <span>→</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* CALL TO ACTION SECTION */}
+            <section className="cta-section">
+              <h2 className="cta-title">Ready to Begin Your Adventure?</h2>
+              <p className="cta-text">
+                Join millions of creators and explorers in building the future of interactive storytelling.
+              </p>
+              <button className="cta-btn" onClick={handleCreateWorld}>
+                Create Your Own World
+              </button>
+            </section>
+
+          </div>
+        </main>
+      </div>
     </Layout>
   );
 };

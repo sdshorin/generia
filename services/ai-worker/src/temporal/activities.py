@@ -527,6 +527,36 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
                 # logger.error(f"Activity failed: {error_msg}")
                 raise
 
+    @activity.defn(name="update_world_image")
+    async def update_world_image(
+        world_id: str,
+        header_media_id: str,
+        icon_media_id: str
+    ) -> bool:
+        """
+        Обновляет изображения мира (header и icon)
+        """
+        async with resource_manager.grpc_semaphore:
+            try:
+                info = activity.info()
+                # # logger.info(f"Activity {info.activity_type} - Updating world images for world {world_id}")
+                
+                result = await resource_manager.service_client.update_world_image(
+                    world_id=world_id,
+                    image_uuid=header_media_id,
+                    icon_uuid=icon_media_id,
+                    task_id=info.activity_id
+                )
+                
+                # # logger.info(f"Successfully updated world images")
+                
+                return result
+                
+            except Exception as e:
+                error_msg = f"Error updating world images: {str(e)}"
+                # logger.error(f"Activity failed: {error_msg}")
+                raise
+
     # ==================== TASK STORAGE ACTIVITIES ====================
 
     @activity.defn(name="create_task")
@@ -700,6 +730,7 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
         'create_character': create_character,
         'create_post': create_post,
         'update_character_avatar': update_character_avatar,
+        'update_world_image': update_world_image,
         'create_task': create_task,
         'get_task': get_task,
         'update_task': update_task,

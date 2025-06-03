@@ -158,6 +158,25 @@ class GenerateWorldImageWorkflow(BaseWorkflow):
             
             workflow.logger.info(f"Generated both images for world {input.world_id}")
             
+            # Сохраняем изображения мира
+            await workflow.execute_activity(
+                "update_world_image",
+                args=[
+                    input.world_id,
+                    header_image.get("media_id"),
+                    icon_image.get("media_id")
+                ],
+                task_queue="ai-worker-services",
+                start_to_close_timeout=timedelta(minutes=2),
+                retry_policy=RetryPolicy(
+                    initial_interval=timedelta(seconds=2),
+                    maximum_interval=timedelta(seconds=30),
+                    maximum_attempts=3
+                )
+            )
+            
+            workflow.logger.info(f"Successfully saved world images for world {input.world_id}")
+
             # Обновляем статус этапа на "Завершен"
             await workflow.execute_activity(
                 "update_stage",

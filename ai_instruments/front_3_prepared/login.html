@@ -55,23 +55,23 @@
             required
           >
           <div class="auth-error-message" id="password-error">Password is required</div>
-          <div class="forgot-password-link">
+          <!-- <div class="forgot-password-link">
             <a href="#" onclick="showForgotPassword()">Forgot your password?</a>
-          </div>
+          </div> -->
         </div>
 
         <!-- Remember Me -->
-        <div class="auth-checkbox-group">
-          <label class="auth-checkbox">
+        <!-- <div class="auth-checkbox-group"> -->
+          <!-- <label class="auth-checkbox">
             <input type="checkbox" id="remember-me" name="remember">
             <div class="auth-checkbox-icon">
               <svg viewBox="0 0 16 16" fill="currentColor">
                 <path d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z"/>
               </svg>
             </div>
-          </label>
-          <label class="auth-checkbox-label" for="remember-me">Remember me for 30 days</label>
-        </div>
+          </label> -->
+          <!-- <label class="auth-checkbox-label" for="remember-me">Remember me for 30 days</label> -->
+        <!-- </div> -->
 
         <!-- Submit Button -->
         <div class="auth-actions">
@@ -95,179 +95,5 @@
     </div>
   </div>
 
-  <script>
-    // Form validation
-    function validateEmail(email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email) || email.length >= 3; // Accept username (3+ chars) or email
-    }
-
-    function validatePassword(password) {
-      return password.length >= 6;
-    }
-
-    function showError(fieldId, message) {
-      const group = document.getElementById(`${fieldId}-group`);
-      const input = document.getElementById(fieldId);
-      const error = document.getElementById(`${fieldId}-error`);
-      
-      group.classList.add('error');
-      input.classList.add('error');
-      error.textContent = message;
-      error.classList.add('show');
-    }
-
-    function clearError(fieldId) {
-      const group = document.getElementById(`${fieldId}-group`);
-      const input = document.getElementById(fieldId);
-      const error = document.getElementById(`${fieldId}-error`);
-      
-      group.classList.remove('error');
-      input.classList.remove('error');
-      error.classList.remove('show');
-    }
-
-    function showGeneralError(message) {
-      const errorDiv = document.getElementById('general-error');
-      errorDiv.textContent = message;
-      errorDiv.classList.add('show');
-    }
-
-    function clearGeneralError() {
-      const errorDiv = document.getElementById('general-error');
-      errorDiv.classList.remove('show');
-    }
-
-    function setLoading(isLoading) {
-      const btn = document.getElementById('login-btn');
-      const form = document.getElementById('login-form');
-      
-      if (isLoading) {
-        btn.classList.add('loading');
-        btn.disabled = true;
-        form.style.pointerEvents = 'none';
-      } else {
-        btn.classList.remove('loading');
-        btn.disabled = false;
-        form.style.pointerEvents = 'auto';
-      }
-    }
-
-    // Real-time validation
-    document.getElementById('email').addEventListener('input', function() {
-      const email = this.value.trim();
-      if (email && !validateEmail(email)) {
-        showError('email', 'Please enter a valid email address or username (3+ characters)');
-      } else {
-        clearError('email');
-      }
-    });
-
-    document.getElementById('password').addEventListener('input', function() {
-      const password = this.value;
-      if (password && !validatePassword(password)) {
-        showError('password', 'Password must be at least 6 characters long');
-      } else {
-        clearError('password');
-      }
-    });
-
-    // Form submission
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const remember = document.getElementById('remember-me').checked;
-      
-      // Clear previous errors
-      clearError('email');
-      clearError('password');
-      clearGeneralError();
-      
-      // Validate fields
-      let hasErrors = false;
-      
-      if (!email) {
-        showError('email', 'Email or username is required');
-        hasErrors = true;
-      } else if (!validateEmail(email)) {
-        showError('email', 'Please enter a valid email address or username');
-        hasErrors = true;
-      }
-      
-      if (!password) {
-        showError('password', 'Password is required');
-        hasErrors = true;
-      } else if (!validatePassword(password)) {
-        showError('password', 'Password must be at least 6 characters long');
-        hasErrors = true;
-      }
-      
-      if (hasErrors) {
-        return;
-      }
-      
-      // Show loading state
-      setLoading(true);
-      
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // For demo purposes, check for demo credentials
-        if (email === 'demo@generia.com' && password === 'demo123') {
-          // Successful login
-          localStorage.setItem('generia_user', JSON.stringify({
-            id: 'user-1',
-            email: email,
-            username: 'Demo User',
-            remember: remember
-          }));
-          
-          // Redirect to main page
-          window.location.href = 'main.html';
-        } else {
-          // Invalid credentials
-          showGeneralError('Invalid email/username or password. Try demo@generia.com / demo123');
-        }
-      } catch (error) {
-        showGeneralError('Login failed. Please try again.');
-        console.error('Login error:', error);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    // Forgot password functionality
-    function showForgotPassword() {
-      alert('Password reset functionality will be implemented soon. For demo, use: demo@generia.com / demo123');
-    }
-
-    // Auto-focus first field
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('email').focus();
-    });
-
-    // Demo credentials helper
-    function fillDemoCredentials() {
-      document.getElementById('email').value = 'demo@generia.com';
-      document.getElementById('password').value = 'demo123';
-    }
-
-    // Add demo button for testing (remove in production)
-    document.addEventListener('DOMContentLoaded', function() {
-      const demoButton = document.createElement('button');
-      demoButton.type = 'button';
-      demoButton.textContent = 'Fill Demo Credentials';
-      demoButton.className = 'btn btn-secondary';
-      demoButton.style.marginTop = 'var(--spacing-4)';
-      demoButton.style.width = '100%';
-      demoButton.onclick = fillDemoCredentials;
-      
-      const authActions = document.querySelector('.auth-actions');
-      authActions.appendChild(demoButton);
-    });
-  </script>
 </body>
 </html>

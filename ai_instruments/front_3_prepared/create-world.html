@@ -94,17 +94,27 @@
             <div class="cost-display">
               <div class="cost-header">
                 <span class="cost-label">Generation Cost</span>
-                <span id="total-cost" class="cost-value">💎 75 Credits</span>
+                <span id="total-cost" class="cost-value">170 💎</span>
               </div>
               <div class="cost-breakdown">
-                <span>Characters: <span id="character-cost">45</span> • Posts: <span id="posts-cost">30</span></span>
+                <span>Characters: <span id="character-cost">45</span> • Posts: <span id="posts-cost">30</span> • ~90 seconds</span>
               </div>
             </div>
 
             <!-- Generate Button -->
-            <button id="generate-btn" class="btn btn-primary btn-large" onclick="startGeneration()">
-              Generate World
+            <button id="generate-btn" class="btn btn-primary" onclick="startGeneration()" style="width: 100%; height: 4rem; font-size: var(--text-lg); font-weight: var(--font-bold);">
+              Generate World ✨
             </button>
+          </div>
+
+          <!-- Examples Section -->
+          <div class="example-prompts">
+            <p class="example-prompts-text">Need inspiration? Try these prompts:</p>
+            <div class="example-prompts-container">
+              <button onclick="fillPrompt('underwater')" class="example-prompt-btn">🌊 Underwater civilization</button>
+              <button onclick="fillPrompt('space')" class="example-prompt-btn">🚀 Space station colony</button>
+              <button onclick="fillPrompt('medieval')" class="example-prompt-btn">🏰 Medieval fantasy kingdom</button>
+            </div>
           </div>
         </div>
 
@@ -249,12 +259,22 @@
       const charCost = parseInt(characterCost.textContent);
       const postCost = parseInt(postsCost.textContent);
       const total = charCost + postCost;
-      document.getElementById('total-cost').textContent = `💎 ${total} Credits`;
+      document.getElementById('total-cost').textContent = `${total} 💎`;
     }
 
     // Initialize sliders
     updateSliderProgress(characterSlider);
     updateSliderProgress(postsSlider);
+
+    // Fill example prompts
+    function fillPrompt(type) {
+      const prompts = {
+        underwater: "A vast underwater civilization where merfolk, sea creatures, and coral cities thrive in the deep ocean. Ancient magic flows through the currents, and bioluminescent technology lights the abyssal depths.",
+        space: "A massive space station at the edge of known space, where diverse alien species trade, explore, and live together. Advanced technology meets ancient wisdom as cultures blend in this cosmic melting pot.",
+        medieval: "A sprawling medieval kingdom where knights, wizards, and mythical creatures coexist. Ancient castles dot the landscape, magic flows through enchanted forests, and political intrigue shapes the realm."
+      };
+      document.getElementById('world-prompt').value = prompts[type];
+    }
 
     // Start generation process
     function startGeneration() {

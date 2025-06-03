@@ -21,59 +21,17 @@
     
     <!-- MAIN CONTENT -->
     <main class="flex-1">
-      
-      <!-- PAGE HEADER -->
-      <div class="catalog-header">
-        <h1 class="catalog-title">Explore Worlds</h1>
-        <p class="catalog-subtitle">Discover infinite AI-generated universes, each with unique stories, characters, and endless possibilities.</p>
-      </div>
-
-      <!-- FILTERS AND SEARCH -->
-      <div class="catalog-filters">
-        <div class="filters-container">
-          
-          <!-- Search Section -->
-          <div class="search-section">
-            <div class="search-container">
-              <div class="search-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-                  <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2"/>
-                </svg>
-              </div>
-              <input type="text" class="search-input" placeholder="Search worlds..." id="search-input">
-            </div>
-          </div>
-
-          <!-- Filters Section -->
-          <div class="filters-section">
-            <div class="filter-tabs">
-              <button class="filter-tab active" onclick="setFilter('all')">All Worlds</button>
-              <button class="filter-tab" onclick="setFilter('popular')">Popular</button>
-              <button class="filter-tab" onclick="setFilter('new')">New</button>
-              <button class="filter-tab" onclick="setFilter('fantasy')">Fantasy</button>
-              <button class="filter-tab" onclick="setFilter('scifi')">Sci-Fi</button>
-              <button class="filter-tab" onclick="setFilter('my')">My Worlds</button>
-            </div>
-            
-            <div class="sort-dropdown">
-              <span class="sort-label">Sort by:</span>
-              <select class="sort-select" id="sort-select" onchange="sortWorlds()">
-                <option value="popularity">Popularity</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="activity">Activity</option>
-                <option value="characters">Characters</option>
-                <option value="posts">Posts</option>
-              </select>
-            </div>
-          </div>
+      <div class="container">
+        
+        <!-- PAGE HEADER -->
+        <div class="catalog-header">
+          <h1 class="catalog-title">Explore Worlds</h1>
+          <p class="catalog-subtitle">Discover infinite AI-generated universes, each with unique stories, characters, and endless possibilities.</p>
         </div>
-      </div>
 
-      <!-- WORLDS GRID -->
-      <div class="catalog-content">
-        <div class="worlds-grid" id="worlds-grid">
+        <!-- WORLDS GRID -->
+        <div class="catalog-content">
+          <div class="worlds-grid" id="worlds-grid">
           
           <!-- World Cards will be inserted here -->
           <div id="world-1-placeholder"></div>
@@ -85,14 +43,14 @@
 
         </div>
 
-        <!-- Load More Button -->
-        <div class="catalog-load-more">
-          <button class="load-more-btn" onclick="loadMoreWorlds()">
-            Load More Worlds
-          </button>
+          <!-- Load More Button -->
+          <div class="catalog-load-more">
+            <button class="load-more-btn" onclick="loadMoreWorlds()">
+              Load More Worlds
+            </button>
+          </div>
         </div>
       </div>
-
     </main>
   </div>
 
@@ -175,30 +133,6 @@
       })
       .catch(err => console.error('Error loading world cards:', err));
 
-    // Filter and sort functions
-    function setFilter(filter) {
-      // Remove active class from all tabs
-      document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      
-      // Add active class to clicked tab
-      event.target.classList.add('active');
-      
-      // Apply filter logic (simplified for demo)
-      console.log('Filter set to:', filter);
-      
-      // Here you would implement actual filtering logic
-      // For now, just log the action
-    }
-    
-    function sortWorlds() {
-      const sortBy = document.getElementById('sort-select').value;
-      console.log('Sorting by:', sortBy);
-      
-      // Here you would implement actual sorting logic
-      // For now, just log the action
-    }
     
     function loadMoreWorlds() {
       console.log('Loading more worlds...');
@@ -216,14 +150,6 @@
       }, 2000);
     }
     
-    // Search functionality
-    document.getElementById('search-input').addEventListener('input', function(e) {
-      const searchTerm = e.target.value.toLowerCase();
-      console.log('Searching for:', searchTerm);
-      
-      // Here you would implement actual search logic
-      // For now, just log the search term
-    });
   </script>
 </body>
 </html>

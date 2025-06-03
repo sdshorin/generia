@@ -1,401 +1,472 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { motion, HTMLMotionProps } from 'framer-motion';
 import { Layout } from '../../components/layout/Layout';
-import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
-import { TextArea } from '../../components/ui/TextArea';
-import { Button } from '../../components/ui/Button';
-import { Loader } from '../../components/ui/Loader';
 import { useWorld } from '../../hooks/useWorld';
-
-const PageContainer = styled.div`
-  max-width: 720px;
-  margin: 0 auto;
-`;
-
-const PageHeader = styled.div`
-  text-align: center;
-  margin-bottom: var(--space-6);
-`;
-
-const Title = styled.h1`
-  font-size: var(--font-3xl);
-  margin-bottom: var(--space-2);
-  background: linear-gradient(135deg, var(--color-primary), #FF9900);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-`;
-
-const Subtitle = styled.p`
-  color: var(--color-text-light);
-  font-size: var(--font-md);
-  max-width: 500px;
-  margin: 0 auto;
-`;
-
-const FormContainer = styled(Card)`
-  margin-bottom: var(--space-8);
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-`;
-
-const FieldGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-`;
-
-const Label = styled.label`
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-text);
-  margin-bottom: var(--space-1);
-`;
-
-const HelperText = styled.p`
-  font-size: var(--font-xs);
-  color: var(--color-text-lighter);
-  margin-top: var(--space-1);
-`;
-
-const ButtonsContainer = styled.div`
-  display: flex;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-  
-  @media (max-width: 640px) {
-    flex-direction: column;
-  }
-`;
-
-const ExamplePrompts = styled.div`
-  margin-top: var(--space-4);
-`;
-
-const ExamplePromptTitle = styled.h4`
-  font-size: var(--font-sm);
-  color: var(--color-text-light);
-  margin-bottom: var(--space-2);
-`;
-
-const ExamplePromptCard = styled(motion.div)<HTMLMotionProps<'div'>>`
-  background-color: var(--color-input-bg);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  font-size: var(--font-sm);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-bottom: var(--space-2);
-  
-  &:hover {
-    background-color: var(--color-border);
-  }
-`;
-
-const ErrorMessage = styled.div`
-  color: var(--color-accent);
-  font-size: var(--font-sm);
-  padding: var(--space-3);
-  background-color: rgba(239, 118, 122, 0.1);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-4);
-`;
-
-const SliderContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-`;
-
-const SliderWrapper = styled.div`
-  position: relative;
-  margin: var(--space-3) 0;
-`;
-
-const SliderInput = styled.input`
-  width: 100%;
-  height: 6px;
-  background: var(--color-input-bg);
-  border-radius: var(--radius-full);
-  outline: none;
-  -webkit-appearance: none;
-  
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--color-primary);
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s;
-    
-    &:hover {
-      transform: scale(1.1);
-      background: var(--color-primary-hover);
-    }
-  }
-  
-  &::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--color-primary);
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    box-shadow: var(--shadow-sm);
-  }
-`;
-
-const SliderLabels = styled.div`
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--font-xs);
-  color: var(--color-text-lighter);
-  margin-top: var(--space-1);
-`;
-
-const SliderValue = styled.div`
-  text-align: center;
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--color-primary);
-  margin-bottom: var(--space-2);
-`;
-
-const SlidersRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-// Example prompts for world generation
-const examplePrompts = [
-  "A cyberpunk city where nature has reclaimed technology, with neon-lit trees and digital wildlife.",
-  "A peaceful medieval village where everyone specializes in unique magical crafts.",
-  "A retro 1980s mall filled with bizarre shops that sell impossible objects.",
-  "A tropical island community where residents communicate through colorful sand art.",
-  "A steampunk space colony orbiting Jupiter where Victorian fashion meets advanced astronomy."
-];
+import { WorldGenerationStatus, StageInfo } from '../../types';
+import { worldsAPI } from '../../api/services';
+import '../../styles/pages/create-world.css';
 
 export const CreateWorldPage: React.FC = () => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [currentState, setCurrentState] = useState<'form' | 'progress'>('form');
   const [prompt, setPrompt] = useState('');
-  const [charactersCount, setCharactersCount] = useState(25);
-  const [postsCount, setPostsCount] = useState(150);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const { createWorld, error, isLoading, clearError } = useWorld();
+  const [charactersCount, setCharactersCount] = useState(15);
+  const [postsCount, setPostsCount] = useState(30);
+  const [characterCost, setCharacterCost] = useState(45);
+  const [postsCost, setPostsCost] = useState(30);
+  const [totalCost, setTotalCost] = useState(75);
+  const [createdWorldId, setCreatedWorldId] = useState<string | null>(null);
+  
+  // Progress state from real API
+  const [status, setStatus] = useState<WorldGenerationStatus | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  
+  const { createWorld, error, isLoading } = useWorld();
   const navigate = useNavigate();
   
-  const validateForm = (): boolean => {
-    const formErrors: Record<string, string> = {};
-    
-    if (!name.trim()) {
-      formErrors.name = 'World name is required';
-    } else if (name.length < 3) {
-      formErrors.name = 'World name must be at least 3 characters';
-    }
-    
-    if (!prompt.trim()) {
-      formErrors.prompt = 'Prompt is required to generate the world';
-    } else if (prompt.length < 10) {
-      formErrors.prompt = 'Please provide a more detailed prompt (at least 10 characters)';
-    }
-    
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
+  // Example prompts
+  const prompts = {
+    underwater: "A vast underwater civilization where merfolk, sea creatures, and coral cities thrive in the deep ocean. Ancient magic flows through the currents, and bioluminescent technology lights the abyssal depths.",
+    space: "A massive space station at the edge of known space, where diverse alien species trade, explore, and live together. Advanced technology meets ancient wisdom as cultures blend in this cosmic melting pot.",
+    medieval: "A sprawling medieval kingdom where knights, wizards, and mythical creatures coexist. Ancient castles dot the landscape, magic flows through enchanted forests, and political intrigue shapes the realm."
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
+  // Map real API stages to template stages
+  const getStageNumber = (stageName: string): number => {
+    const stageMap: Record<string, number> = {
+      'initializing': 1,
+      'world_description': 1,
+      'world_image': 2,
+      'characters': 3,
+      'posts': 4,
+      'finishing': 5
+    };
+    return stageMap[stageName] || 1;
+  };
+
+  // Check if generation is complete based on actual counts
+  const isGenerationComplete = (statusData?: any): boolean => {
+    const currentStatus = statusData || status;
+    if (!currentStatus) return false;
     
-    if (!validateForm()) {
+    const usersComplete = currentStatus.users_predicted > 0 && currentStatus.users_created >= currentStatus.users_predicted;
+    const postsComplete = currentStatus.posts_predicted > 0 && currentStatus.posts_created >= currentStatus.posts_predicted;
+    
+    return usersComplete && postsComplete;
+  };
+  
+  // Update costs when character count changes
+  const handleCharacterSliderChange = useCallback((value: number) => {
+    setCharactersCount(value);
+    const cost = value * 3; // 3 credits per character
+    setCharacterCost(cost);
+  }, []);
+  
+  // Update costs when posts count changes
+  const handlePostsSliderChange = useCallback((value: number) => {
+    setPostsCount(value);
+    const cost = value * 1; // 1 credit per post
+    setPostsCost(cost);
+  }, []);
+  
+  // Update total cost
+  useEffect(() => {
+    setTotalCost(characterCost + postsCost);
+  }, [characterCost, postsCost]);
+  
+  // Fill example prompt
+  const fillPrompt = useCallback((type: keyof typeof prompts) => {
+    setPrompt(prompts[type]);
+  }, [prompts]);
+  
+  // Start generation process
+  const startGeneration = useCallback(async () => {
+    const trimmedPrompt = prompt.trim();
+    if (!trimmedPrompt) {
+      alert('Please describe your world first!');
       return;
     }
     
     try {
-      const world = await createWorld(name, description, prompt, charactersCount, postsCount);
-      navigate(`/worlds/${world.id}/feed`);
+      // Use real API to create world
+      const world = await createWorld(
+        'Generated World', // You can add a name field later if needed
+        '', // Description
+        trimmedPrompt,
+        charactersCount,
+        postsCount
+      );
+      
+      // Switch to progress view and set the created world ID
+      setCreatedWorldId(world.id);
+      setCurrentState('progress');
+      
+      // Start listening to progress updates
+      startProgressTracking(world.id);
+      
     } catch (err) {
       console.error('Failed to create world:', err);
     }
+  }, [prompt, charactersCount, postsCount, createWorld]);
+  
+  // Start tracking progress with real API
+  const startProgressTracking = useCallback((worldId: string) => {
+    let eventSource: EventSource | null = null;
+
+    const connectSSE = () => {
+      try {
+        eventSource = worldsAPI.createWorldStatusEventSource(worldId);
+        eventSourceRef.current = eventSource;
+
+        eventSource.onopen = () => {
+          console.log('SSE connection opened');
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'ping') return;
+            
+            setStatus(data);
+            
+            // Check if generation is actually complete based on counts
+            if (data.status === 'completed' || isGenerationComplete(data)) {
+              setTimeout(() => {
+                navigate(`/worlds/${worldId}/feed`);
+              }, 2000);
+            } else if (data.status === 'failed') {
+              // Go back to form on failure
+              setCurrentState('form');
+              setCreatedWorldId(null);
+            }
+          } catch (error) {
+            console.error('Failed to parse SSE data:', error);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.error('SSE error:', error);
+          eventSource?.close();
+          
+          // Retry connection after 5 seconds
+          setTimeout(connectSSE, 5000);
+        };
+      } catch (error) {
+        console.error('Failed to create EventSource:', error);
+        
+        // Fallback to polling
+        const pollStatus = async () => {
+          try {
+            const statusData = await worldsAPI.getWorldStatus(worldId);
+            setStatus(statusData);
+            
+            if (statusData.status === 'completed' || isGenerationComplete(statusData)) {
+              setTimeout(() => {
+                navigate(`/worlds/${worldId}/feed`);
+              }, 2000);
+            } else if (statusData.status === 'failed') {
+              setCurrentState('form');
+              setCreatedWorldId(null);
+            } else {
+              setTimeout(pollStatus, 1000);
+            }
+          } catch (error) {
+            console.error('Failed to poll status:', error);
+            setTimeout(pollStatus, 5000);
+          }
+        };
+        
+        pollStatus();
+      }
+    };
+
+    connectSSE();
+  }, [navigate]);
+  
+  // Cancel generation
+  const cancelGeneration = useCallback(() => {
+    if (window.confirm('Are you sure you want to cancel world generation?')) {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      setCurrentState('form');
+      setCreatedWorldId(null);
+      setStatus(null);
+      // Note: The actual API call to cancel generation would go here
+    }
+  }, []);
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
+  
+  // Update slider visual progress
+  const updateSliderProgress = useCallback((slider: HTMLInputElement) => {
+    const value = ((Number(slider.value) - Number(slider.min)) / (Number(slider.max) - Number(slider.min))) * 100;
+    slider.style.background = `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${value}%, var(--color-border) ${value}%, var(--color-border) 100%)`;
+  }, []);
+  
+  // Initialize sliders on mount
+  useEffect(() => {
+    const characterSlider = document.getElementById('character-slider') as HTMLInputElement;
+    const postsSlider = document.getElementById('posts-slider') as HTMLInputElement;
+    
+    if (characterSlider) updateSliderProgress(characterSlider);
+    if (postsSlider) updateSliderProgress(postsSlider);
+  }, [updateSliderProgress]);
+  
+  // Get current step based on real API status
+  const getCurrentStep = (): number => {
+    if (!status) return 0;
+    return getStageNumber(status.current_stage);
   };
-  
-  const handleUseExamplePrompt = useCallback((examplePrompt: string) => {
-    setPrompt(examplePrompt);
-  }, []);
-  
-  const handleRandomPrompt = useCallback(() => {
-    const randomIndex = Math.floor(Math.random() * examplePrompts.length);
-    setPrompt(examplePrompts[randomIndex]);
-  }, []);
   
   return (
     <Layout>
-      <PageContainer>
-        <PageHeader>
-          <Title>Generate a New World</Title>
-          <Subtitle>
-            Create a synthetic world with its own unique theme and AI-generated inhabitants.
-          </Subtitle>
-        </PageHeader>
-        
-        <FormContainer padding="var(--space-6)" variant="elevated">
-          {error && <ErrorMessage>{error}</ErrorMessage>}
+      <div className="min-h-screen flex flex-col bg-white">
+        {/* MAIN CONTENT */}
+        <main className="flex-1">
+          <div className="container">
           
-          <Form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Label htmlFor="name">World Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter a name for your world"
-                error={errors.name}
-              />
-            </FieldGroup>
-            
-            <FieldGroup>
-              <Label htmlFor="description">Description (Optional)</Label>
-              <TextArea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Briefly describe what makes this world unique"
-                rows={2}
-              />
-            </FieldGroup>
-            
-            <FieldGroup>
-              <Label htmlFor="prompt">World Generation Prompt</Label>
-              <TextArea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe the theme, aesthetics, and characteristics of your world"
-                rows={4}
-                error={errors.prompt}
-              />
-              <HelperText>
-                Be specific and detailed about the world you want to create. This will guide the AI in generating users and content.
-              </HelperText>
-            </FieldGroup>
-            
-            <FieldGroup>
-              <Label>World Size Settings</Label>
-              <SlidersRow>
-                <SliderContainer>
-                  <Label htmlFor="charactersCount">Number of Characters</Label>
-                  <SliderValue>{charactersCount} characters</SliderValue>
-                  <SliderWrapper>
-                    <SliderInput
-                      id="charactersCount"
-                      type="range"
-                      min="1"
-                      max="40"
-                      value={charactersCount}
-                      onChange={(e) => setCharactersCount(parseInt(e.target.value))}
-                    />
-                    <SliderLabels>
-                      <span>1</span>
-                      <span>40</span>
-                    </SliderLabels>
-                  </SliderWrapper>
-                </SliderContainer>
-                
-                <SliderContainer>
-                  <Label htmlFor="postsCount">Number of Posts</Label>
-                  <SliderValue>{postsCount} posts</SliderValue>
-                  <SliderWrapper>
-                    <SliderInput
-                      id="postsCount"
-                      type="range"
-                      min="1"
-                      max="250"
-                      value={postsCount}
-                      onChange={(e) => setPostsCount(parseInt(e.target.value))}
-                    />
-                    <SliderLabels>
-                      <span>1</span>
-                      <span>250</span>
-                    </SliderLabels>
-                  </SliderWrapper>
-                </SliderContainer>
-              </SlidersRow>
-              <HelperText>
-                Configure how many AI characters and posts will be generated for your world. More content creates a richer experience but takes longer to generate.
-              </HelperText>
-            </FieldGroup>
-            
-            <ExamplePrompts>
-              <ExamplePromptTitle>Not sure what to write? Try one of these examples:</ExamplePromptTitle>
-              {examplePrompts.slice(0, 3).map((examplePrompt, index) => (
-                <ExamplePromptCard
-                  key={index}
-                  onClick={() => handleUseExamplePrompt(examplePrompt)}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  "{examplePrompt}"
-                </ExamplePromptCard>
-              ))}
-            </ExamplePrompts>
-            
-            <ButtonsContainer>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleRandomPrompt}
-              >
-                Surprise Me
-              </Button>
-              <Button
-                type="submit"
-                isLoading={isLoading}
-                disabled={isLoading}
-                fullWidth
-              >
-                Generate World
-              </Button>
-            </ButtonsContainer>
-          </Form>
-        </FormContainer>
-        
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card variant="outline" padding="var(--space-6)">
-              <div style={{ textAlign: 'center' }}>
-                <Loader />
-                <h3 style={{ marginTop: 'var(--space-4)' }}>Creating your world...</h3>
-                <p style={{ color: 'var(--color-text-light)', margin: 'var(--space-3) 0' }}>
-                  We're building your synthetic world and populating it with AI-generated users and content.
-                </p>
-                <p style={{ color: 'var(--color-text-light)' }}>
-                  This may take a moment as we craft a unique experience based on your prompt.
-                </p>
+          {/* CREATE FORM (Initial State) */}
+          {currentState === 'form' && (
+            <div id="create-form" className="create-form-state">
+              {/* Page Header */}
+              <div className="page-header">
+                <h1 className="page-title">Create Your World</h1>
+                <p className="page-subtitle">Describe your vision and watch our AI bring it to life with characters, stories, and endless possibilities.</p>
               </div>
-            </Card>
-          </motion.div>
-        )}
-      </PageContainer>
+
+              {/* Error Display */}
+              {error && (
+                <div style={{ 
+                  color: 'var(--color-accent)', 
+                  background: 'rgba(239, 118, 122, 0.1)', 
+                  padding: 'var(--spacing-4)', 
+                  borderRadius: 'var(--radius-lg)', 
+                  marginBottom: 'var(--spacing-6)' 
+                }}>
+                  {error}
+                </div>
+              )}
+
+              {/* Main Form Card */}
+              <div className="form-card">
+                
+                {/* Prompt Input */}
+                <div className="form-group">
+                  <label className="form-label">Describe Your World</label>
+                  <textarea
+                    id="world-prompt"
+                    placeholder="A mystical ancient city floating among the clouds, where magic and technology intertwine..."
+                    rows={6}
+                    className="form-textarea"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                  />
+                  <p className="form-help-text">Be specific about the setting, culture, technology level, and atmosphere you envision.</p>
+                </div>
+
+                {/* Character Count Slider */}
+                <div className="form-group">
+                  <div className="slider-header">
+                    <label className="form-label">Number of Characters</label>
+                    <span id="character-count" className="slider-value">{charactersCount}</span>
+                  </div>
+                  <div className="slider-container">
+                    <input
+                      type="range"
+                      id="character-slider"
+                      min="5"
+                      max="50"
+                      value={charactersCount}
+                      className="slider"
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        handleCharacterSliderChange(value);
+                        updateSliderProgress(e.target);
+                      }}
+                    />
+                  </div>
+                  <div className="slider-labels">
+                    <span>5 characters</span>
+                    <span>50 characters</span>
+                  </div>
+                </div>
+
+                {/* Posts Count Slider */}
+                <div className="form-group">
+                  <div className="slider-header">
+                    <label className="form-label">Number of Posts</label>
+                    <span id="posts-count" className="slider-value">{postsCount}</span>
+                  </div>
+                  <div className="slider-container">
+                    <input
+                      type="range"
+                      id="posts-slider"
+                      min="10"
+                      max="100"
+                      value={postsCount}
+                      className="slider"
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        handlePostsSliderChange(value);
+                        updateSliderProgress(e.target);
+                      }}
+                    />
+                  </div>
+                  <div className="slider-labels">
+                    <span>10 posts</span>
+                    <span>100 posts</span>
+                  </div>
+                </div>
+
+                {/* Cost Display */}
+                <div className="cost-display">
+                  <div className="cost-header">
+                    <span className="cost-label">Generation Cost</span>
+                    <span id="total-cost" className="cost-value">{totalCost} 💎</span>
+                  </div>
+                  <div className="cost-breakdown">
+                    <span>Characters: <span id="character-cost">{characterCost}</span> • Posts: <span id="posts-cost">{postsCost}</span> • ~90 seconds</span>
+                  </div>
+                </div>
+
+                {/* Generate Button */}
+                <button 
+                  id="generate-btn" 
+                  className="btn btn-primary" 
+                  onClick={startGeneration}
+                  disabled={isLoading}
+                  style={{ 
+                    width: '100%', 
+                    height: '4rem', 
+                    fontSize: 'var(--text-lg)', 
+                    fontWeight: 'var(--font-bold)',
+                    opacity: isLoading ? 0.6 : 1,
+                    cursor: isLoading ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {isLoading ? 'Creating World...' : 'Generate World ✨'}
+                </button>
+              </div>
+
+              {/* Examples Section */}
+              <div className="example-prompts">
+                <p className="example-prompts-text">Need inspiration? Try these prompts:</p>
+                <div className="example-prompts-container">
+                  <button onClick={() => fillPrompt('underwater')} className="example-prompt-btn">🌊 Underwater civilization</button>
+                  <button onClick={() => fillPrompt('space')} className="example-prompt-btn">🚀 Space station colony</button>
+                  <button onClick={() => fillPrompt('medieval')} className="example-prompt-btn">🏰 Medieval fantasy kingdom</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* GENERATION PROGRESS */}
+          {currentState === 'progress' && createdWorldId && (
+            <div id="generation-progress" className="generation-progress-state">
+              {/* Progress Header */}
+              <div className="progress-header">
+                <h1 className="progress-title">Creating Your World</h1>
+                <p className="progress-subtitle">AI is generating your unique world. This may take a few minutes...</p>
+              </div>
+
+              {/* Progress Steps - Using template design with real data */}
+              <div className="progress-steps">
+                <div className={`progress-step ${getCurrentStep() >= 1 ? 'active' : ''} ${getCurrentStep() > 1 ? 'completed' : ''}`} id="step-1">
+                  <div className="progress-step-icon">1</div>
+                  <div className="progress-step-content">
+                    <h3>Generating World</h3>
+                    <p>Creating world description and cover image</p>
+                  </div>
+                </div>
+                
+                <div className={`progress-step ${getCurrentStep() >= 2 ? 'active' : ''} ${getCurrentStep() > 2 ? 'completed' : ''}`} id="step-2">
+                  <div className="progress-step-icon">2</div>
+                  <div className="progress-step-content">
+                    <h3>Creating World Image</h3>
+                    <p>Generating beautiful world cover</p>
+                  </div>
+                </div>
+                
+                <div className={`progress-step ${getCurrentStep() >= 3 ? 'active' : ''} ${getCurrentStep() > 3 ? 'completed' : ''}`} id="step-3">
+                  <div className="progress-step-icon">3</div>
+                  <div className="progress-step-content">
+                    <h3>Creating Characters</h3>
+                    <p>Designing unique AI personalities</p>
+                  </div>
+                </div>
+                
+                <div className={`progress-step ${getCurrentStep() >= 4 ? 'active' : ''} ${getCurrentStep() > 4 ? 'completed' : ''}`} id="step-4">
+                  <div className="progress-step-icon">4</div>
+                  <div className="progress-step-content">
+                    <h3>Generating Posts</h3>
+                    <p>Creating stories and interactions</p>
+                  </div>
+                </div>
+                
+                <div className={`progress-step ${getCurrentStep() >= 5 ? 'active' : ''} ${isGenerationComplete() ? 'completed' : ''}`} id="step-5">
+                  <div className="progress-step-icon">5</div>
+                  <div className="progress-step-content">
+                    <h3>Finalizing World</h3>
+                    <p>Preparing your world for exploration</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bars - Using real data from API */}
+              {status && (
+                <div className="progress-bars">
+                  <div className="progress-bar-item">
+                    <div className="progress-bar-header">
+                      <span>Characters Created</span>
+                      <span id="characters-progress-text">{status.users_created} / {status.users_predicted || charactersCount}</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        id="characters-progress-fill" 
+                        className="progress-bar-fill"
+                        style={{ 
+                          width: status.users_predicted > 0 
+                            ? `${(status.users_created / status.users_predicted) * 100}%` 
+                            : '0%'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="progress-bar-item">
+                    <div className="progress-bar-header">
+                      <span>Posts Generated</span>
+                      <span id="posts-progress-text">{status.posts_created} / {status.posts_predicted || postsCount}</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        id="posts-progress-fill" 
+                        className="progress-bar-fill"
+                        style={{ 
+                          width: status.posts_predicted > 0 
+                            ? `${(status.posts_created / status.posts_predicted) * 100}%` 
+                            : '0%'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          </div>
+        </main>
+      </div>
     </Layout>
   );
 };

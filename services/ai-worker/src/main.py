@@ -170,7 +170,7 @@ async def create_workers():
             activities['create_character'],
             activities['create_post'],
             activities['update_character_avatar'],
-            
+            activities['update_world_image'],
         ],
         max_concurrent_activities=MAX_CONCURRENT_GRPC_CALLS,
         workflow_runner=UnsandboxedWorkflowRunner(), # AGENT_LIMITS

@@ -15,7 +15,9 @@ import { CreatePostPage } from './pages/posts/CreatePostPage';
 import { ViewPostPage } from './pages/posts/ViewPostPage';
 import { CreateCharacterPage } from './pages/posts/CreateCharacterPage';
 import { ProfilePage } from './pages/user/ProfilePage';
+import { SettingsPage } from './pages/user/SettingsPage';
 import { CharacterPage } from './pages/characters/CharacterPage';
+import { WorldAboutPage } from './pages/worlds/WorldAboutPage';
 
 const App: React.FC = () => {
   return (
@@ -43,6 +45,11 @@ const App: React.FC = () => {
             <Route path="/create-world" element={
               <ProtectedRoute>
                 <CreateWorldPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/worlds/:worldId/about" element={
+              <ProtectedRoute>
+                <WorldAboutPage />
               </ProtectedRoute>
             } />
             
@@ -84,6 +91,11 @@ const App: React.FC = () => {
             <Route path="/profile/:userId" element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             } />
             

@@ -8,6 +8,7 @@ export interface Character {
   avatar_url?: string;
   meta?: string;
   created_at: string;
+  role?: string;
 }
 
 export interface CharacterListResponse {

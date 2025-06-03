@@ -1,113 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import { motion, HTMLMotionProps } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-
-const LoginContainer = styled.div`
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 10% 20%, rgba(255, 199, 95, 0.15) 0%, rgba(255, 255, 255, 0) 80%);
-    z-index: -1;
-  }
-`;
-
-const LoginCard = styled(motion.div)<HTMLMotionProps<'div'>>`
-  background-color: var(--color-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  width: 100%;
-  max-width: 420px;
-  padding: var(--space-8);
-  
-  @media (max-width: 480px) {
-    padding: var(--space-6);
-  }
-`;
-
-const LoginHeader = styled.div`
-  text-align: center;
-  margin-bottom: var(--space-6);
-`;
-
-const LogoText = styled.h1`
-  font-family: var(--font-sora);
-  font-size: var(--font-3xl);
-  margin-bottom: var(--space-2);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-`;
-
-const SubTitle = styled.p`
-  color: var(--color-text-light);
-  font-size: var(--font-md);
-`;
-
-const LoginForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-`;
-
-const InputLabel = styled.label`
-  font-size: var(--font-sm);
-  color: var(--color-text-light);
-  margin-bottom: var(--space-1);
-`;
-
-const ForgotPassword = styled(Link)`
-  font-size: var(--font-sm);
-  color: var(--color-text-light);
-  text-align: right;
-  margin-top: var(--space-1);
-  
-  &:hover {
-    color: var(--color-primary);
-  }
-`;
-
-const FormError = styled.div`
-  color: #D32F2F;
-  font-size: var(--font-sm);
-  font-weight: 600;
-  padding: var(--space-3);
-  background-color: rgba(211, 47, 47, 0.1);
-  border: 1px solid rgba(211, 47, 47, 0.3);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-4);
-  text-align: center;
-`;
-
-const RegisterLink = styled.div`
-  text-align: center;
-  margin-top: var(--space-6);
-  font-size: var(--font-sm);
-  color: var(--color-text-light);
-  
-  a {
-    color: var(--color-primary);
-    font-weight: 500;
-    
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
+import '../../styles/pages/auth.css';
 
 export const LoginPage: React.FC = () => {
   const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -145,63 +39,79 @@ export const LoginPage: React.FC = () => {
   };
   
   return (
-    <LoginContainer>
-      <LoginCard
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <LoginHeader>
-          <LogoText>Generia</LogoText>
-          <SubTitle>Sign in to your account</SubTitle>
-        </LoginHeader>
+    <div className="auth-container">
+      <div className="auth-card">
         
-        {(error || formError) && (
-          <FormError>
-            {formError || error}
-          </FormError>
-        )}
-        
-        <LoginForm onSubmit={handleSubmit}>
-          <div>
-            <InputLabel htmlFor="emailOrUsername">Email or Username</InputLabel>
-            <Input
-              id="emailOrUsername"
-              type="text"
+        {/* Auth Header */}
+        <div className="auth-header">
+          <div className="auth-logo">
+            <div className="auth-logo-icon"></div>
+            <span className="auth-logo-text">Generia</span>
+          </div>
+          <h1 className="auth-title">Welcome back</h1>
+          <p className="auth-subtitle">Sign in to your account to continue exploring virtual worlds</p>
+        </div>
+
+        {/* Login Form */}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          
+          {/* General Error Message */}
+          {(error || formError) && (
+            <div className="auth-error-message show" style={{textAlign: 'center', marginBottom: 'var(--spacing-4)'}}>
+              {formError || error}
+            </div>
+          )}
+          
+          {/* Email Field */}
+          <div className="auth-form-group">
+            <label className="auth-form-label" htmlFor="email">Email or Username</label>
+            <input 
+              type="text" 
+              id="email" 
+              name="email" 
+              className="auth-form-input" 
+              placeholder="Enter your email or username"
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
-              placeholder="Enter your email or username"
-              fullWidth
+              required
             />
           </div>
-          
-          <div>
-            <InputLabel htmlFor="password">Password</InputLabel>
-            <Input
-              id="password"
-              type="password"
+
+          {/* Password Field */}
+          <div className="auth-form-group">
+            <label className="auth-form-label" htmlFor="password">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              className="auth-form-input" 
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              fullWidth
+              required
             />
-            <ForgotPassword to="/forgot-password">Forgot password?</ForgotPassword>
           </div>
-          
-          <Button 
-            type="submit" 
-            fullWidth 
-            isLoading={isLoading}
-            disabled={isLoading}
-          >
-            Sign In
-          </Button>
-        </LoginForm>
-        
-        <RegisterLink>
-          Don't have an account? <Link to="/register">Sign up</Link>
-        </RegisterLink>
-      </LoginCard>
-    </LoginContainer>
+
+          {/* Submit Button */}
+          <div className="auth-actions">
+            <button 
+              type="submit" 
+              className={`auth-submit-btn ${isLoading ? 'loading' : ''}`}
+              disabled={isLoading}
+            >
+              {isLoading ? '' : 'Sign In'}
+            </button>
+          </div>
+
+        </form>
+
+        {/* Auth Toggle */}
+        <div className="auth-toggle">
+          <span className="auth-toggle-text">Don't have an account?</span>
+          <Link to="/register" className="auth-toggle-link">Sign up for free</Link>
+        </div>
+
+      </div>
+    </div>
   );
 };

@@ -1,102 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { motion, HTMLMotionProps } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-
-const RegisterContainer = styled.div`
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 90% 20%, rgba(239, 118, 122, 0.15) 0%, rgba(255, 255, 255, 0) 80%);
-    z-index: -1;
-  }
-`;
-
-const RegisterCard = styled(motion.div)<HTMLMotionProps<'div'>>`
-  background-color: var(--color-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  width: 100%;
-  max-width: 420px;
-  padding: var(--space-8);
-  
-  @media (max-width: 480px) {
-    padding: var(--space-6);
-  }
-`;
-
-const RegisterHeader = styled.div`
-  text-align: center;
-  margin-bottom: var(--space-6);
-`;
-
-const LogoText = styled.h1`
-  font-family: var(--font-sora);
-  font-size: var(--font-3xl);
-  margin-bottom: var(--space-2);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-`;
-
-const SubTitle = styled.p`
-  color: var(--color-text-light);
-  font-size: var(--font-md);
-`;
-
-const RegisterForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-`;
-
-const InputLabel = styled.label`
-  font-size: var(--font-sm);
-  color: var(--color-text-light);
-  margin-bottom: var(--space-1);
-`;
-
-const FormError = styled.div`
-  color: #D32F2F;
-  font-size: var(--font-sm);
-  font-weight: 600;
-  padding: var(--space-3);
-  background-color: rgba(211, 47, 47, 0.1);
-  border: 1px solid rgba(211, 47, 47, 0.3);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-4);
-  text-align: center;
-`;
-
-const LoginLink = styled.div`
-  text-align: center;
-  margin-top: var(--space-6);
-  font-size: var(--font-sm);
-  color: var(--color-text-light);
-  
-  a {
-    color: var(--color-primary);
-    font-weight: 500;
-    
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
+import '../../styles/pages/auth.css';
 
 export const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -148,86 +53,112 @@ export const RegisterPage: React.FC = () => {
   };
   
   return (
-    <RegisterContainer>
-      <RegisterCard
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <RegisterHeader>
-          <LogoText>Generia</LogoText>
-          <SubTitle>Create your account</SubTitle>
-        </RegisterHeader>
+    <div className="auth-container">
+      <div className="auth-card">
         
-        {(error || formError) && (
-          <FormError>
-            {formError || error}
-          </FormError>
-        )}
-        
-        <RegisterForm onSubmit={handleSubmit}>
-          <div>
-            <InputLabel htmlFor="username">Username</InputLabel>
-            <Input
-              id="username"
-              type="text"
+        {/* Auth Header */}
+        <div className="auth-header">
+          <div className="auth-logo">
+            <div className="auth-logo-icon"></div>
+            <span className="auth-logo-text">Generia</span>
+          </div>
+          <h1 className="auth-title">Create your account</h1>
+          <p className="auth-subtitle">Join Generia and start exploring infinite virtual worlds powered by AI</p>
+        </div>
+
+        {/* Register Form */}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          
+          {/* General Error Message */}
+          {(error || formError) && (
+            <div className="auth-error-message show" style={{textAlign: 'center', marginBottom: 'var(--spacing-4)'}}>
+              {formError || error}
+            </div>
+          )}
+          
+          {/* Username Field */}
+          <div className="auth-form-group">
+            <label className="auth-form-label" htmlFor="username">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              className="auth-form-input" 
+              placeholder="Choose a unique username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Choose a username"
-              fullWidth
+              required
+              minLength={3}
+              maxLength={20}
             />
           </div>
-          
-          <div>
-            <InputLabel htmlFor="email">Email</InputLabel>
-            <Input
-              id="email"
-              type="email"
+
+          {/* Email Field */}
+          <div className="auth-form-group">
+            <label className="auth-form-label" htmlFor="email">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              className="auth-form-input" 
+              placeholder="Enter your email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              fullWidth
+              required
             />
           </div>
-          
-          <div>
-            <InputLabel htmlFor="password">Password</InputLabel>
-            <Input
-              id="password"
-              type="password"
+
+          {/* Password Field */}
+          <div className="auth-form-group">
+            <label className="auth-form-label" htmlFor="password">Password</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              className="auth-form-input" 
+              placeholder="Create a strong password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              fullWidth
+              required
+              minLength={8}
             />
           </div>
-          
-          <div>
-            <InputLabel htmlFor="confirmPassword">Confirm Password</InputLabel>
-            <Input
-              id="confirmPassword"
-              type="password"
+
+          {/* Confirm Password Field */}
+          <div className="auth-form-group">
+            <label className="auth-form-label" htmlFor="confirm-password">Confirm Password</label>
+            <input 
+              type="password" 
+              id="confirm-password" 
+              name="confirm-password" 
+              className="auth-form-input" 
+              placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              fullWidth
+              required
             />
           </div>
-          
-          <Button 
-            type="submit" 
-            fullWidth 
-            isLoading={isLoading}
-            disabled={isLoading}
-          >
-            Create Account
-          </Button>
-        </RegisterForm>
-        
-        <LoginLink>
-          Already have an account? <Link to="/login">Sign in</Link>
-        </LoginLink>
-      </RegisterCard>
-    </RegisterContainer>
+
+          {/* Submit Button */}
+          <div className="auth-actions">
+            <button 
+              type="submit" 
+              className={`auth-submit-btn ${isLoading ? 'loading' : ''}`}
+              disabled={isLoading}
+            >
+              {isLoading ? '' : 'Create Account'}
+            </button>
+          </div>
+
+        </form>
+
+        {/* Auth Toggle */}
+        <div className="auth-toggle">
+          <span className="auth-toggle-text">Already have an account?</span>
+          <Link to="/login" className="auth-toggle-link">Sign in</Link>
+        </div>
+
+      </div>
+    </div>
   );
 };

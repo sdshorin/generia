@@ -1,196 +1,33 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { Layout } from '../../components/layout/Layout';
-import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { TextArea } from '../../components/ui/TextArea';
 import { Loader } from '../../components/ui/Loader';
-import { Avatar } from '../../components/ui/Avatar';
+import { CommentCard } from '../../components/cards/CommentCard';
 import { useWorld } from '../../hooks/useWorld';
 import { useAuth } from '../../hooks/useAuth';
 import { postsAPI, interactionsAPI } from '../../api/services';
 import { Post, Comment } from '../../types';
+import { formatNumber } from '../../utils/formatters';
+import '../../styles/pages/feed.css';
 
-const PageContainer = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-`;
-
-const BackButton = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-light);
-  text-decoration: none;
-  margin-bottom: var(--space-6);
-  font-size: var(--font-sm);
-  
-  &:hover {
-    color: var(--color-text);
-  }
-`;
-
-const PostContainer = styled(Card)`
-  margin-bottom: var(--space-6);
-  overflow: hidden;
-`;
-
-const PostMedia = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  background-color: var(--color-background);
-  
-  img {
-    max-width: 100%;
-    max-height: 600px;
-    object-fit: contain;
-  }
-`;
-
-const PostHeader = styled.div`
-  display: flex;
-  align-items: center;
-  padding: var(--space-4);
-`;
-
-const UserInfo = styled.div`
-  margin-left: var(--space-3);
-  flex: 1;
-`;
-
-const Username = styled.div`
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  
-  .ai-badge {
-    margin-left: var(--space-2);
-    font-size: var(--font-xs);
-    background-color: var(--color-secondary);
-    color: white;
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-  }
-`;
-
-const Timestamp = styled.div`
-  font-size: var(--font-xs);
-  color: var(--color-text-lighter);
-`;
-
-const PostCaption = styled.div`
-  padding: var(--space-4);
-  padding-top: 0;
-  font-size: var(--font-md);
-  line-height: 1.5;
-  white-space: pre-wrap;
-`;
-
-const InteractionsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
-`;
-
-const LikeButton = styled.button<{ $isLiked: boolean }>`
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  color: ${props => props.$isLiked ? 'var(--color-accent)' : 'var(--color-text-light)'};
-  font-size: var(--font-sm);
-  cursor: pointer;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  
-  &:hover {
-    background-color: rgba(239, 118, 122, 0.1);
-  }
-  
-  svg {
-    margin-right: var(--space-2);
-  }
-`;
-
-const CommentButton = styled.div`
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  color: var(--color-text-light);
-  font-size: var(--font-sm);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  margin-left: var(--space-4);
-  
-  svg {
-    margin-right: var(--space-2);
-  }
-`;
-
-const CommentsSection = styled(Card)`
-  margin-bottom: var(--space-6);
-`;
-
-const CommentsList = styled.div`
-  margin-top: var(--space-4);
-`;
-
-const CommentItem = styled.div`
-  display: flex;
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-const CommentContent = styled.div`
-  margin-left: var(--space-3);
-  flex: 1;
-`;
-
-const CommentText = styled.div`
-  font-size: var(--font-sm);
-  margin-top: var(--space-1);
-  white-space: pre-wrap;
-`;
-
-const CommentForm = styled.form`
-  margin-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
-  padding-top: var(--space-4);
-`;
-
-const ErrorMessage = styled.div`
-  color: var(--color-accent);
-  background-color: rgba(239, 118, 122, 0.1);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-4);
-`;
-
-const NoCommentsMessage = styled.div`
-  text-align: center;
-  padding: var(--space-6);
-  color: var(--color-text-light);
-`;
-
+// Helper functions and icons
 const HeartIcon = ({ filled }: { filled: boolean }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+    <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z"></path>
   </svg>
 );
 
 const CommentIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"></path>
+  </svg>
+);
+
+const SaveIcon = ({ filled }: { filled: boolean }) => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+    <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z"></path>
   </svg>
 );
 
@@ -206,14 +43,17 @@ export const ViewPostPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isCommentLoading, setIsCommentLoading] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   
   // Refs to prevent duplicate requests
   const isLoadingRef = useRef(false);
   const postIdRef = useRef<string | null>(null);
   const worldIdRef = useRef<string | null>(null);
+  const commentTextareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Load world and post data
   useEffect(() => {
@@ -275,6 +115,21 @@ export const ViewPostPage: React.FC = () => {
       setIsLiking(false);
     }
   };
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+    // В реальном приложении здесь был бы API запрос
+  };
+
+  const focusCommentInput = () => {
+    if (commentTextareaRef.current) {
+      commentTextareaRef.current.focus();
+    }
+  };
+
+  const handleGoToCharacter = (characterId: string) => {
+    navigate(`/characters/${characterId}`);
+  };
   
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -320,134 +175,211 @@ export const ViewPostPage: React.FC = () => {
   if (!post || !currentWorld) {
     return (
       <Layout>
-        <PageContainer>
-          <ErrorMessage>
-            {error || "Post not found or you don't have access."}
-          </ErrorMessage>
-          <Button onClick={() => navigate(`/worlds/${worldId}/feed`)}>
-            Return to Feed
-          </Button>
-        </PageContainer>
+        <div className="container">
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p style={{ color: 'var(--color-error)', marginBottom: '1rem' }}>
+              {error || "Post not found or you don't have access."}
+            </p>
+            <Button onClick={() => navigate(`/worlds/${worldId}/feed`)}>
+              Return to Feed
+            </Button>
+          </div>
+        </div>
       </Layout>
     );
   }
   
   return (
     <Layout>
-      <PageContainer>
-        <BackButton to={`/worlds/${worldId}/feed`}>
-          ← Back to {currentWorld.name} feed
-        </BackButton>
-        
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        
-        <PostContainer>
-          {(post.media_url || post.image_url) && (
-            <PostMedia>
-              <img 
-                src={post.media_url || post.image_url} 
-                alt="Post content" 
-                loading="lazy" 
+      {/* MAIN CONTENT */}
+      <div className="feed-container">
+        <div className="post-detail-container">
+          
+          {error && (
+            <div style={{
+              backgroundColor: 'rgba(239, 118, 122, 0.1)',
+              color: 'var(--color-accent)',
+              padding: 'var(--space-4)',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: 'var(--space-6)'
+            }}>
+              {error}
+            </div>
+          )}
+          
+          {/* POST CARD */}
+          <div className="post-detail-card">
+            
+            {/* Post Header */}
+            <div className="post-detail-header">
+              <div 
+                className="post-detail-avatar" 
+                style={{
+                  backgroundImage: `url(${post.avatar_url || '/no-image.jpg'})`
+                }}
+                onClick={() => handleGoToCharacter(post.character_id)}
               />
-            </PostMedia>
-          )}
-          
-          <PostHeader>
-            <Avatar name={post.display_name || ''} isAi={post.is_ai} />
-            <UserInfo>
-              <Username>
-                {post.display_name}
-                {post.is_ai && <span className="ai-badge">AI</span>}
-              </Username>
-              <Timestamp>{formatRelativeTime(post.created_at)}</Timestamp>
-            </UserInfo>
-          </PostHeader>
-          
-          {post.caption && (
-            <PostCaption>{post.caption}</PostCaption>
-          )}
-          
-          <InteractionsContainer>
-            <AnimatePresence initial={false}>
-              <LikeButton 
-                $isLiked={isLiked} 
-                onClick={handleLike}
-                disabled={isLiking}
-              >
-                <motion.div
-                  key={isLiked ? 'liked' : 'unliked'}
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.8 }}
-                  transition={{ duration: 0.2 }}
+              <div className="post-detail-author-info">
+                <p 
+                  className="post-detail-author-name" 
+                  onClick={() => handleGoToCharacter(post.character_id)}
+                >
+                  {post.display_name}
+                </p>
+                <p className="post-detail-author-meta">
+                  {post.is_ai ? 'AI Character' : 'User'} • {currentWorld.name}
+                </p>
+                <p className="post-detail-time">
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                </p>
+              </div>
+              <button className="post-menu-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            
+            {/* Post Image */}
+            {(post.media_url || post.image_url) && (
+              <div 
+                className="post-detail-image" 
+                style={{
+                  backgroundImage: `url(${post.media_url || post.image_url})`
+                }}
+              />
+            )}
+            
+            {/* Post Actions and Caption */}
+            <div className="post-detail-content">
+              {/* Action Buttons */}
+              <div className="post-detail-actions">
+                <button 
+                  className={`post-detail-action-btn like-btn ${isLiked ? 'liked' : ''}`} 
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  style={{ color: isLiked ? '#ef4444' : undefined }}
                 >
                   <HeartIcon filled={isLiked} />
-                </motion.div>
-                {likesCount} likes
-              </LikeButton>
-            </AnimatePresence>
-            
-            <CommentButton>
-              <CommentIcon />
-              {post.comments_count} comments
-            </CommentButton>
-          </InteractionsContainer>
-        </PostContainer>
-        
-        <CommentsSection>
-          <h3 style={{ fontSize: 'var(--font-lg)', padding: 'var(--space-4)' }}>
-            Comments
-          </h3>
-          
-          {isAuthenticated && (
-            <CommentForm onSubmit={handleAddComment}>
-              <TextArea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                rows={2}
-              />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-3)' }}>
-                <Button 
-                  type="submit" 
-                  disabled={!newComment.trim() || isCommentLoading}
-                  isLoading={isCommentLoading}
+                </button>
+                <button className="post-detail-action-btn" onClick={focusCommentInput}>
+                  <CommentIcon />
+                </button>
+                <button 
+                  className={`post-detail-action-btn post-detail-save-btn ${isSaved ? 'saved' : ''}`} 
+                  onClick={handleSave}
+                  style={{ color: isSaved ? 'currentColor' : undefined }}
                 >
-                  Post
-                </Button>
+                  <SaveIcon filled={isSaved} />
+                </button>
               </div>
-            </CommentForm>
-          )}
-          
-          <CommentsList>
+              
+              {/* Likes */}
+              <p className="post-detail-likes">{formatNumber(likesCount)} likes</p>
+              
+              {/* Caption */}
+              {post.caption && (
+                <div className="post-detail-caption">
+                  <p className="post-detail-caption-text">
+                    <span className="post-detail-caption-author">{post.display_name}</span> {post.caption}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* COMMENTS SECTION */}
+          <div className="comments-section">
+            <h3 className="comments-title">Comments</h3>
+            
+            {/* Comments List */}
             {comments.length > 0 ? (
               comments.map((comment) => (
-                <CommentItem key={comment.id}>
-                  <Avatar 
-                    name={comment.display_name || ''} 
-                    isAi={comment.is_ai} 
-                    size="sm" 
-                  />
-                  <CommentContent>
-                    <Username>
-                      {comment.display_name}
-                      {comment.is_ai && <span className="ai-badge">AI</span>}
-                      <Timestamp style={{ marginLeft: 'var(--space-2)' }}>
-                        {formatRelativeTime(comment.created_at)}
-                      </Timestamp>
-                    </Username>
-                    <CommentText>{comment.text}</CommentText>
-                  </CommentContent>
-                </CommentItem>
+                <CommentCard 
+                  key={comment.id} 
+                  comment={comment} 
+                  currentWorldId={worldId || ''}
+                />
               ))
             ) : (
-              <NoCommentsMessage>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: 'var(--space-6)', 
+                color: 'var(--color-text-secondary)' 
+              }}>
                 No comments yet. Be the first to add one!
-              </NoCommentsMessage>
+              </div>
             )}
-          </CommentsList>
-        </CommentsSection>
-      </PageContainer>
+            
+            {/* Add Comment Form */}
+            {isAuthenticated && (
+              <div className="add-comment-form">
+                <div className="comment-form-header">
+                  <div 
+                    className="user-avatar" 
+                    style={{
+                      backgroundImage: `url(${user?.avatar_url || '/no-image.jpg'})`
+                    }}
+                  />
+                  <div className="comment-form-content">
+                    <textarea 
+                      ref={commentTextareaRef}
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      rows={1}
+                      className="comment-textarea"
+                      style={{
+                        height: 'auto',
+                        minHeight: '2.5rem'
+                      }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = 'auto';
+                        target.style.height = target.scrollHeight + 'px';
+                        
+                        // Show/hide actions based on content
+                        const actions = target.parentElement?.querySelector('.comment-form-actions') as HTMLElement;
+                        if (actions) {
+                          actions.style.display = target.value.trim() ? 'flex' : 'none';
+                        }
+                      }}
+                    />
+                    <div 
+                      className="comment-form-actions" 
+                      style={{ 
+                        display: newComment.trim() ? 'flex' : 'none',
+                        justifyContent: 'flex-end',
+                        gap: 'var(--space-2)',
+                        marginTop: 'var(--space-3)'
+                      }}
+                    >
+                      <button 
+                        className="btn btn-secondary btn-sm" 
+                        onClick={() => setNewComment('')}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className="btn btn-primary btn-sm" 
+                        onClick={handleAddComment}
+                        disabled={!newComment.trim() || isCommentLoading}
+                        type="button"
+                      >
+                        {isCommentLoading ? 'Posting...' : 'Post'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+        </div>
+      </div>
     </Layout>
   );
 };

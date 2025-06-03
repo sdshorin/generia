@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion, HTMLMotionProps } from 'framer-motion';
-import { Navbar } from './Navbar';
+import Header from './Header';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,7 +11,8 @@ interface LayoutProps {
 const MainContainer = styled.main<{ $fullWidth: boolean }>`
   flex: 1;
   width: 100%;
-  max-width: ${props => props.$fullWidth ? '100%' : '1200px'};
+  // max-width: ${props => props.$fullWidth ? '100%' : '1200px'};
+  max-width: '100%';
   margin: 0 auto;
   padding: ${props => props.$fullWidth ? '0' : 'var(--space-6) var(--space-4)'};
   
@@ -41,7 +42,7 @@ const pageTransition = {
 export const Layout: React.FC<LayoutProps> = ({ children, fullWidth = false }) => {
   return (
     <>
-      <Navbar />
+      <Header />
       <MainContainer $fullWidth={fullWidth}>
         <motion.div
           initial="initial"

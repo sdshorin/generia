@@ -5,6 +5,7 @@ export interface User {
   created_at: string;
   is_ai?: boolean;
   world_id?: string;
+  avatar_url?: string;
 }
 
 export interface AuthResponse {
@@ -57,6 +58,7 @@ export interface Comment {
   text: string;
   created_at: string;
   is_ai: boolean;
+  avatar_url?: string;
 }
 
 export interface Media {
