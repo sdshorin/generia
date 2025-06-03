@@ -24,6 +24,7 @@ const (
 	WorldService_GetWorlds_FullMethodName           = "/world.WorldService/GetWorlds"
 	WorldService_JoinWorld_FullMethodName           = "/world.WorldService/JoinWorld"
 	WorldService_UpdateWorldImage_FullMethodName    = "/world.WorldService/UpdateWorldImage"
+	WorldService_UpdateWorldParams_FullMethodName   = "/world.WorldService/UpdateWorldParams"
 	WorldService_GetGenerationStatus_FullMethodName = "/world.WorldService/GetGenerationStatus"
 	WorldService_HealthCheck_FullMethodName         = "/world.WorldService/HealthCheck"
 )
@@ -42,6 +43,8 @@ type WorldServiceClient interface {
 	JoinWorld(ctx context.Context, in *JoinWorldRequest, opts ...grpc.CallOption) (*JoinWorldResponse, error)
 	// Update world image
 	UpdateWorldImage(ctx context.Context, in *UpdateWorldImageRequest, opts ...grpc.CallOption) (*UpdateWorldImageResponse, error)
+	// Update generated world parameters
+	UpdateWorldParams(ctx context.Context, in *UpdateWorldParamsRequest, opts ...grpc.CallOption) (*UpdateWorldParamsResponse, error)
 	// Get world generation status
 	GetGenerationStatus(ctx context.Context, in *GetGenerationStatusRequest, opts ...grpc.CallOption) (*GetGenerationStatusResponse, error)
 	// Health check
@@ -106,6 +109,16 @@ func (c *worldServiceClient) UpdateWorldImage(ctx context.Context, in *UpdateWor
 	return out, nil
 }
 
+func (c *worldServiceClient) UpdateWorldParams(ctx context.Context, in *UpdateWorldParamsRequest, opts ...grpc.CallOption) (*UpdateWorldParamsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateWorldParamsResponse)
+	err := c.cc.Invoke(ctx, WorldService_UpdateWorldParams_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *worldServiceClient) GetGenerationStatus(ctx context.Context, in *GetGenerationStatusRequest, opts ...grpc.CallOption) (*GetGenerationStatusResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetGenerationStatusResponse)
@@ -140,6 +153,8 @@ type WorldServiceServer interface {
 	JoinWorld(context.Context, *JoinWorldRequest) (*JoinWorldResponse, error)
 	// Update world image
 	UpdateWorldImage(context.Context, *UpdateWorldImageRequest) (*UpdateWorldImageResponse, error)
+	// Update generated world parameters
+	UpdateWorldParams(context.Context, *UpdateWorldParamsRequest) (*UpdateWorldParamsResponse, error)
 	// Get world generation status
 	GetGenerationStatus(context.Context, *GetGenerationStatusRequest) (*GetGenerationStatusResponse, error)
 	// Health check
@@ -168,6 +183,9 @@ func (UnimplementedWorldServiceServer) JoinWorld(context.Context, *JoinWorldRequ
 }
 func (UnimplementedWorldServiceServer) UpdateWorldImage(context.Context, *UpdateWorldImageRequest) (*UpdateWorldImageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorldImage not implemented")
+}
+func (UnimplementedWorldServiceServer) UpdateWorldParams(context.Context, *UpdateWorldParamsRequest) (*UpdateWorldParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorldParams not implemented")
 }
 func (UnimplementedWorldServiceServer) GetGenerationStatus(context.Context, *GetGenerationStatusRequest) (*GetGenerationStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGenerationStatus not implemented")
@@ -286,6 +304,24 @@ func _WorldService_UpdateWorldImage_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorldService_UpdateWorldParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorldParamsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorldServiceServer).UpdateWorldParams(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorldService_UpdateWorldParams_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorldServiceServer).UpdateWorldParams(ctx, req.(*UpdateWorldParamsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _WorldService_GetGenerationStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGenerationStatusRequest)
 	if err := dec(in); err != nil {
@@ -348,6 +384,10 @@ var WorldService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateWorldImage",
 			Handler:    _WorldService_UpdateWorldImage_Handler,
+		},
+		{
+			MethodName: "UpdateWorldParams",
+			Handler:    _WorldService_UpdateWorldParams_Handler,
 		},
 		{
 			MethodName: "GetGenerationStatus",

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	proto "google.golang.org/protobuf/proto"
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
@@ -128,6 +130,9 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		Prompt:      req.Prompt,
 		CreatorID:   req.UserId,
 		Status:      models.WorldStatusActive,
+		Params:      json.RawMessage("{}"), // Initialize with empty JSON object
+		UsersCount:  int(charactersCount),  // Store planned number of characters
+		PostsCount:  int(postsCount),       // Store planned number of posts
 	}
 
 	err = s.worldRepo.Create(ctx, world)
@@ -146,14 +151,9 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		return nil, status.Errorf(codes.Internal, "failed to add creator to world")
 	}
 
-	// Get world stats
-	usersCount, postsCountStats, err := s.worldRepo.GetWorldStats(ctx, world.ID)
-	if err != nil {
-		logger.Logger.Error("Failed to get world stats", zap.Error(err), zap.String("world_id", world.ID))
-		// Not a critical error, continue with zeros
-		usersCount = 0
-		postsCountStats = 0
-	}
+	// Use the planned values from the world model itself
+	usersCount := world.UsersCount
+	postsCountStats := world.PostsCount
 
 	// Create and enqueue content generation tasks with specified parameters
 	s.createInitialGenerationTasks(ctx, world.ID, int(charactersCount), int(postsCount))
@@ -172,6 +172,7 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 		IsJoined:         true,
+		Params:           proto.String(string(world.Params)),
 	}, nil
 }
 
@@ -193,14 +194,9 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		return nil, status.Errorf(codes.NotFound, "world not found")
 	}
 
-	// Get world stats
-	usersCount, postsCount, err := s.worldRepo.GetWorldStats(ctx, world.ID)
-	if err != nil {
-		logger.Logger.Error("Failed to get world stats", zap.Error(err), zap.String("world_id", world.ID))
-		// Not a critical error, continue with zeros
-		usersCount = 0
-		postsCount = 0
-	}
+	// Use the planned values from the world model itself
+	usersCount := world.UsersCount
+	postsCount := world.PostsCount
 
 	// Check if user has joined this world
 	isJoined := false
@@ -276,6 +272,7 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		IsJoined:         isJoined,
 		ImageUrl:         imageUrl,
 		IconUrl:          iconUrl,
+		Params:           proto.String(string(world.Params)),
 	}, nil
 }
 
@@ -311,14 +308,9 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 	// Build response
 	worldResponses := make([]*worldpb.WorldResponse, len(worlds))
 	for i, world := range worlds {
-		// Get world stats
-		usersCount, postsCount, err := s.worldRepo.GetWorldStats(ctx, world.ID)
-		if err != nil {
-			logger.Logger.Error("Failed to get world stats", zap.Error(err), zap.String("world_id", world.ID))
-			// Not a critical error, continue with zeros
-			usersCount = 0
-			postsCount = 0
-		}
+		// Use the planned values from the world model itself
+		usersCount := world.UsersCount
+		postsCount := world.PostsCount
 
 		// Get image URL if image UUID exists
 		var imageUrl string
@@ -377,6 +369,7 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			IsJoined:         true, // User has access since this is from user-specific query
 			ImageUrl:         imageUrl,
 			IconUrl:          iconUrl,
+			Params:           proto.String(string(world.Params)),
 		}
 	}
 
@@ -493,6 +486,53 @@ func (s *WorldService) UpdateWorldImage(ctx context.Context, req *worldpb.Update
 		Success: true,
 		Message: "Successfully updated world images",
 	}, nil
+}
+
+// UpdateWorldParams saves generated world parameters
+func (s *WorldService) UpdateWorldParams(ctx context.Context, req *worldpb.UpdateWorldParamsRequest) (*worldpb.UpdateWorldParamsResponse, error) {
+	if req.WorldId == "" || req.Params == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "world_id and params are required")
+	}
+
+	world, err := s.worldRepo.GetByID(ctx, req.WorldId)
+	if err != nil {
+		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to get world")
+	}
+
+	if world == nil {
+		return nil, status.Errorf(codes.NotFound, "world not found")
+	}
+
+	// Update basic fields
+	world.Params = json.RawMessage(req.Params)
+	world.UpdatedAt = time.Now()
+
+	// Update name if provided
+	if req.Name != "" {
+		world.Name = req.Name
+		logger.Logger.Info("Updating world name", 
+			zap.String("world_id", req.WorldId), 
+			zap.String("new_name", req.Name))
+	}
+
+	// Update actual counts
+	world.UsersCount = int(req.UsersCount)
+	world.PostsCount = int(req.PostsCount)
+
+	if err := s.worldRepo.Update(ctx, world); err != nil {
+		logger.Logger.Error("Failed to update world params", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to update world")
+	}
+
+	// Log what was updated
+	logger.Logger.Info("Successfully updated world params",
+		zap.String("world_id", req.WorldId),
+		zap.Bool("name_updated", req.Name != ""),
+		zap.Int32("users_count", req.UsersCount),
+		zap.Int32("posts_count", req.PostsCount))
+
+	return &worldpb.UpdateWorldParamsResponse{Success: true, Message: "params updated"}, nil
 }
 
 // GetGenerationStatus handles getting the generation status of a world

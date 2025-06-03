@@ -290,7 +290,10 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
     @activity.defn(name="save_world_parameters")
     async def save_world_parameters(
         world_data: Dict[str, Any],
-        world_id: str
+        world_id: str,
+        users_count:int,
+        posts_count: int
+
     ) -> Dict[str, Any]:
         """
         Сохраняет параметры мира в базу данных
@@ -305,14 +308,23 @@ def create_activity_functions(resource_manager) -> Dict[str, Callable]:
                 now = datetime.now(timezone.utc)
                 
                 world_description = WorldDescription(
-                    **world_data,
-                    id=world_id,
-                    created_at=now,
-                    updated_at=now
+                    **world_data, id=world_id, created_at=now, updated_at=now
                 )
-                
-                await resource_manager.db_manager.save_world_parameters(world_description)
-                
+
+                await resource_manager.db_manager.save_world_parameters(
+                    world_description
+                )
+
+                # Also store params in world-service
+                await resource_manager.service_client.update_world_params(
+                    world_id=world_id,
+                    params=world_data,
+                    name=world_data.get("name", ""),
+                    users_count=users_count,  # Will be updated when characters are created
+                    posts_count=posts_count,  # Will be updated when posts are created
+                    task_id=info.activity_id,  # Use activity_id instead of task_token
+                )
+
                 # # logger.info(f"Successfully saved world parameters for {world_id}")
                 
                 return {"world_id": world_id, "saved": True}

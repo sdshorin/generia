@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS worlds (
     status VARCHAR(20) NOT NULL DEFAULT 'active', -- active, archived
     image_uuid UUID, -- UUID of the background image
     icon_uuid UUID, -- UUID of the world icon image
+    params JSONB,
+    users_count INTEGER DEFAULT 0, -- Actual number of AI users/characters
+    posts_count INTEGER DEFAULT 0, -- Actual number of AI posts
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

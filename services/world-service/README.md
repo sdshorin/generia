@@ -90,8 +90,7 @@ type WorldRepository interface {
     GetUserWorlds(ctx context.Context, userID string) ([]*models.UserWorld, error)
     CheckUserWorld(ctx context.Context, userID, worldID string) (bool, error)
 
-    // World statistics
-    GetWorldStats(ctx context.Context, worldID string) (int, int, error) // usersCount, postsCount, error
+    
 }
 ```
 
@@ -158,7 +157,7 @@ The service provides several operations for managing worlds:
 2. **Get Worlds**: Retrieve a paginated list of worlds a user has access to, with filtering by status
 3. **Update World Status**: Change a world's status (active/archived) - currently implemented as an internal method
 
-All world retrieval operations attempt to populate world statistics (user and post counts) through `GetWorldStats`, though this functionality is currently a placeholder.
+
 
 Reference: [internal/service/world_service.go:GetWorld](internal/service/world_service.go), [internal/service/world_service.go:GetWorlds](internal/service/world_service.go)
 
@@ -220,6 +219,7 @@ CREATE TABLE worlds (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     prompt TEXT NOT NULL,
+    params JSONB,
     creator_id UUID NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'active',
     generation_status VARCHAR(255) NOT NULL DEFAULT '',
