@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS worlds (
     status VARCHAR(20) NOT NULL DEFAULT 'active', -- active, archived
     image_uuid UUID, -- UUID of the background image
     icon_uuid UUID, -- UUID of the world icon image
+    params JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

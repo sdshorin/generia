@@ -30,6 +30,7 @@ export interface World {
   is_active?: boolean;
   image_url?: string;
   icon_url?: string;
+  params?: any;
 }
 
 export interface Post {
@@ -99,4 +100,4 @@ export interface WorldGenerationStatus {
   updated_at: string;
 }
 
-export * from './character';
+export * from "./character";

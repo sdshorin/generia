@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	proto "google.golang.org/protobuf/proto"
 
 	authpb "github.com/sdshorin/generia/api/grpc/auth"
 	mediapb "github.com/sdshorin/generia/api/grpc/media"
@@ -172,6 +174,7 @@ func (s *WorldService) CreateWorld(ctx context.Context, req *worldpb.CreateWorld
 		CreatedAt:        world.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        world.UpdatedAt.Format(time.RFC3339),
 		IsJoined:         true,
+		Params:           proto.String(string(world.Params)),
 	}, nil
 }
 
@@ -276,6 +279,7 @@ func (s *WorldService) GetWorld(ctx context.Context, req *worldpb.GetWorldReques
 		IsJoined:         isJoined,
 		ImageUrl:         imageUrl,
 		IconUrl:          iconUrl,
+		Params:           proto.String(string(world.Params)),
 	}, nil
 }
 
@@ -377,6 +381,7 @@ func (s *WorldService) GetWorlds(ctx context.Context, req *worldpb.GetWorldsRequ
 			IsJoined:         true, // User has access since this is from user-specific query
 			ImageUrl:         imageUrl,
 			IconUrl:          iconUrl,
+			Params:           proto.String(string(world.Params)),
 		}
 	}
 
@@ -493,6 +498,33 @@ func (s *WorldService) UpdateWorldImage(ctx context.Context, req *worldpb.Update
 		Success: true,
 		Message: "Successfully updated world images",
 	}, nil
+}
+
+// UpdateWorldParams saves generated world parameters
+func (s *WorldService) UpdateWorldParams(ctx context.Context, req *worldpb.UpdateWorldParamsRequest) (*worldpb.UpdateWorldParamsResponse, error) {
+	if req.WorldId == "" || req.Params == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "world_id and params are required")
+	}
+
+	world, err := s.worldRepo.GetByID(ctx, req.WorldId)
+	if err != nil {
+		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to get world")
+	}
+
+	if world == nil {
+		return nil, status.Errorf(codes.NotFound, "world not found")
+	}
+
+	world.Params = json.RawMessage(req.Params)
+	world.UpdatedAt = time.Now()
+
+	if err := s.worldRepo.Update(ctx, world); err != nil {
+		logger.Logger.Error("Failed to update world params", zap.Error(err), zap.String("world_id", req.WorldId))
+		return nil, status.Errorf(codes.Internal, "failed to update world")
+	}
+
+	return &worldpb.UpdateWorldParamsResponse{Success: true, Message: "params updated"}, nil
 }
 
 // GetGenerationStatus handles getting the generation status of a world

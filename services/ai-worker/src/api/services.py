@@ -28,14 +28,14 @@ except ImportError:
     import importlib.util
 
     # Get the absolute path to the grpc directory
-    grpc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'grpc'))
+    grpc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "grpc"))
 
     # Add to Python path if not already there
     if grpc_dir not in sys.path:
         sys.path.append(grpc_dir)
 
     # Import modules using importlib
-    for service in ['character', 'media', 'post', 'world']:
+    for service in ["character", "media", "post", "world"]:
         # Create the full path to the module
         pb2_path = os.path.join(grpc_dir, service, f"{service}_pb2.py")
         grpc_pb2_path = os.path.join(grpc_dir, service, f"{service}_pb2_grpc.py")
@@ -43,6 +43,7 @@ except ImportError:
         # Check if files exist
         if not os.path.exists(pb2_path) or not os.path.exists(grpc_pb2_path):
             import logging
+
             logging.error(f"Missing gRPC files for {service} service")
             continue
 
@@ -51,13 +52,16 @@ except ImportError:
         pb2_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(pb2_module)
 
-        spec = importlib.util.spec_from_file_location(f"{service}_pb2_grpc", grpc_pb2_path)
+        spec = importlib.util.spec_from_file_location(
+            f"{service}_pb2_grpc", grpc_pb2_path
+        )
         grpc_pb2_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(grpc_pb2_module)
 
         # Assign modules to global namespace
         globals()[f"{service}_pb2"] = pb2_module
         globals()[f"{service}_pb2_grpc"] = grpc_pb2_module
+
 
 class ServiceClient:
     """
@@ -105,7 +109,7 @@ class ServiceClient:
             self.character_channel,
             self.media_channel,
             self.post_channel,
-            self.world_channel
+            self.world_channel,
         ]
 
         for channel in channels:
@@ -135,7 +139,7 @@ class ServiceClient:
         duration_ms: int,
         error: Optional[str] = None,
         task_id: Optional[str] = None,
-        world_id: Optional[str] = None
+        world_id: Optional[str] = None,
     ):
         """Log gRPC request to database"""
         if not self.db_manager:
@@ -164,7 +168,7 @@ class ServiceClient:
             response_data=response_dict,
             error=error,
             duration_ms=duration_ms,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         await self.db_manager.log_api_request(log_entry)
@@ -178,7 +182,9 @@ class ServiceClient:
 
             # Create channel and stub
             self.character_channel = grpc.aio.insecure_channel(address)
-            self.character_stub = character_pb2_grpc.CharacterServiceStub(self.character_channel)
+            self.character_stub = character_pb2_grpc.CharacterServiceStub(
+                self.character_channel
+            )
 
             return self.character_stub
         except Exception as e:
@@ -259,7 +265,9 @@ class ServiceClient:
 
     # Character Service methods
 
-    @circuit_breaker(name="character_service", failure_threshold=3, recovery_timeout=60.0)
+    @circuit_breaker(
+        name="character_service", failure_threshold=3, recovery_timeout=60.0
+    )
     @with_retries(max_retries=2)
     async def create_character(
         self,
@@ -267,7 +275,7 @@ class ServiceClient:
         display_name: str,
         meta: Optional[Dict[str, Any]] = None,
         avatar_media_id: Optional[str] = None,
-        task_id: Optional[str] = None
+        task_id: Optional[str] = None,
     ) -> Tuple[str, Dict[str, Any]]:
         """
         Creates a character in the specified world
@@ -311,7 +319,7 @@ class ServiceClient:
                 response_data=response,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             # Convert to dictionary and return
@@ -331,23 +339,23 @@ class ServiceClient:
                     "world_id": world_id,
                     "display_name": display_name,
                     "meta": meta,
-                    "avatar_media_id": avatar_media_id
+                    "avatar_media_id": avatar_media_id,
                 },
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             raise Exception(f"Failed to create character: {str(e)}")
 
-    @circuit_breaker(name="character_service", failure_threshold=3, recovery_timeout=60.0)
+    @circuit_breaker(
+        name="character_service", failure_threshold=3, recovery_timeout=60.0
+    )
     @with_retries(max_retries=2)
     async def get_character(
-        self,
-        character_id: str,
-        task_id: Optional[str] = None
+        self, character_id: str, task_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Gets a character by ID
@@ -364,9 +372,7 @@ class ServiceClient:
 
         try:
             # Prepare request
-            request = character_pb2.GetCharacterRequest(
-                character_id=character_id
-            )
+            request = character_pb2.GetCharacterRequest(character_id=character_id)
 
             # Call gRPC method
             response = await stub.GetCharacter(request)
@@ -379,7 +385,7 @@ class ServiceClient:
                 request_data=request,
                 response_data=response,
                 duration_ms=duration_ms,
-                task_id=task_id
+                task_id=task_id,
             )
 
             # Convert to dictionary and return
@@ -398,12 +404,14 @@ class ServiceClient:
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
-                task_id=task_id
+                task_id=task_id,
             )
 
             raise Exception(f"Failed to get character: {str(e)}")
 
-    @circuit_breaker(name="character_service", failure_threshold=3, recovery_timeout=60.0)
+    @circuit_breaker(
+        name="character_service", failure_threshold=3, recovery_timeout=60.0
+    )
     @with_retries(max_retries=2)
     async def update_character(
         self,
@@ -411,7 +419,7 @@ class ServiceClient:
         display_name: Optional[str] = None,
         avatar_media_id: Optional[str] = None,
         meta: Optional[Dict[str, Any]] = None,
-        task_id: Optional[str] = None
+        task_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Updates a character
@@ -431,9 +439,7 @@ class ServiceClient:
 
         try:
             # Prepare request
-            request = character_pb2.UpdateCharacterRequest(
-                character_id=character_id
-            )
+            request = character_pb2.UpdateCharacterRequest(character_id=character_id)
 
             # Add optional fields
             if display_name is not None:
@@ -456,7 +462,7 @@ class ServiceClient:
                 request_data=request,
                 response_data=response,
                 duration_ms=duration_ms,
-                task_id=task_id
+                task_id=task_id,
             )
 
             # Convert to dictionary and return
@@ -475,12 +481,12 @@ class ServiceClient:
                     "character_id": character_id,
                     "display_name": display_name,
                     "avatar_media_id": avatar_media_id,
-                    "meta": meta
+                    "meta": meta,
                 },
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
-                task_id=task_id
+                task_id=task_id,
             )
 
             raise Exception(f"Failed to update character: {str(e)}")
@@ -497,7 +503,7 @@ class ServiceClient:
         content_type: str,
         size: int,
         media_type_enum: int,
-        task_id: Optional[str] = None
+        task_id: Optional[str] = None,
     ) -> Tuple[str, str, int]:
         """
         Gets a presigned URL for uploading media
@@ -525,7 +531,7 @@ class ServiceClient:
                 filename=filename,
                 content_type=content_type,
                 size=size,
-                media_type=media_type_enum
+                media_type=media_type_enum,
             )
 
             # Call gRPC method
@@ -540,7 +546,7 @@ class ServiceClient:
                 response_data=response,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             return response.media_id, response.upload_url, response.expires_at
@@ -559,13 +565,13 @@ class ServiceClient:
                     "world_id": world_id,
                     "filename": filename,
                     "content_type": content_type,
-                    "size": size
+                    "size": size,
                 },
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             raise Exception(f"Failed to get presigned upload URL: {str(e)}")
@@ -573,9 +579,7 @@ class ServiceClient:
     @circuit_breaker(name="media_service", failure_threshold=3, recovery_timeout=60.0)
     @with_retries(max_retries=2)
     async def confirm_upload(
-        self,
-        media_id: str,
-        task_id: Optional[str] = None
+        self, media_id: str, task_id: Optional[str] = None
     ) -> bool:
         """
         Confirms that a media file has been uploaded
@@ -592,9 +596,7 @@ class ServiceClient:
 
         try:
             # Prepare request
-            request = media_pb2.ConfirmUploadRequest(
-                media_id=media_id
-            )
+            request = media_pb2.ConfirmUploadRequest(media_id=media_id)
 
             # Call gRPC method
             response = await stub.ConfirmUpload(request)
@@ -607,7 +609,7 @@ class ServiceClient:
                 request_data=request,
                 response_data=response,
                 duration_ms=duration_ms,
-                task_id=task_id
+                task_id=task_id,
             )
 
             # Возвращаем булево значение
@@ -615,20 +617,20 @@ class ServiceClient:
 
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
-            error_message = f"gRPC error: {str(e)} for confirm_upload with media id {media_id}"
+            error_message = (
+                f"gRPC error: {str(e)} for confirm_upload with media id {media_id}"
+            )
             # logger.error(error_message)
 
             # Log error
             await self._log_grpc_request(
                 service_name="media-service",
                 method_name="ConfirmUpload",
-                request_data={
-                    "media_id": media_id
-                },
+                request_data={"media_id": media_id},
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
-                task_id=task_id
+                task_id=task_id,
             )
 
             raise Exception(f"Failed to confirm upload: {str(e)}")
@@ -644,7 +646,7 @@ class ServiceClient:
         media_id: str,
         world_id: str,
         tags: List[str] = None,
-        task_id: Optional[str] = None
+        task_id: Optional[str] = None,
     ) -> Tuple[str, str]:
         """
         Creates an AI post
@@ -688,14 +690,11 @@ class ServiceClient:
                 response_data=response,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             # Возвращаем словарь с результатом
-            return {
-                "post_id": response.post_id,
-                "created_at": response.created_at
-            }
+            return {"post_id": response.post_id, "created_at": response.created_at}
 
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
@@ -711,13 +710,13 @@ class ServiceClient:
                     "caption": caption,
                     "media_id": media_id,
                     "world_id": world_id,
-                    "tags": tags or []
+                    "tags": tags or [],
                 },
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             raise Exception(f"Failed to create AI post: {str(e)}")
@@ -727,9 +726,7 @@ class ServiceClient:
     @circuit_breaker(name="world_service", failure_threshold=3, recovery_timeout=60.0)
     @with_retries(max_retries=2)
     async def get_world(
-        self,
-        world_id: str,
-        task_id: Optional[str] = None
+        self, world_id: str, task_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Gets world information
@@ -745,9 +742,7 @@ class ServiceClient:
         start_time = time.time()
         try:
             # Prepare request
-            request = world_pb2.GetWorldRequest(
-                world_id=world_id
-            )
+            request = world_pb2.GetWorldRequest(world_id=world_id)
 
             # Call gRPC method
             response = await stub.GetWorld(request)
@@ -761,7 +756,7 @@ class ServiceClient:
                 response_data=response,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             # Convert to dictionary and return
@@ -769,7 +764,9 @@ class ServiceClient:
 
         except grpc.RpcError as e:
             duration_ms = int((time.time() - start_time) * 1000)
-            error_message = f"gRPC error: {str(e)} for get_world with world id {world_id}"
+            error_message = (
+                f"gRPC error: {str(e)} for get_world with world id {world_id}"
+            )
             # logger.error(error_message)
 
             # Log error
@@ -781,7 +778,7 @@ class ServiceClient:
                 error=error_message,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             raise Exception(f"Failed to get world: {str(e)}")
@@ -793,7 +790,7 @@ class ServiceClient:
         world_id: str,
         image_uuid: str,
         icon_uuid: str,
-        task_id: Optional[str] = None
+        task_id: Optional[str] = None,
     ) -> bool:
         """
         Updates world background image and icon
@@ -813,9 +810,7 @@ class ServiceClient:
         try:
             # Prepare request
             request = world_pb2.UpdateWorldImageRequest(
-                world_id=world_id,
-                image_uuid=image_uuid,
-                icon_uuid=icon_uuid
+                world_id=world_id, image_uuid=image_uuid, icon_uuid=icon_uuid
             )
 
             # Call gRPC method
@@ -830,7 +825,7 @@ class ServiceClient:
                 response_data=response,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             return response.success
@@ -847,13 +842,53 @@ class ServiceClient:
                 request_data={
                     "world_id": world_id,
                     "image_uuid": image_uuid,
-                    "icon_uuid": icon_uuid
+                    "icon_uuid": icon_uuid,
                 },
                 response_data=None,
                 error=error_message,
                 duration_ms=duration_ms,
                 task_id=task_id,
-                world_id=world_id
+                world_id=world_id,
             )
 
             raise Exception(f"Failed to update world image: {str(e)}")
+
+    @circuit_breaker(name="world_service", failure_threshold=3, recovery_timeout=60.0)
+    @with_retries(max_retries=2)
+    async def update_world_params(
+        self, world_id: str, params: Dict[str, Any], task_id: Optional[str] = None
+    ) -> bool:
+        """Updates world parameters in world service"""
+        stub = await self._ensure_world_stub()
+        start_time = time.time()
+        try:
+            request = world_pb2.UpdateWorldParamsRequest(
+                world_id=world_id, params=json.dumps(params)
+            )
+            response = await stub.UpdateWorldParams(request)
+
+            duration_ms = int((time.time() - start_time) * 1000)
+            await self._log_grpc_request(
+                service_name="world-service",
+                method_name="UpdateWorldParams",
+                request_data=request,
+                response_data=response,
+                duration_ms=duration_ms,
+                task_id=task_id,
+                world_id=world_id,
+            )
+            return response.success
+        except grpc.RpcError as e:
+            duration_ms = int((time.time() - start_time) * 1000)
+            error_message = f"gRPC error: {str(e)} updating world params for {world_id}"
+            await self._log_grpc_request(
+                service_name="world-service",
+                method_name="UpdateWorldParams",
+                request_data={"world_id": world_id},
+                response_data=None,
+                error=error_message,
+                duration_ms=duration_ms,
+                task_id=task_id,
+                world_id=world_id,
+            )
+            raise Exception(f"Failed to update world params: {str(e)}")

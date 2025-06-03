@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Layout } from '../../components/layout/Layout';
-import { useWorld } from '../../hooks/useWorld';
-import { World } from '../../types';
-import '../../styles/pages/world-about.css';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Layout } from "../../components/layout/Layout";
+import { useWorld } from "../../hooks/useWorld";
+import { World } from "../../types";
+import "../../styles/pages/world-about.css";
 
 // Mock data for world details (since not available in API)
 const mockWorldDetails = {
@@ -12,16 +12,16 @@ const mockWorldDetails = {
   history: [
     {
       title: "",
-      content: ""
+      content: "",
     },
     {
       title: "",
-      content: ""
+      content: "",
     },
     {
       title: "",
-      content: ""
-    }
+      content: "",
+    },
   ],
   characteristics: {
     technology: [
@@ -34,16 +34,16 @@ const mockWorldDetails = {
     ],
     social: [
       "",
-      // "⚖️ Guild-based Economy", 
+      // "⚖️ Guild-based Economy",
       // "🤝 Collaborative Governance",
       // "📚 Knowledge Sharing Culture"
     ],
     geography: [
       "",
       // "🌉 Cloud Bridge Networks",
-      // "🏰 Multi-Level Architecture", 
+      // "🏰 Multi-Level Architecture",
       // "🌪️ Weather Control Systems"
-    ]
+    ],
   },
   featuredCharacters: [
     // {
@@ -55,7 +55,7 @@ const mockWorldDetails = {
     //   likes: 456
     // },
     // {
-    //   id: 'character-2', 
+    //   id: 'character-2',
     //   name: 'Zephyr Cloudwright',
     //   role: 'Sky Merchant',
     //   avatar: '/no-image.jpg',
@@ -86,7 +86,7 @@ const mockWorldDetails = {
     //   posts: 27,
     //   likes: 523
     // }
-  ]
+  ],
 };
 
 export const WorldAboutPage: React.FC = () => {
@@ -101,7 +101,7 @@ export const WorldAboutPage: React.FC = () => {
         try {
           await loadCurrentWorld(worldId);
         } catch (error) {
-          console.error('Error loading world:', error);
+          console.error("Error loading world:", error);
         }
       }
       setLoading(false);
@@ -122,7 +122,7 @@ export const WorldAboutPage: React.FC = () => {
 
   const handleViewAllCharacters = () => {
     // TODO: Navigate to characters list page when implemented
-    console.log('View all characters for world:', worldId);
+    console.log("View all characters for world:", worldId);
   };
 
   if (loading) {
@@ -140,10 +140,14 @@ export const WorldAboutPage: React.FC = () => {
       <Layout>
         <div className="flex justify-center items-center min-h-screen">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">World not found</h2>
-            <p className="text-gray-600 mb-4">The world you're looking for doesn't exist.</p>
-            <button 
-              onClick={() => navigate('/worlds')}
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              World not found
+            </h2>
+            <p className="text-gray-600 mb-4">
+              The world you're looking for doesn't exist.
+            </p>
+            <button
+              onClick={() => navigate("/worlds")}
               className="btn btn-primary"
             >
               Browse Worlds
@@ -154,33 +158,34 @@ export const WorldAboutPage: React.FC = () => {
     );
   }
 
+  const worldParams = currentWorld.params
+    ? JSON.parse(currentWorld.params)
+    : {};
+
   const worldStats = [
-    { label: 'Active Characters', value: currentWorld.users_count },
-    { label: 'Total Posts', value: currentWorld.posts_count },
-    { label: 'Total Likes', value: '2,341' }, // Mock data
-    { label: 'Daily Activity', value: '89 Posts' }, // Mock data
-    { label: 'World Age', value: '12 Days' } // Mock data
+    { label: "Active Characters", value: currentWorld.users_count },
+    { label: "Total Posts", value: currentWorld.posts_count },
+    { label: "Theme", value: worldParams.theme || "" },
   ];
 
   return (
     <Layout>
       <div className="min-h-screen flex flex-col bg-white">
-        
         {/* World Cover Section */}
-        <div 
-          className="world-cover" 
+        <div
+          className="world-cover"
           style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url('${currentWorld.image_url || '/no-image.jpg'}')`
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url('${currentWorld.image_url || "/no-image.jpg"}')`,
           }}
         >
           <div className="world-cover-overlay">
             <div className="world-cover-content">
               <div className="world-cover-info">
                 {/* World Icon */}
-                <div 
-                  className="world-icon" 
+                <div
+                  className="world-icon"
                   style={{
-                    backgroundImage: `url('${currentWorld.icon_url || '/no-image.jpg'}')`
+                    backgroundImage: `url('${currentWorld.icon_url || "/no-image.jpg"}')`,
                   }}
                 ></div>
                 <div className="world-details">
@@ -192,9 +197,9 @@ export const WorldAboutPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Enter World Button */}
-              <button 
+              <button
                 onClick={handleEnterWorld}
                 className="btn btn-primary btn-lg enter-world-btn"
               >
@@ -208,109 +213,65 @@ export const WorldAboutPage: React.FC = () => {
         <div className="world-about-content">
           <div className="world-about-container">
             <div className="world-about-grid">
-              
               {/* Left Column: World Details */}
               <div className="space-y-8">
-                
                 {/* World Description */}
                 <div className="world-section">
                   <h2 className="world-section-title">About This World</h2>
                   <p className="world-section-content">
-                    {currentWorld.description || mockWorldDetails.description}
+                    {worldParams.description || currentWorld.description}
                   </p>
-                  <p className="world-section-subcontent">
-                    {mockWorldDetails.subDescription}
-                  </p>
+                  {worldParams.description_short && (
+                    <p className="world-section-subcontent">
+                      {worldParams.description_short}
+                    </p>
+                  )}
                 </div>
 
                 {/* World History */}
                 <div className="world-section">
                   <h2 className="world-section-title">History & Origins</h2>
-                  <div className="history-timeline">
-                    {mockWorldDetails.history.map((item, index) => (
-                      <div key={index} className="history-item">
-                        <h3 className="history-item-title">{item.title}</h3>
-                        <p className="history-item-content">{item.content}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="world-section-content">{worldParams.history}</p>
                 </div>
 
                 {/* World Characteristics */}
                 <div className="world-section">
                   <h2 className="world-section-title">World Characteristics</h2>
                   <div className="characteristics-grid">
-                    
                     {/* Technology Level */}
                     <div className="characteristic-item">
                       <h3 className="characteristic-title">Technology Level</h3>
-                      <div className="characteristic-content">
-                        {mockWorldDetails.characteristics.technology.map((tech, index) => (
-                          <div key={index} className="progress-item">
-                            <div className="progress-label">
-                              <span className="progress-label-text">{tech.name}</span>
-                              <span className="progress-label-value">{tech.level}</span>
-                            </div>
-                            <div className="progress-bar">
-                              <div 
-                                className="progress-bar-fill" 
-                                style={{ width: `${tech.value}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Magic Level */}
-                    <div className="characteristic-item">
-                      <h3 className="characteristic-title">Magic Level</h3>
-                      <div className="characteristic-content">
-                        {mockWorldDetails.characteristics.magic.map((magic, index) => (
-                          <div key={index} className="progress-item">
-                            <div className="progress-label">
-                              <span className="progress-label-text">{magic.name}</span>
-                              <span className="progress-label-value">{magic.level}</span>
-                            </div>
-                            <div className="progress-bar">
-                              <div 
-                                className="progress-bar-fill" 
-                                style={{ width: `${magic.value}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <p className="characteristic-list-item">
+                        {worldParams.technology_level}
+                      </p>
                     </div>
 
-                    {/* Social Structure */}
+                    <div className="characteristic-item">
+                      <h3 className="characteristic-title">Magic System</h3>
+                      <p className="characteristic-list-item">
+                        {worldParams.additional_details?.magic_system}
+                      </p>
+                    </div>
+
                     <div className="characteristic-item">
                       <h3 className="characteristic-title">Social Structure</h3>
-                      <div className="characteristic-list">
-                        {mockWorldDetails.characteristics.social.map((item, index) => (
-                          <p key={index} className="characteristic-list-item">{item}</p>
-                        ))}
-                      </div>
+                      <p className="characteristic-list-item">
+                        {worldParams.social_structure}
+                      </p>
                     </div>
 
-                    {/* Geography */}
                     <div className="characteristic-item">
                       <h3 className="characteristic-title">Geography</h3>
-                      <div className="characteristic-list">
-                        {mockWorldDetails.characteristics.geography.map((item, index) => (
-                          <p key={index} className="characteristic-list-item">{item}</p>
-                        ))}
-                      </div>
+                      <p className="characteristic-list-item">
+                        {worldParams.geography}
+                      </p>
                     </div>
-                    
                   </div>
                 </div>
-
               </div>
 
               {/* Right Column: Characters & Stats */}
               <div className="space-y-8">
-                
                 {/* Quick Stats */}
                 <div className="world-section">
                   <h2 className="world-section-title">World Statistics</h2>
@@ -349,9 +310,9 @@ export const WorldAboutPage: React.FC = () => {
                         </div>
                       ))} */}
                     </div>
-                    
+
                     {/* View All Characters Button */}
-                    <button 
+                    <button
                       className="btn btn-secondary view-all-btn"
                       onClick={handleViewAllCharacters}
                     >
@@ -359,7 +320,6 @@ export const WorldAboutPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
