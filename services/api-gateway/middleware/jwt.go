@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,9 +44,13 @@ func (m *JWTMiddleware) RequireAuth(next http.Handler) http.Handler {
 		}
 
 		tokenString := tokenParts[1]
-		
+
 		// Validate token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// Ensure the signing method is HMAC to prevent alg=none attacks
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
 			return []byte(m.jwtSecret), nil
 		})
 
@@ -79,7 +84,7 @@ func (m *JWTMiddleware) Optional(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get token from header
 		authHeader := r.Header.Get("Authorization")
-		
+
 		// If no token, continue without authentication
 		if authHeader == "" {
 			next.ServeHTTP(w, r)
@@ -95,9 +100,12 @@ func (m *JWTMiddleware) Optional(next http.Handler) http.Handler {
 		}
 
 		tokenString := tokenParts[1]
-		
+
 		// Validate token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
 			return []byte(m.jwtSecret), nil
 		})
 
