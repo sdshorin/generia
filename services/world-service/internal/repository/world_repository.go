@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sdshorin/generia/pkg/logger"
@@ -28,7 +29,6 @@ type WorldRepository interface {
 	// Generation tasks
 
 	// UpdateGenerationTask(ctx context.Context, taskID, status, result string) error
-	GetWorldStats(ctx context.Context, worldID string) (int, int, error) // usersCount, postsCount, error
 }
 
 // PostgresWorldRepository is the PostgreSQL implementation of WorldRepository
@@ -46,10 +46,10 @@ func NewWorldRepository(db *sqlx.DB) WorldRepository {
 // Create inserts a new world into the database
 func (r *PostgresWorldRepository) Create(ctx context.Context, world *models.World) error {
 	query := `
-		INSERT INTO worlds (name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		RETURNING id, created_at, updated_at
-	`
+               INSERT INTO worlds (name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, params, users_count, posts_count)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+               RETURNING id, created_at, updated_at
+       `
 
 	row := r.db.QueryRowContext(
 		ctx,
@@ -63,6 +63,9 @@ func (r *PostgresWorldRepository) Create(ctx context.Context, world *models.Worl
 		world.Status,
 		world.ImageUUID, // Use sql.NullString which will be NULL when not set
 		world.IconUUID,  // Use sql.NullString which will be NULL when not set
+		world.Params,
+		world.UsersCount,
+		world.PostsCount,
 	)
 
 	err := row.Scan(&world.ID, &world.CreatedAt, &world.UpdatedAt)
@@ -77,14 +80,18 @@ func (r *PostgresWorldRepository) Create(ctx context.Context, world *models.Worl
 // GetByID retrieves a world by its ID
 func (r *PostgresWorldRepository) GetByID(ctx context.Context, id string) (*models.World, error) {
 	query := `
-		SELECT id, name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, created_at, updated_at
-		FROM worlds
-		WHERE id = $1
-	`
+               SELECT id, name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, params, users_count, posts_count, created_at, updated_at
+               FROM worlds
+               WHERE id = $1
+       `
 
 	var world models.World
 	err := r.db.GetContext(ctx, &world, query, id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			// World not found - this is not an error, just return nil
+			return nil, nil
+		}
 		logger.Logger.Error("Failed to get world by ID", zap.Error(err), zap.String("id", id))
 		return nil, err
 	}
@@ -99,20 +106,20 @@ func (r *PostgresWorldRepository) GetAll(ctx context.Context, limit, offset int,
 
 	if status != "" && status != "all" {
 		query = `
-			SELECT id, name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, created_at, updated_at
-			FROM worlds
-			WHERE status = $1
-			ORDER BY created_at DESC
-			LIMIT $2 OFFSET $3
-		`
+                       SELECT id, name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, params, users_count, posts_count, created_at, updated_at
+                       FROM worlds
+                       WHERE status = $1
+                       ORDER BY created_at DESC
+                       LIMIT $2 OFFSET $3
+               `
 		args = []interface{}{status, limit, offset}
 	} else {
 		query = `
-			SELECT id, name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, created_at, updated_at
-			FROM worlds
-			ORDER BY created_at DESC
-			LIMIT $1 OFFSET $2
-		`
+                       SELECT id, name, description, prompt, creator_id, generation_status, status, image_uuid, icon_uuid, params, users_count, posts_count, created_at, updated_at
+                       FROM worlds
+                       ORDER BY created_at DESC
+                       LIMIT $1 OFFSET $2
+               `
 		args = []interface{}{limit, offset}
 	}
 
@@ -152,7 +159,7 @@ func (r *PostgresWorldRepository) GetByUser(ctx context.Context, userID string, 
 
 	if status != "" && status != "all" {
 		query = `
-			SELECT w.id, w.name, w.description, w.prompt, w.creator_id, w.generation_status, w.status, w.image_uuid, w.icon_uuid, w.created_at, w.updated_at
+                       SELECT w.id, w.name, w.description, w.prompt, w.creator_id, w.generation_status, w.status, w.image_uuid, w.icon_uuid, w.params, w.users_count, w.posts_count, w.created_at, w.updated_at
 			FROM worlds w
 			JOIN user_worlds uw ON w.id = uw.world_id
 			WHERE uw.user_id = $1 AND w.status = $2
@@ -162,7 +169,7 @@ func (r *PostgresWorldRepository) GetByUser(ctx context.Context, userID string, 
 		args = []interface{}{userID, status, limit, offset}
 	} else {
 		query = `
-			SELECT w.id, w.name, w.description, w.prompt, w.creator_id, w.generation_status, w.status, w.image_uuid, w.icon_uuid, w.created_at, w.updated_at
+                       SELECT w.id, w.name, w.description, w.prompt, w.creator_id, w.generation_status, w.status, w.image_uuid, w.icon_uuid, w.params, w.users_count, w.posts_count, w.created_at, w.updated_at
 			FROM worlds w
 			JOIN user_worlds uw ON w.id = uw.world_id
 			WHERE uw.user_id = $1
@@ -330,34 +337,23 @@ func (r *PostgresWorldRepository) CheckUserWorld(ctx context.Context, userID, wo
 	return exists, nil
 }
 
-// GetWorldStats gets user and post counts for a world
-func (r *PostgresWorldRepository) GetWorldStats(ctx context.Context, worldID string) (int, int, error) {
-
-	var usersCount int
-	var postsCount int
-
-	// TODO: Request character service for users count
-	// TODO: Request post service for posts count
-
-	// TODO: move this to service layer
-
-	return usersCount, postsCount, nil
-}
-
 // Update updates all fields of a world in the database
 func (r *PostgresWorldRepository) Update(ctx context.Context, world *models.World) error {
 	query := `
-		UPDATE worlds
-		SET name = $1,
-		    description = $2,
-		    prompt = $3,
-		    status = $4,
-		    generation_status = $5,
-		    image_uuid = $6,
-			icon_uuid = $7,
-		    updated_at = NOW()
-		WHERE id = $8
-	`
+               UPDATE worlds
+               SET name = $1,
+                   description = $2,
+                   prompt = $3,
+                   status = $4,
+                   generation_status = $5,
+                   image_uuid = $6,
+                   icon_uuid = $7,
+                   params = $8,
+                   users_count = $9,
+                   posts_count = $10,
+                   updated_at = NOW()
+               WHERE id = $11
+       `
 
 	_, err := r.db.ExecContext(
 		ctx,
@@ -369,6 +365,9 @@ func (r *PostgresWorldRepository) Update(ctx context.Context, world *models.Worl
 		world.GenerationStatus,
 		world.ImageUUID,
 		world.IconUUID,
+		world.Params,
+		world.UsersCount,
+		world.PostsCount,
 		world.ID,
 	)
 	if err != nil {

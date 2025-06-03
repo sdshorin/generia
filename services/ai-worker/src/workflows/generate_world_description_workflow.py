@@ -98,12 +98,10 @@ class GenerateWorldDescriptionWorkflow(BaseWorkflow):
                 )
             )
             
-            # llm_result теперь уже содержит результат или вызовет exception
-            
             # Сохраняем параметры мира в БД
             save_result = await workflow.execute_activity(
                 "save_world_parameters",
-                args=[llm_result, input.world_id],
+                args=[llm_result, input.world_id, input.users_count, input.posts_count ],
                 task_queue="ai-worker-main",
                 start_to_close_timeout=timedelta(seconds=30),
                 retry_policy=RetryPolicy(maximum_attempts=3)

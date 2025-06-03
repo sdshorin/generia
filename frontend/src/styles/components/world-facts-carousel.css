@@ -1,0 +1,148 @@
+/* ============================================================================
+   WORLD FACTS CAROUSEL STYLES
+   Карусель фактов о мире для страницы создания мира
+   ============================================================================ */
+
+.world-facts-carousel {
+  margin-top: var(--spacing-8);
+  padding: var(--spacing-6);
+  background: white;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.facts-container {
+  position: relative;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fact-content {
+  text-align: center;
+  padding: var(--spacing-4) 0;
+}
+
+.fact-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-3);
+  position: relative;
+}
+
+.fact-title::after {
+  content: '';
+  position: absolute;
+  bottom: -var(--spacing-1);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+.fact-text {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Fact indicators */
+.fact-indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-6);
+}
+
+.fact-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-bg-lighter);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.fact-indicator:hover {
+  background: var(--color-border-dark);
+  transform: scale(1.2);
+}
+
+.fact-indicator.active {
+  background: var(--color-primary);
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(32, 148, 243, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .world-facts-carousel {
+    margin-top: var(--spacing-6);
+    padding: var(--spacing-4);
+  }
+  
+  .facts-container {
+    min-height: 100px;
+  }
+  
+  .fact-title {
+    font-size: var(--text-base);
+  }
+  
+  .fact-text {
+    font-size: var(--text-sm);
+  }
+}
+
+/* Animation variants for different entrance effects */
+.world-facts-carousel.fade-in {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state */
+.world-facts-carousel.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.world-facts-carousel.loading .fact-content {
+  filter: blur(1px);
+}
+
+/* Enhanced styling for generation progress page */
+.generation-progress-state .world-facts-carousel {
+  background: linear-gradient(to right, var(--color-bg-light), var(--color-bg-lighter));
+  border-color: var(--color-border);
+}
+
+.generation-progress-state .fact-title {
+  color: var(--color-text-primary);
+}
+
+.generation-progress-state .fact-text {
+  color: var(--color-text-secondary);
+}

@@ -857,3 +857,54 @@ class ServiceClient:
             )
 
             raise Exception(f"Failed to update world image: {str(e)}")
+
+    @circuit_breaker(name="world_service", failure_threshold=3, recovery_timeout=60.0)
+    @with_retries(max_retries=2)
+    async def update_world_params(
+        self, 
+        world_id: str, 
+        params: Dict[str, Any], 
+        name: str,
+        users_count: int,
+        posts_count: int,
+        task_id: Optional[str] = None
+    ) -> bool:
+        """Updates world parameters in world service"""
+        stub = await self._ensure_world_stub()
+        start_time = time.time()
+        try:
+            request = world_pb2.UpdateWorldParamsRequest(
+                world_id=world_id, 
+                params=json.dumps(params),
+                name=name,
+                users_count=users_count,
+                posts_count=posts_count
+            )
+                
+            response = await stub.UpdateWorldParams(request)
+
+            duration_ms = int((time.time() - start_time) * 1000)
+            await self._log_grpc_request(
+                service_name="world-service",
+                method_name="UpdateWorldParams",
+                request_data=request,
+                response_data=response,
+                duration_ms=duration_ms,
+                task_id=task_id,
+                world_id=world_id,
+            )
+            return response.success
+        except grpc.RpcError as e:
+            duration_ms = int((time.time() - start_time) * 1000)
+            error_message = f"gRPC error: {str(e)} updating world params for {world_id}"
+            await self._log_grpc_request(
+                service_name="world-service",
+                method_name="UpdateWorldParams",
+                request_data={"world_id": world_id},
+                response_data=None,
+                error=error_message,
+                duration_ms=duration_ms,
+                task_id=task_id,
+                world_id=world_id,
+            )
+            raise Exception(f"Failed to update world params: {str(e)}")

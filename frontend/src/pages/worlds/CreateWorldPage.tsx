@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
 import { useWorld } from '../../hooks/useWorld';
+import { WorldFactsCarousel } from '../../components/common/WorldFactsCarousel';
 import { WorldGenerationStatus, StageInfo } from '../../types';
 import { worldsAPI } from '../../api/services';
 import '../../styles/pages/create-world.css';
+import '../../styles/components/world-facts-carousel.css';
 
 export const CreateWorldPage: React.FC = () => {
   const [currentState, setCurrentState] = useState<'form' | 'progress'>('form');
@@ -18,6 +20,7 @@ export const CreateWorldPage: React.FC = () => {
   
   // Progress state from real API
   const [status, setStatus] = useState<WorldGenerationStatus | null>(null);
+  const [worldParams, setWorldParams] = useState<any | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   
   const { createWorld, error, isLoading } = useWorld();
@@ -108,6 +111,22 @@ export const CreateWorldPage: React.FC = () => {
     }
   }, [prompt, charactersCount, postsCount, createWorld]);
   
+  // Load world parameters when world description is completed
+  const loadWorldParams = useCallback(async (worldId: string) => {
+      const worldData = await worldsAPI.getWorldById(worldId);
+      if (worldData && worldData.params) {
+        const parsedParams = typeof worldData.params === 'string' 
+          ? JSON.parse(worldData.params) 
+          : worldData.params;
+        
+        // Only set params if we have meaningful data
+        if (parsedParams && Object.keys(parsedParams).length > 0) {
+          setWorldParams(parsedParams);
+          console.log('World params loaded:', parsedParams);
+        }
+      }
+  }, []);
+  
   // Start tracking progress with real API
   const startProgressTracking = useCallback((worldId: string) => {
     let eventSource: EventSource | null = null;
@@ -127,6 +146,14 @@ export const CreateWorldPage: React.FC = () => {
             if (data.type === 'ping') return;
             
             setStatus(data);
+            
+            // Check if world_image stage is started/completed and load world params
+            if (data.stages && !worldParams) {
+              const worldImageStage = data.stages.find((stage: StageInfo) => stage.name === 'world_image');
+              if (worldImageStage && (worldImageStage.status === 'in_progress' || worldImageStage.status === 'completed')) {
+                loadWorldParams(worldId);
+              }
+            }
             
             // Check if generation is actually complete based on counts
             if (data.status === 'completed' || isGenerationComplete(data)) {
@@ -159,6 +186,14 @@ export const CreateWorldPage: React.FC = () => {
             const statusData = await worldsAPI.getWorldStatus(worldId);
             setStatus(statusData);
             
+            // Check if world_image stage is started/completed and load world params
+            if (statusData.stages && !worldParams) {
+              const worldImageStage = statusData.stages.find((stage: StageInfo) => stage.name === 'world_image');
+              if (worldImageStage && (worldImageStage.status === 'in_progress' || worldImageStage.status === 'completed')) {
+                loadWorldParams(worldId);
+              }
+            }
+            
             if (statusData.status === 'completed' || isGenerationComplete(statusData)) {
               setTimeout(() => {
                 navigate(`/worlds/${worldId}/feed`);
@@ -180,7 +215,7 @@ export const CreateWorldPage: React.FC = () => {
     };
 
     connectSSE();
-  }, [navigate]);
+  }, [navigate, loadWorldParams, worldParams]);
   
   // Cancel generation
   const cancelGeneration = useCallback(() => {
@@ -459,6 +494,14 @@ export const CreateWorldPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* World Facts Carousel - Show only when world description is completed */}
+              {worldParams && (
+                <WorldFactsCarousel 
+                  worldParams={worldParams}
+                  className="fade-in"
+                />
               )}
 
             </div>

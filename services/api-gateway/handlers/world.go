@@ -15,6 +15,8 @@ import (
 	"github.com/sdshorin/generia/services/api-gateway/middleware"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	worldpb "github.com/sdshorin/generia/api/grpc/world"
 )
@@ -89,8 +91,9 @@ func (h *WorldHandler) GetWorlds(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		logger.Logger.Error("Failed to get worlds", zap.Error(err))
-		http.Error(w, "Failed to get worlds", http.StatusInternalServerError)
+		httpStatus := grpcStatusToHTTP(err)
+		logger.Logger.Error("Failed to get worlds", zap.Error(err), zap.Int("http_status", httpStatus))
+		http.Error(w, "Failed to get worlds", httpStatus)
 		return
 	}
 
@@ -141,8 +144,9 @@ func (h *WorldHandler) CreateWorld(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		logger.Logger.Error("Failed to create world", zap.Error(err))
-		http.Error(w, "Failed to create world", http.StatusInternalServerError)
+		httpStatus := grpcStatusToHTTP(err)
+		logger.Logger.Error("Failed to create world", zap.Error(err), zap.Int("http_status", httpStatus))
+		http.Error(w, "Failed to create world", httpStatus)
 		return
 	}
 
@@ -181,8 +185,9 @@ func (h *WorldHandler) GetWorld(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", worldID))
-		http.Error(w, "Failed to get world", http.StatusInternalServerError)
+		httpStatus := grpcStatusToHTTP(err)
+		logger.Logger.Error("Failed to get world", zap.Error(err), zap.String("world_id", worldID), zap.Int("http_status", httpStatus))
+		http.Error(w, "Failed to get world", httpStatus)
 		return
 	}
 
@@ -220,11 +225,13 @@ func (h *WorldHandler) JoinWorld(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
+		httpStatus := grpcStatusToHTTP(err)
 		logger.Logger.Error("Failed to join world",
 			zap.Error(err),
 			zap.String("user_id", userID),
-			zap.String("world_id", worldID))
-		http.Error(w, "Failed to join world", http.StatusInternalServerError)
+			zap.String("world_id", worldID),
+			zap.Int("http_status", httpStatus))
+		http.Error(w, "Failed to join world", httpStatus)
 		return
 	}
 
@@ -261,15 +268,48 @@ func (h *WorldHandler) GetWorldStatus(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
+		httpStatus := grpcStatusToHTTP(err)
 		logger.Logger.Error("Failed to get world generation status",
 			zap.Error(err),
-			zap.String("world_id", worldID))
-		http.Error(w, "Failed to get world generation status", http.StatusInternalServerError)
+			zap.String("world_id", worldID),
+			zap.Int("http_status", httpStatus))
+		http.Error(w, "Failed to get world generation status", httpStatus)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+}
+
+// grpcStatusToHTTP converts gRPC status codes to HTTP status codes
+func grpcStatusToHTTP(err error) int {
+	if st, ok := status.FromError(err); ok {
+		switch st.Code() {
+		case codes.NotFound:
+			return http.StatusNotFound
+		case codes.InvalidArgument:
+			return http.StatusBadRequest
+		case codes.Unauthenticated:
+			return http.StatusUnauthorized
+		case codes.PermissionDenied:
+			return http.StatusForbidden
+		case codes.AlreadyExists:
+			return http.StatusConflict
+		case codes.ResourceExhausted:
+			return http.StatusTooManyRequests
+		case codes.FailedPrecondition:
+			return http.StatusPreconditionFailed
+		case codes.Unimplemented:
+			return http.StatusNotImplemented
+		case codes.Unavailable:
+			return http.StatusServiceUnavailable
+		case codes.DeadlineExceeded:
+			return http.StatusRequestTimeout
+		default:
+			return http.StatusInternalServerError
+		}
+	}
+	return http.StatusInternalServerError
 }
 
 // validateTokenFromQuery validates JWT token from query parameters
