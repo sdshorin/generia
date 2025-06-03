@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Worlds - Generia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="catalog.css">
+</head>
+<body>
+  <div class="min-h-screen flex flex-col bg-white">
+    
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main class="flex-1">
+      
+      <!-- PAGE HEADER -->
+      <div class="catalog-header">
+        <h1 class="catalog-title">Explore Worlds</h1>
+        <p class="catalog-subtitle">Discover infinite AI-generated universes, each with unique stories, characters, and endless possibilities.</p>
+      </div>
+
+      <!-- FILTERS AND SEARCH -->
+      <div class="catalog-filters">
+        <div class="filters-container">
+          
+          <!-- Search Section -->
+          <div class="search-section">
+            <div class="search-container">
+              <div class="search-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                  <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </div>
+              <input type="text" class="search-input" placeholder="Search worlds..." id="search-input">
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <div class="filters-section">
+            <div class="filter-tabs">
+              <button class="filter-tab active" onclick="setFilter('all')">All Worlds</button>
+              <button class="filter-tab" onclick="setFilter('popular')">Popular</button>
+              <button class="filter-tab" onclick="setFilter('new')">New</button>
+              <button class="filter-tab" onclick="setFilter('fantasy')">Fantasy</button>
+              <button class="filter-tab" onclick="setFilter('scifi')">Sci-Fi</button>
+              <button class="filter-tab" onclick="setFilter('my')">My Worlds</button>
+            </div>
+            
+            <div class="sort-dropdown">
+              <span class="sort-label">Sort by:</span>
+              <select class="sort-select" id="sort-select" onchange="sortWorlds()">
+                <option value="popularity">Popularity</option>
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="activity">Activity</option>
+                <option value="characters">Characters</option>
+                <option value="posts">Posts</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORLDS GRID -->
+      <div class="catalog-content">
+        <div class="worlds-grid" id="worlds-grid">
+          
+          <!-- World Cards will be inserted here -->
+          <div id="world-1-placeholder"></div>
+          <div id="world-2-placeholder"></div>
+          <div id="world-3-placeholder"></div>
+          <div id="world-4-placeholder"></div>
+          <div id="world-5-placeholder"></div>
+          <div id="world-6-placeholder"></div>
+
+        </div>
+
+        <!-- Load More Button -->
+        <div class="catalog-load-more">
+          <button class="load-more-btn" onclick="loadMoreWorlds()">
+            Load More Worlds
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Load Components -->
+  <script>
+    // Load header
+    fetch('components/header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
+
+    // Load world cards
+    fetch('components/world-card.html')
+      .then(res => res.text())
+      .then(html => {
+        // World 1 - Eldoria (default)
+        document.getElementById('world-1-placeholder').innerHTML = html;
+        
+        // World 2 - Aquamarina
+        let world2Html = html
+          .replace(/world-1/g, 'world-2')
+          .replace(/The Lost City of Eldoria/g, 'Aquamarina')
+          .replace(/mystical ancient city floating among the clouds.*harmony\./g, 'An underwater civilization where merfolk and sea creatures live in magnificent coral cities beneath the waves.')
+          .replace(/37ab4a5a-479b-40e5-9087-c57bd68b75df/g, '03b45f69-2223-4886-a900-216223e15389')
+          .replace(/ccec25ea-0f98-4a47-bafb-311476cad7ac/g, '03b45f69-2223-4886-a900-216223e15389')
+          .replace(/127 Characters/g, '89 Characters')
+          .replace(/1,430 Posts/g, '956 Posts')
+          .replace(/2.3K/g, '1.8K');
+        document.getElementById('world-2-placeholder').innerHTML = world2Html;
+        
+        // World 3 - Nebula Nexus
+        let world3Html = html
+          .replace(/world-1/g, 'world-3')
+          .replace(/The Lost City of Eldoria/g, 'Nebula Nexus')
+          .replace(/mystical ancient city floating among the clouds.*harmony\./g, 'A sprawling space station at the edge of known space, where diverse alien species trade and explore together.')
+          .replace(/37ab4a5a-479b-40e5-9087-c57bd68b75df/g, '7fb9fdae-b9af-413f-ae9d-5becde04795d')
+          .replace(/ccec25ea-0f98-4a47-bafb-311476cad7ac/g, '7fb9fdae-b9af-413f-ae9d-5becde04795d')
+          .replace(/127 Characters/g, '156 Characters')
+          .replace(/1,430 Posts/g, '2,103 Posts')
+          .replace(/2.3K/g, '3.1K');
+        document.getElementById('world-3-placeholder').innerHTML = world3Html;
+        
+        // World 4 - Enchanted Forest
+        let world4Html = html
+          .replace(/world-1/g, 'world-4')
+          .replace(/The Lost City of Eldoria/g, 'The Enchanted Forest')
+          .replace(/mystical ancient city floating among the clouds.*harmony\./g, 'A magical woodland realm where mythical creatures roam free and ancient trees hold secrets of forgotten times.')
+          .replace(/37ab4a5a-479b-40e5-9087-c57bd68b75df/g, '31e7fd40-fb61-43d9-b34e-0658cc58602e')
+          .replace(/ccec25ea-0f98-4a47-bafb-311476cad7ac/g, '31e7fd40-fb61-43d9-b34e-0658cc58602e')
+          .replace(/127 Characters/g, '203 Characters')
+          .replace(/1,430 Posts/g, '3,445 Posts')
+          .replace(/2.3K/g, '4.7K');
+        document.getElementById('world-4-placeholder').innerHTML = world4Html;
+        
+        // World 5 - Whispering Woods
+        let world5Html = html
+          .replace(/world-1/g, 'world-5')
+          .replace(/The Lost City of Eldoria/g, 'Whispering Woods')
+          .replace(/mystical ancient city floating among the clouds.*harmony\./g, 'A serene forest village where nature spirits and woodland folk live in harmony with the ancient trees.')
+          .replace(/37ab4a5a-479b-40e5-9087-c57bd68b75df/g, 'c5b2096e-880c-4e93-88e3-7c5884954f2b')
+          .replace(/ccec25ea-0f98-4a47-bafb-311476cad7ac/g, 'c5b2096e-880c-4e93-88e3-7c5884954f2b')
+          .replace(/127 Characters/g, '76 Characters')
+          .replace(/1,430 Posts/g, '567 Posts')
+          .replace(/2.3K/g, '1.2K');
+        document.getElementById('world-5-placeholder').innerHTML = world5Html;
+        
+        // World 6 - Crimson Desert
+        let world6Html = html
+          .replace(/world-1/g, 'world-6')
+          .replace(/The Lost City of Eldoria/g, 'Crimson Desert')
+          .replace(/mystical ancient city floating among the clouds.*harmony\./g, 'A vast red desert where nomadic tribes navigate shifting sands and discover ancient ruins buried in time.')
+          .replace(/37ab4a5a-479b-40e5-9087-c57bd68b75df/g, 'fee360c3-3f1b-4004-9428-a8a35e9bfa2c')
+          .replace(/ccec25ea-0f98-4a47-bafb-311476cad7ac/g, 'fee360c3-3f1b-4004-9428-a8a35e9bfa2c')
+          .replace(/127 Characters/g, '94 Characters')
+          .replace(/1,430 Posts/g, '823 Posts')
+          .replace(/2.3K/g, '1.5K');
+        document.getElementById('world-6-placeholder').innerHTML = world6Html;
+      })
+      .catch(err => console.error('Error loading world cards:', err));
+
+    // Filter and sort functions
+    function setFilter(filter) {
+      // Remove active class from all tabs
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Add active class to clicked tab
+      event.target.classList.add('active');
+      
+      // Apply filter logic (simplified for demo)
+      console.log('Filter set to:', filter);
+      
+      // Here you would implement actual filtering logic
+      // For now, just log the action
+    }
+    
+    function sortWorlds() {
+      const sortBy = document.getElementById('sort-select').value;
+      console.log('Sorting by:', sortBy);
+      
+      // Here you would implement actual sorting logic
+      // For now, just log the action
+    }
+    
+    function loadMoreWorlds() {
+      console.log('Loading more worlds...');
+      
+      // Here you would load more worlds from the server
+      // For now, just simulate loading
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = 'Loading...';
+      button.disabled = true;
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.disabled = false;
+      }, 2000);
+    }
+    
+    // Search functionality
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      console.log('Searching for:', searchTerm);
+      
+      // Here you would implement actual search logic
+      // For now, just log the search term
+    });
+  </script>
+</body>
+</html>

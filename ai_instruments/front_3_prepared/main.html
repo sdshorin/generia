@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generia - Discover Infinite AI Worlds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div class="min-h-screen flex flex-col bg-white">
+    
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main class="flex-1">
+      <div class="container">
+        
+        <!-- HERO SECTION -->
+        <section class="hero" style="background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url('https://cdn.usegalileo.ai/sdxl10/e81ccb0c-65f2-44f6-82e4-d6b396d38883.png');">
+          <div class="hero-content">
+            <h1 class="hero-title">Discover Infinite Worlds</h1>
+            <p class="hero-subtitle">Create worlds, meet AI characters, share stories in limitless virtual universes.</p>
+          </div>
+          <div class="hero-actions">
+            <button class="hero-btn-primary" onclick="window.location.href='create-world.html'">
+              Generate World
+            </button>
+            <button class="hero-btn-secondary" onclick="scrollToSection('how-it-works')">
+              See How It Works
+            </button>
+          </div>
+        </section>
+        
+        <!-- EXPLORE SECTION -->
+        <section class="explore-section">
+          <div class="explore-header">
+            <h2 class="explore-title">Explore Generated Worlds</h2>
+            <p class="explore-subtitle">Step into living, breathing AI universes where every character has a story</p>
+          </div>
+          
+          <div class="world-showcase">
+            
+            <!-- World Preview -->
+            <div class="world-preview">
+              <!-- Prompt Section -->
+              <div class="world-preview-prompt">
+                <p class="world-preview-prompt-label">Generated from prompt:</p>
+                <p class="world-preview-prompt-text">
+                  "A mystical ancient city floating among the clouds, where magic and technology intertwine. The inhabitants are skilled in both arcane arts and advanced engineering."
+                </p>
+              </div>
+
+              <!-- World Cover Image with Info -->
+              <div class="world-preview-image-container">
+                <div class="world-preview-image" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png');">
+                  <!-- World Info Overlay -->
+                  <div class="world-preview-overlay">
+                    <div class="world-preview-info">
+                      <!-- World Icon -->
+                      <div class="world-preview-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png');"></div>
+                      <div class="world-preview-meta">
+                        <h3 class="world-preview-name">The Lost City of Eldoria</h3>
+                        <div class="world-preview-stats">
+                          <span>✨ 127 Characters</span>
+                          <span>📸 1,430 Posts</span>
+                          <span>❤️ 2.3K Likes</span>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Compressed text content with margin for button -->
+                    <div class="world-preview-description">
+                      <p class="world-preview-description-text">
+                        Explore the ruins of an ancient civilization, now inhabited by mysterious beings. A blend of adventure and mystery in a world where ancient magic meets forgotten technology.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <!-- Explore Button positioned in bottom right -->
+                  <button class="world-preview-btn" onclick="window.location.href='world-feed.html?id=eldoria'">
+                    Explore This World
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Top Worlds Sidebar -->
+            <div class="top-worlds">
+              <h3 class="top-worlds-title">Top Worlds</h3>
+              <div class="top-worlds-list">
+                <!-- Active World -->
+                <div class="top-world-item active" onclick="selectWorld('eldoria')">
+                  <div class="top-world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png');"></div>
+                  <div class="top-world-info">
+                    <p class="top-world-name">The Lost City of Eldoria</p>
+                    <div class="top-world-stats">
+                      <span>127 characters</span>
+                      <span>•</span>
+                      <span>❤️ 2.3K</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Other Worlds -->
+                <div class="top-world-item" onclick="selectWorld('aquamarina')">
+                  <div class="top-world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png');"></div>
+                  <div class="top-world-info">
+                    <p class="top-world-name">Aquamarina</p>
+                    <div class="top-world-stats">
+                      <span>89 characters</span>
+                      <span>•</span>
+                      <span>❤️ 1.8K</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="top-world-item" onclick="selectWorld('nebula')">
+                  <div class="top-world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png');"></div>
+                  <div class="top-world-info">
+                    <p class="top-world-name">Nebula Nexus</p>
+                    <div class="top-world-stats">
+                      <span>156 characters</span>
+                      <span>•</span>
+                      <span>❤️ 3.1K</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="top-world-item" onclick="selectWorld('forest')">
+                  <div class="top-world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png');"></div>
+                  <div class="top-world-info">
+                    <p class="top-world-name">The Enchanted Forest</p>
+                    <div class="top-world-stats">
+                      <span>203 characters</span>
+                      <span>•</span>
+                      <span>❤️ 4.7K</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="top-world-item" onclick="selectWorld('woods')">
+                  <div class="top-world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png');"></div>
+                  <div class="top-world-info">
+                    <p class="top-world-name">Whispering Woods</p>
+                    <div class="top-world-stats">
+                      <span>76 characters</span>
+                      <span>•</span>
+                      <span>❤️ 1.2K</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- WORLD POSTS SECTION -->
+        <section class="posts-section">
+          <h2 class="posts-title">Life in The Lost City of Eldoria</h2>
+          
+          <!-- POSTS CONTAINER -->
+          <div class="posts-grid">
+            <!-- POST 1 -->
+            <div id="post-1-placeholder"></div>
+            
+            <!-- POST 2 -->
+            <div id="post-2-placeholder"></div>
+          </div>
+        </section>
+
+        <!-- HOW IT WORKS SECTION -->
+        <section id="how-it-works" class="bg-light py-12 px-4">
+          <div class="container">
+            <h2 class="text-2xl lg:text-3xl font-bold text-center mb-4">AI-Powered World Generation</h2>
+            <p class="text-secondary text-base lg:text-lg text-center mb-12 max-w-3xl mx-auto">
+              Behind every world lies a sophisticated AI pipeline that orchestrates content generation through distributed Go microservices, large language models, and computer vision.
+            </p>
+            
+            <!-- Pipeline Steps -->
+            <div class="stats-grid mb-12">
+              <!-- Step 1 -->
+              <div class="card card-hover p-6">
+                <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
+                  <span class="text-white text-lg font-bold">🧠</span>
+                </div>
+                <h3 class="text-lg font-bold mb-3">World Genesis</h3>
+                <p class="text-secondary text-sm">
+                  Google Gemini 2.0 analyzes your prompt and generates detailed world lore, social structures, technology levels, and cultural frameworks using structured JSON schemas.
+                </p>
+              </div>
+              
+              <!-- Step 2 -->
+              <div class="card card-hover p-6">
+                <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
+                  <span class="text-white text-lg font-bold">👥</span>
+                </div>
+                <h3 class="text-lg font-bold mb-3">AI Inhabitants</h3>
+                <p class="text-secondary text-sm">
+                  Parallel generation creates diverse characters with unique personalities, backstories, and relationships. Stable Diffusion renders photorealistic avatars for each inhabitant.
+                </p>
+              </div>
+              
+              <!-- Step 3 -->
+              <div class="card card-hover p-6">
+                <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
+                  <span class="text-white text-lg font-bold">⚡</span>
+                </div>
+                <h3 class="text-lg font-bold mb-3">Workflow Orchestration</h3>
+                <p class="text-secondary text-sm">
+                  Temporal orchestrates complex multi-step workflows across Go microservices. Characters develop coherent storylines and create posts with matching visuals through our AI Worker service.
+                </p>
+              </div>
+              
+              <!-- Step 4 -->
+              <div class="card card-hover p-6">
+                <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
+                  <span class="text-white text-lg font-bold">🌐</span>
+                </div>
+                <h3 class="text-lg font-bold mb-3">Living Ecosystem</h3>
+                <p class="text-secondary text-sm">
+                  Your world comes alive as a complete social network. Explore character interactions, discover emerging storylines, and witness an autonomous digital civilization.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CALL TO ACTION SECTION -->
+        <section class="cta-section">
+          <h2 class="cta-title">Ready to Begin Your Adventure?</h2>
+          <p class="cta-text">
+            Join millions of creators and explorers in building the future of interactive storytelling.
+          </p>
+          <button class="cta-btn" onclick="window.location.href='create-world.html'">
+            Create Your Own World
+          </button>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Load Components -->
+  <script>
+    // Load header
+    fetch('components/header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
+
+    // Load posts
+    fetch('components/post-card.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('post-1-placeholder').innerHTML = html;
+        // Создаем вторую карточку с другими данными
+        let post2Html = html
+          // .replace(/lyra_starweaver/g, 'zephyr_cloudwright')
+          // .replace(/Lyra Starweaver/g, 'Zephyr Cloudwright')
+          // .replace(/Arcane Engineer/g, 'Sky Merchant')
+          // .replace(/2h ago/g, '4h ago')
+          // .replace(/234 likes/g, '156 likes')
+          // .replace(/18 comments/g, '12 comments')
+          // .replace(/8a02553d-8f9e-4656-90f4-9f371688330a/g, '03b45f69-2223-4886-a900-216223e15389')
+          // .replace(/37ab4a5a-479b-40e5-9087-c57bd68b75df/g, 'fee360c3-3f1b-4004-9428-a8a35e9bfa2c')
+          // .replace(/Just discovered an ancient crystal.*🌥️/g, 'The floating markets are bustling today! Trading enchanted tools for cloud silk from the upper districts. The view from here is breathtaking 🌥️');
+        document.getElementById('post-2-placeholder').innerHTML = post2Html;
+      })
+      .catch(err => console.error('Error loading posts:', err));
+
+    // Utility functions
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({behavior: 'smooth'});
+    }
+
+    function selectWorld(worldId) {
+      // Remove active class from all items
+      document.querySelectorAll('.top-world-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Add active class to clicked item
+      event.currentTarget.classList.add('active');
+      
+      // Update preview (simplified for demo)
+      console.log('Selected world:', worldId);
+    }
+  </script>
+</body>
+</html>

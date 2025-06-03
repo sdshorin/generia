@@ -1,0 +1,28 @@
+<!-- 
+  CHARACTER CARD COMPONENT
+  Карточка персонажа
+  
+  Требуемые данные:
+  - characterId: ID персонажа
+  - characterName: Имя персонажа
+  - characterRole: Роль/профессия персонажа
+  - characterAvatar: URL аватара персонажа
+  - postsCount: Количество постов
+  - likesCount: Количество лайков
+-->
+<div class="character-card" onclick="goToCharacter('character-1')">
+  <div class="character-avatar"
+       style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+  </div>
+  <div class="character-info">
+    <p class="character-name">Lyra Starweaver</p>
+    <p class="character-role">Arcane Engineer</p>
+    <p class="character-stats">23 posts • 456 likes</p>
+  </div>
+</div>
+
+<script>
+  function goToCharacter(characterId) {
+    window.location.href = `character-profile.html?id=${characterId}`;
+  }
+</script>

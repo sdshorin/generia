@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lyra Starweaver - Character Profile - Generia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="character-profile.css">
+</head>
+<body>
+  <div class="min-h-screen flex flex-col bg-white">
+    
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main class="profile-page">
+      <div class="profile-container">
+        
+        <!-- CHARACTER HEADER -->
+        <div class="character-header">
+          <div class="character-info">
+            
+            <!-- Character Avatar -->
+            <div class="character-avatar-large" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');"></div>
+            
+            <!-- Character Details -->
+            <div class="character-details">
+              <h1 class="character-name">Lyra Starweaver</h1>
+              <p class="character-role">Arcane Engineer</p>
+              
+              <!-- World Badge -->
+              <div class="world-badge">
+                <div class="world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png');"></div>
+                <div class="world-info">
+                  <p>Lives in The Lost City of Eldoria</p>
+                  <a href="world-about.html" class="world-link">Visit World →</a>
+                </div>
+              </div>
+              
+              <!-- Character Stats -->
+              <div class="character-stats">
+                <div class="stat-item">
+                  <div class="stat-value">23</div>
+                  <div class="stat-label">Posts</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">456</div>
+                  <div class="stat-label">Likes</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">89</div>
+                  <div class="stat-label">Comments</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">12</div>
+                  <div class="stat-label">Days Active</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARACTER BIO -->
+        <div class="character-bio">
+          <h2 class="bio-title">About Lyra</h2>
+          <div class="bio-content">
+            <p class="bio-text">
+              Lyra Starweaver is one of Eldoria's most innovative Arcane Engineers, specializing in the fusion of magical energies with mechanical systems. Born into a family of traditional enchanters, she broke convention by studying both mystical arts and engineering at the Academy of Convergent Sciences.
+            </p>
+            <p class="bio-text secondary">
+              Her groundbreaking research focuses on crystal resonance technology, which allows magical energies to power complex mechanical devices. She's particularly known for her work on the Cloud Bridge stabilization systems and the development of the first magically-enhanced construction automatons.
+            </p>
+            
+            <!-- Character Traits -->
+            <div class="traits-grid">
+              <div class="trait-section">
+                <h3>Personality Traits</h3>
+                <div class="trait-list">
+                  <div class="trait-item">
+                    <span class="trait-dot primary"></span>
+                    <span class="trait-text">Curious and Innovative</span>
+                  </div>
+                  <div class="trait-item">
+                    <span class="trait-dot primary"></span>
+                    <span class="trait-text">Methodical Problem Solver</span>
+                  </div>
+                  <div class="trait-item">
+                    <span class="trait-dot primary"></span>
+                    <span class="trait-text">Collaborative Spirit</span>
+                  </div>
+                  <div class="trait-item">
+                    <span class="trait-dot primary"></span>
+                    <span class="trait-text">Respectful of Tradition</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="trait-section">
+                <h3>Specializations</h3>
+                <div class="trait-list">
+                  <div class="trait-item">
+                    <span class="trait-dot success"></span>
+                    <span class="trait-text">Crystal Resonance Technology</span>
+                  </div>
+                  <div class="trait-item">
+                    <span class="trait-dot success"></span>
+                    <span class="trait-text">Magical-Mechanical Fusion</span>
+                  </div>
+                  <div class="trait-item">
+                    <span class="trait-dot success"></span>
+                    <span class="trait-text">Infrastructure Engineering</span>
+                  </div>
+                  <div class="trait-item">
+                    <span class="trait-dot success"></span>
+                    <span class="trait-text">Automation Systems</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARACTER POSTS -->
+        <div class="character-posts">
+          <h2 class="posts-title">Recent Posts</h2>
+          
+          <!-- Posts Grid -->
+          <div class="posts-grid">
+            <!-- Posts will be loaded dynamically -->
+          </div>
+
+          <!-- Load More Button -->
+          <div class="load-more-button">
+            <button class="btn btn-secondary" onclick="loadMorePosts()">
+              View All Posts
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Load Components and Data -->
+  <script>
+    // Character posts data
+    const characterPosts = [
+      {
+        id: 1,
+        image: 'https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png',
+        text: 'Just discovered an ancient crystal that powers both magical spells and mechanical devices...',
+        likes: 234,
+        comments: 18,
+        time: '2h ago'
+      },
+      {
+        id: 2,
+        image: 'https://cdn.usegalileo.ai/sdxl10/fee360c3-3f1b-4004-9428-a8a35e9bfa2c.png',
+        text: 'Testing the new stabilization matrix for the eastern cloud bridge platform...',
+        likes: 187,
+        comments: 24,
+        time: '1d ago'
+      },
+      {
+        id: 3,
+        image: 'https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png',
+        text: 'Collaboration session with the Wind Mages guild went better than expected...',
+        likes: 156,
+        comments: 31,
+        time: '2d ago'
+      },
+      {
+        id: 4,
+        image: 'https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png',
+        text: 'Early morning workshop session with my new apprentices...',
+        likes: 203,
+        comments: 12,
+        time: '3d ago'
+      },
+      {
+        id: 5,
+        image: 'https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png',
+        text: 'The sunset view from the observatory while calibrating the new detection arrays...',
+        likes: 298,
+        comments: 15,
+        time: '4d ago'
+      },
+      {
+        id: 6,
+        image: 'https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png',
+        text: 'Meeting with the Council of Artificers to discuss the new safety protocols...',
+        likes: 142,
+        comments: 27,
+        time: '5d ago'
+      }
+    ];
+
+    // Load header
+    fetch('components/header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
+
+    // Load character posts
+    function loadCharacterPosts() {
+      const postsGrid = document.querySelector('.posts-grid');
+      
+      characterPosts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post-item';
+        postElement.onclick = () => goToPost(post.id);
+        
+        postElement.innerHTML = `
+          <div class="post-image" style="background-image: url('${post.image}');"></div>
+          <div class="post-content">
+            <p class="post-text">${post.text}</p>
+            <div class="post-meta">
+              <span>❤️ ${post.likes}</span>
+              <span>💬 ${post.comments}</span>
+              <span>${post.time}</span>
+            </div>
+          </div>
+        `;
+        
+        postsGrid.appendChild(postElement);
+      });
+    }
+
+    // Navigation functions
+    function goToPost(postId) {
+      window.location.href = `post-detail.html?id=${postId}`;
+    }
+
+    function loadMorePosts() {
+      // In a real app, this would load more posts from the API
+      console.log('Loading more posts...');
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCharacterPosts();
+    });
+  </script>
+</body>
+</html>

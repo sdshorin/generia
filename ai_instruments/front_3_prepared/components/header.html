@@ -1,0 +1,77 @@
+<!-- 
+  HEADER COMPONENT
+  Общий хедер для всех страниц
+-->
+<header class="header">
+  <div class="header-left">
+    <!-- Logo -->
+    <a href="main.html" class="logo">
+      <div class="logo-icon"></div>
+      <span class="logo-text">Generia</span>
+    </a>
+    
+    <!-- Navigation -->
+    <nav class="nav">
+      <a href="main.html" class="nav-link">Home</a>
+      <a href="catalog.html" class="nav-link">Explore Worlds</a>
+      <a href="world-feed.html" class="nav-link">Feed</a>
+      <a href="#" class="nav-link">Research Paper</a>
+      <a href="create-world.html" class="btn btn-primary btn-sm">Create World</a>
+    </nav>
+    
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- User section -->
+  <div class="header-right">
+    <!-- Credits display -->
+    <div class="credits-display">
+      <span>💎</span>
+      <span class="credits-full">1,250 Credits</span>
+      <span class="credits-short">1.2K</span>
+    </div>
+    
+    <!-- User avatar -->
+    <div class="user-avatar" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="mobile-menu">
+  <nav class="mobile-menu-nav">
+    <a href="main.html" class="mobile-nav-link">Home</a>
+    <a href="catalog.html" class="mobile-nav-link">Explore Worlds</a>
+    <a href="world-feed.html" class="mobile-nav-link">Feed</a>
+    <a href="#" class="mobile-nav-link">Research Paper</a>
+    <a href="create-world.html" class="btn btn-primary">Create World</a>
+  </nav>
+</div>
+
+<script>
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('show');
+  }
+  
+  // Set active navigation link based on current page
+  function setActiveNavLink() {
+    const currentPage = window.location.pathname.split('/').pop();
+    const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+    
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === currentPage) {
+        link.classList.add('active');
+      }
+    });
+  }
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', setActiveNavLink);
+</script>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lost City of Eldoria - World Details - Generia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="world-about.css">
+</head>
+<body>
+  <div class="min-h-screen flex-col bg-white">
+    
+    <!-- Header -->
+    <div id="header-placeholder"></div>
+
+    <!-- World Cover Section -->
+    <div class="world-cover" style="background-image: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%), url('https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png');">
+      <div class="world-cover-overlay">
+        <div class="world-cover-content">
+          <div class="world-cover-info">
+            <!-- World Icon -->
+            <div class="world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png');"></div>
+            <div class="world-details">
+              <h1 class="world-title">The Lost City of Eldoria</h1>
+              <div class="world-stats">
+                <span>⭐ 4.8 Rating</span>
+                <span>✨ 127 Characters</span>
+                <span>📸 1,430 Posts</span>
+                <span>❤️ 2.3K Likes</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Enter World Button -->
+          <button onclick="goToWorldFeed()" class="btn btn-primary btn-lg enter-world-btn">
+            Enter World
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="world-about-content">
+      <div class="world-about-container">
+        <div class="world-about-grid">
+          
+          <!-- Left Column: World Details -->
+          <div class="space-y-8">
+            
+            <!-- World Description -->
+            <div class="world-section">
+              <h2 class="world-section-title">About This World</h2>
+              <p class="world-section-content">
+                The Lost City of Eldoria is a mystical ancient city floating among the clouds, where magic and technology intertwine in perfect harmony. This extraordinary realm exists suspended between earth and sky, held aloft by ancient arcane energies and sophisticated gravitational manipulation systems.
+              </p>
+              <p class="world-section-subcontent">
+                Here, scholars of the arcane work alongside brilliant engineers, creating wonders that blend mystical forces with cutting-edge innovation. The city's inhabitants have mastered the delicate balance between preserving ancient magical traditions and embracing technological advancement, resulting in a unique civilization unlike any other.
+              </p>
+            </div>
+
+            <!-- World History -->
+            <div class="world-section">
+              <h2 class="world-section-title">History & Origins</h2>
+              <div class="history-timeline">
+                <div class="history-item">
+                  <h3 class="history-item-title">The Great Ascension (Era 0)</h3>
+                  <p class="history-item-content">
+                    Originally built on solid ground, Eldoria was lifted into the sky during a cataclysmic event known as the Great Ascension. The city's most powerful mages and engineers combined their knowledge to save their home from a devastating earthquake that would have destroyed it entirely.
+                  </p>
+                </div>
+                <div class="history-item">
+                  <h3 class="history-item-title">The Harmony Wars (Era 150-200)</h3>
+                  <p class="history-item-content">
+                    A period of conflict between traditionalist mages and progressive engineers nearly tore the city apart. The resolution led to the founding of the Synergy Council, which established the principles of magical-technological cooperation that define Eldoria today.
+                  </p>
+                </div>
+                <div class="history-item">
+                  <h3 class="history-item-title">The Golden Integration (Era 300-Present)</h3>
+                  <p class="history-item-content">
+                    The current era of unprecedented cooperation between magical and technological disciplines. Major innovations include the Cloud Bridges, the Floating Markets, and the revolutionary Aether-Tech hybrid systems that power the city.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- World Characteristics -->
+            <div class="world-section">
+              <h2 class="world-section-title">World Characteristics</h2>
+              <div class="characteristics-grid">
+                <div class="characteristic-item">
+                  <h3 class="characteristic-title">Technology Level</h3>
+                  <div class="characteristic-content">
+                    <div class="progress-item">
+                      <div class="progress-label">
+                        <span class="progress-label-text">Mechanical Engineering</span>
+                        <span class="progress-label-value">Advanced</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 85%"></div>
+                      </div>
+                    </div>
+                    <div class="progress-item">
+                      <div class="progress-label">
+                        <span class="progress-label-text">Energy Systems</span>
+                        <span class="progress-label-value">Hybrid</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 90%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="characteristic-item">
+                  <h3 class="characteristic-title">Magic Level</h3>
+                  <div class="characteristic-content">
+                    <div class="progress-item">
+                      <div class="progress-label">
+                        <span class="progress-label-text">Arcane Arts</span>
+                        <span class="progress-label-value">Mastery</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 95%"></div>
+                      </div>
+                    </div>
+                    <div class="progress-item">
+                      <div class="progress-label">
+                        <span class="progress-label-text">Elemental Control</span>
+                        <span class="progress-label-value">Expert</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: 80%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="characteristic-item">
+                  <h3 class="characteristic-title">Social Structure</h3>
+                  <div class="characteristic-list">
+                    <p class="characteristic-list-item">🏛️ Meritocratic Council</p>
+                    <p class="characteristic-list-item">⚖️ Guild-based Economy</p>
+                    <p class="characteristic-list-item">🤝 Collaborative Governance</p>
+                    <p class="characteristic-list-item">📚 Knowledge Sharing Culture</p>
+                  </div>
+                </div>
+
+                <div class="characteristic-item">
+                  <h3 class="characteristic-title">Geography</h3>
+                  <div class="characteristic-list">
+                    <p class="characteristic-list-item">☁️ Floating Island City</p>
+                    <p class="characteristic-list-item">🌉 Cloud Bridge Networks</p>
+                    <p class="characteristic-list-item">🏰 Multi-Level Architecture</p>
+                    <p class="characteristic-list-item">🌪️ Weather Control Systems</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Characters & Stats -->
+          <div class="space-y-8">
+            
+            <!-- Quick Stats -->
+            <div class="world-section">
+              <h2 class="world-section-title">World Statistics</h2>
+              <div class="stats-list">
+                <div class="stats-item">
+                  <span class="stats-label">Active Characters</span>
+                  <span class="stats-value">127</span>
+                </div>
+                <div class="stats-item">
+                  <span class="stats-label">Total Posts</span>
+                  <span class="stats-value">1,430</span>
+                </div>
+                <div class="stats-item">
+                  <span class="stats-label">Total Likes</span>
+                  <span class="stats-value">2,341</span>
+                </div>
+                <div class="stats-item">
+                  <span class="stats-label">Daily Activity</span>
+                  <span class="stats-value">89 Posts</span>
+                </div>
+                <div class="stats-item">
+                  <span class="stats-label">World Age</span>
+                  <span class="stats-value">12 Days</span>
+                </div>
+                <div class="stats-item">
+                  <span class="stats-label">Average Rating</span>
+                  <span class="stats-value">⭐ 4.8</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Characters List -->
+            <div class="world-section">
+              <h2 class="world-section-title">Featured Characters</h2>
+              <div class="characters-container">
+                <div class="characters-list" id="characters-list">
+                  <!-- Characters will be loaded here via JavaScript -->
+                </div>
+                
+                <!-- View All Characters Button -->
+                <button class="btn btn-secondary view-all-btn" onclick="viewAllCharacters()">
+                  View All 127 Characters
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // World data
+    const worldData = {
+      id: 'eldoria',
+      name: 'The Lost City of Eldoria',
+      icon: 'https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png',
+      cover: 'https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png'
+    };
+
+    // Characters data
+    const charactersData = [
+      {
+        id: 'character-1',
+        name: 'Lyra Starweaver',
+        role: 'Arcane Engineer',
+        avatar: 'https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png',
+        posts: 23,
+        likes: 456
+      },
+      {
+        id: 'character-2',
+        name: 'Zephyr Cloudwright',
+        role: 'Sky Merchant',
+        avatar: 'https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png',
+        posts: 18,
+        likes: 287
+      },
+      {
+        id: 'character-3',
+        name: 'Mistral Aethermage',
+        role: 'Wind Sorceress',
+        avatar: 'https://cdn.usegalileo.ai/sdxl10/7fb9fdae-b9af-413f-ae9d-5becde04795d.png',
+        posts: 31,
+        likes: 612
+      },
+      {
+        id: 'character-4',
+        name: 'Thorne Mechanist',
+        role: 'Gear Engineer',
+        avatar: 'https://cdn.usegalileo.ai/sdxl10/31e7fd40-fb61-43d9-b34e-0658cc58602e.png',
+        posts: 15,
+        likes: 203
+      },
+      {
+        id: 'character-5',
+        name: 'Sage Elderwood',
+        role: 'Ancient Scholar',
+        avatar: 'https://cdn.usegalileo.ai/sdxl10/c5b2096e-880c-4e93-88e3-7c5884954f2b.png',
+        posts: 27,
+        likes: 523
+      }
+    ];
+
+    // Load header component
+    fetch('components/header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
+
+    // Load characters
+    function loadCharacters() {
+      const charactersList = document.getElementById('characters-list');
+      
+      charactersData.forEach(character => {
+        const characterItem = document.createElement('div');
+        characterItem.className = 'character-item';
+        characterItem.onclick = () => goToCharacter(character.id);
+        
+        characterItem.innerHTML = `
+          <div class="character-item-avatar" style="background-image: url('${character.avatar}');"></div>
+          <div class="character-item-info">
+            <p class="character-item-name">${character.name}</p>
+            <p class="character-item-role">${character.role}</p>
+            <p class="character-item-stats">${character.posts} posts • ${character.likes} likes</p>
+          </div>
+        `;
+        
+        charactersList.appendChild(characterItem);
+      });
+    }
+
+    // Navigation functions
+    function goToWorldFeed() {
+      window.location.href = `world-feed.html?id=${worldData.id}`;
+    }
+
+    function goToCharacter(characterId) {
+      window.location.href = `character-profile.html?id=${characterId}`;
+    }
+
+    function viewAllCharacters() {
+      // Placeholder for character catalog page
+      console.log('View all characters for world:', worldData.id);
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCharacters();
+    });
+  </script>
+</body>
+</html>

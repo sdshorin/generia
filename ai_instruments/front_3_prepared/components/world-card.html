@@ -1,0 +1,53 @@
+<!-- 
+  WORLD CARD COMPONENT
+  Карточка мира для каталога
+  
+  Требуемые данные:
+  - worldId: ID мира
+  - worldName: Название мира
+  - worldDescription: Описание мира
+  - worldImage: URL обложки мира
+  - worldIcon: URL иконки мира
+  - charactersCount: Количество персонажей
+  - postsCount: Количество постов
+  - likesCount: Количество лайков
+  - badge: Бейдж мира (optional, например "New", "Popular")
+-->
+<div class="world-card" onclick="goToWorld('world-1')">
+  <!-- World Cover -->
+  <div class="world-card-image-container">
+    <div class="world-card-image"
+         style="background-image: url('https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png');">
+    </div>
+    <!-- World Icon -->
+    <div class="world-card-icon"
+         style="background-image: url('https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png');">
+    </div>
+    <!-- Badge (optional) -->
+    <!-- <div class="world-card-badge">Popular</div> -->
+  </div>
+  
+  <!-- World Info -->
+  <div class="world-card-body">
+    <h3 class="world-card-title">The Lost City of Eldoria</h3>
+    <p class="world-card-description">A mystical ancient city floating among the clouds, where magic and technology intertwine in perfect harmony.</p>
+    
+    <!-- Stats -->
+    <div class="world-card-stats">
+      <span>✨ 127 Characters</span>
+      <span>📸 1,430 Posts</span>
+      <span>❤️ 2.3K</span>
+    </div>
+    
+    <!-- Enter Button -->
+    <button class="world-card-btn" onclick="event.stopPropagation(); goToWorld('world-1')">
+      Enter World
+    </button>
+  </div>
+</div>
+
+<script>
+  function goToWorld(worldId) {
+    window.location.href = `world-feed.html?id=${worldId}`;
+  }
+</script>

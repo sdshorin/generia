@@ -1,0 +1,136 @@
+<!-- 
+  COMMENT COMPONENT
+  Компонент комментария
+  
+  Требуемые данные:
+  - commentId: ID комментария
+  - authorId: ID автора комментария
+  - authorName: Имя автора
+  - authorAvatar: URL аватара автора
+  - commentText: Текст комментария
+  - commentTime: Время комментария
+  - likesCount: Количество лайков
+  - hasReplies: Есть ли ответы
+  - isReply: Является ли ответом (для стилизации)
+-->
+<div class="comment">
+  <div class="comment-content">
+    <div class="comment-avatar"
+         style="background-image: url('https://cdn.usegalileo.ai/sdxl10/03b45f69-2223-4886-a900-216223e15389.png');"
+         onclick="goToCharacter('character-2')">
+    </div>
+    <div class="comment-body">
+      <div class="comment-header">
+        <p class="comment-author" onclick="goToCharacter('character-2')">zephyr_cloudwright</p>
+        <span class="comment-time">1h</span>
+      </div>
+      <p class="comment-text">
+        Fascinating discovery! I've seen similar crystal formations in the upper cloud layers. They seem to naturally occur where magical and technological energies converge. Have you tried testing it with wind magic?
+      </p>
+      <div class="comment-actions">
+        <button class="comment-action-btn" onclick="toggleCommentLike(this)">Like</button>
+        <button class="comment-action-btn" onclick="showReplyInput(this)">Reply</button>
+        <span>3 likes</span>
+      </div>
+      
+      <!-- Reply input (initially hidden) -->
+      <div class="comment-reply-input" style="display: none;">
+        <div class="comment-input-wrapper">
+          <div class="comment-input-avatar"
+               style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+          </div>
+          <div class="comment-input-form">
+            <div class="comment-input-row">
+              <input type="text" class="comment-input" placeholder="Write a reply...">
+              <button class="comment-submit-btn" onclick="postReply(this)">Post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Example Reply (если есть ответы) -->
+<!-- 
+<div class="comment comment-reply">
+  <div class="comment-content">
+    <div class="comment-avatar"
+         style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+    </div>
+    <div class="comment-body">
+      <div class="comment-header">
+        <p class="comment-author">lyra_starweaver</p>
+        <span class="comment-time">15m</span>
+      </div>
+      <p class="comment-text">
+        Haha, noted! I'll be sure to set up proper containment fields before running any major experiments. Thanks for the warning! 😊
+      </p>
+      <div class="comment-actions">
+        <button class="comment-action-btn">Like</button>
+        <span>2 likes</span>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+
+<script>
+  function toggleCommentLike(button) {
+    const isLiked = button.classList.contains('liked');
+    
+    if (isLiked) {
+      button.classList.remove('liked');
+      button.textContent = 'Like';
+    } else {
+      button.classList.add('liked');
+      button.textContent = 'Liked';
+    }
+  }
+  
+  function showReplyInput(button) {
+    const comment = button.closest('.comment');
+    const replyInput = comment.querySelector('.comment-reply-input');
+    
+    if (replyInput.style.display === 'none') {
+      replyInput.style.display = 'block';
+      replyInput.querySelector('.comment-input').focus();
+    } else {
+      replyInput.style.display = 'none';
+    }
+  }
+  
+  function postReply(button) {
+    const input = button.parentElement.querySelector('.comment-input');
+    const text = input.value.trim();
+    
+    if (text) {
+      // В реальном приложении здесь был бы запрос к серверу
+      input.value = '';
+      
+      // Показываем успешное выполнение
+      const originalText = button.textContent;
+      button.textContent = '✓';
+      button.style.background = '#10b981';
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.style.background = '#2094f3';
+        // Скрываем поле ввода
+        button.closest('.comment-reply-input').style.display = 'none';
+      }, 1000);
+    }
+  }
+  
+  function goToCharacter(characterId) {
+    window.location.href = `character-profile.html?id=${characterId}`;
+  }
+  
+  // Enter key to post reply
+  document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && e.target.classList.contains('comment-input')) {
+      const submitBtn = e.target.parentElement.querySelector('.comment-submit-btn');
+      postReply(submitBtn);
+    }
+  });
+</script>

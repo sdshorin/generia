@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create World - Generia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="create-world.css">
+</head>
+<body>
+  <div class="min-h-screen flex flex-col bg-white">
+    
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
+    
+    <!-- MAIN CONTENT -->
+    <main class="flex-1">
+      <div class="container">
+        
+        <!-- CREATE FORM (Initial State) -->
+        <div id="create-form" class="create-form-state">
+          <!-- Page Header -->
+          <div class="page-header">
+            <h1 class="page-title">Create Your World</h1>
+            <p class="page-subtitle">Describe your vision and watch our AI bring it to life with characters, stories, and endless possibilities.</p>
+          </div>
+
+          <!-- Main Form Card -->
+          <div class="form-card">
+            
+            <!-- Prompt Input -->
+            <div class="form-group">
+              <label class="form-label">Describe Your World</label>
+              <textarea
+                id="world-prompt"
+                placeholder="A mystical ancient city floating among the clouds, where magic and technology intertwine..."
+                rows="6"
+                class="form-textarea"
+              ></textarea>
+              <p class="form-help-text">Be specific about the setting, culture, technology level, and atmosphere you envision.</p>
+            </div>
+
+            <!-- Character Count Slider -->
+            <div class="form-group">
+              <div class="slider-header">
+                <label class="form-label">Number of Characters</label>
+                <span id="character-count" class="slider-value">15</span>
+              </div>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="character-slider"
+                  min="5"
+                  max="50"
+                  value="15"
+                  class="slider"
+                >
+              </div>
+              <div class="slider-labels">
+                <span>5 characters</span>
+                <span>50 characters</span>
+              </div>
+            </div>
+
+            <!-- Posts Count Slider -->
+            <div class="form-group">
+              <div class="slider-header">
+                <label class="form-label">Number of Posts</label>
+                <span id="posts-count" class="slider-value">30</span>
+              </div>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="posts-slider"
+                  min="10"
+                  max="100"
+                  value="30"
+                  class="slider"
+                >
+              </div>
+              <div class="slider-labels">
+                <span>10 posts</span>
+                <span>100 posts</span>
+              </div>
+            </div>
+
+            <!-- Cost Display -->
+            <div class="cost-display">
+              <div class="cost-header">
+                <span class="cost-label">Generation Cost</span>
+                <span id="total-cost" class="cost-value">💎 75 Credits</span>
+              </div>
+              <div class="cost-breakdown">
+                <span>Characters: <span id="character-cost">45</span> • Posts: <span id="posts-cost">30</span></span>
+              </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generate-btn" class="btn btn-primary btn-large" onclick="startGeneration()">
+              Generate World
+            </button>
+          </div>
+        </div>
+
+        <!-- GENERATION PROGRESS (Hidden initially) -->
+        <div id="generation-progress" class="generation-progress-state" style="display: none;">
+          <!-- Progress Header -->
+          <div class="progress-header">
+            <h1 class="progress-title">Creating Your World</h1>
+            <p class="progress-subtitle">AI is generating your unique world. This may take a few minutes...</p>
+          </div>
+
+          <!-- Progress Steps -->
+          <div class="progress-steps">
+            <div class="progress-step active" id="step-1">
+              <div class="progress-step-icon">1</div>
+              <div class="progress-step-content">
+                <h3>Generating World</h3>
+                <p>Creating world description and setting</p>
+              </div>
+            </div>
+            
+            <div class="progress-step" id="step-2">
+              <div class="progress-step-icon">2</div>
+              <div class="progress-step-content">
+                <h3>Creating Characters</h3>
+                <p>Designing unique AI personalities</p>
+              </div>
+            </div>
+            
+            <div class="progress-step" id="step-3">
+              <div class="progress-step-icon">3</div>
+              <div class="progress-step-content">
+                <h3>Generating Posts</h3>
+                <p>Creating content and stories</p>
+              </div>
+            </div>
+            
+            <div class="progress-step" id="step-4">
+              <div class="progress-step-icon">4</div>
+              <div class="progress-step-content">
+                <h3>Creating Images</h3>
+                <p>Generating visual content</p>
+              </div>
+            </div>
+            
+            <div class="progress-step" id="step-5">
+              <div class="progress-step-icon">5</div>
+              <div class="progress-step-content">
+                <h3>Building Connections</h3>
+                <p>Establishing character relationships</p>
+              </div>
+            </div>
+            
+            <div class="progress-step" id="step-6">
+              <div class="progress-step-icon">6</div>
+              <div class="progress-step-content">
+                <h3>Finalizing World</h3>
+                <p>Preparing your world for exploration</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bars -->
+          <div class="progress-bars">
+            <div class="progress-bar-item">
+              <div class="progress-bar-header">
+                <span>Characters Created</span>
+                <span id="characters-progress-text">0 / 15</span>
+              </div>
+              <div class="progress-bar">
+                <div id="characters-progress-fill" class="progress-bar-fill"></div>
+              </div>
+            </div>
+            
+            <div class="progress-bar-item">
+              <div class="progress-bar-header">
+                <span>Posts Generated</span>
+                <span id="posts-progress-text">0 / 30</span>
+              </div>
+              <div class="progress-bar">
+                <div id="posts-progress-fill" class="progress-bar-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cancel Button -->
+          <button class="btn btn-secondary" onclick="cancelGeneration()">
+            Cancel Generation
+          </button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Load Header Component -->
+  <script>
+    fetch('components/header.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('header-placeholder').innerHTML = html;
+      })
+      .catch(err => console.error('Error loading header:', err));
+  </script>
+
+  <!-- Page Logic -->
+  <script>
+    // Update character count and cost
+    const characterSlider = document.getElementById('character-slider');
+    const characterCount = document.getElementById('character-count');
+    const characterCost = document.getElementById('character-cost');
+    
+    characterSlider.addEventListener('input', function() {
+      const value = this.value;
+      characterCount.textContent = value;
+      characterCost.textContent = value * 3; // 3 credits per character
+      updateSliderProgress(this);
+      updateTotalCost();
+    });
+
+    // Update posts count and cost
+    const postsSlider = document.getElementById('posts-slider');
+    const postsCount = document.getElementById('posts-count');
+    const postsCost = document.getElementById('posts-cost');
+    
+    postsSlider.addEventListener('input', function() {
+      const value = this.value;
+      postsCount.textContent = value;
+      postsCost.textContent = value * 1; // 1 credit per post
+      updateSliderProgress(this);
+      updateTotalCost();
+    });
+
+    // Update slider visual progress
+    function updateSliderProgress(slider) {
+      const value = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+      slider.style.background = `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${value}%, var(--color-border) ${value}%, var(--color-border) 100%)`;
+    }
+
+    // Update total cost
+    function updateTotalCost() {
+      const charCost = parseInt(characterCost.textContent);
+      const postCost = parseInt(postsCost.textContent);
+      const total = charCost + postCost;
+      document.getElementById('total-cost').textContent = `💎 ${total} Credits`;
+    }
+
+    // Initialize sliders
+    updateSliderProgress(characterSlider);
+    updateSliderProgress(postsSlider);
+
+    // Start generation process
+    function startGeneration() {
+      const prompt = document.getElementById('world-prompt').value.trim();
+      if (!prompt) {
+        alert('Please describe your world first!');
+        return;
+      }
+
+      // Switch to progress view
+      document.getElementById('create-form').style.display = 'none';
+      document.getElementById('generation-progress').style.display = 'block';
+
+      // Start simulation
+      simulateGeneration();
+    }
+
+    // Simulate generation process
+    function simulateGeneration() {
+      const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6'];
+      const maxCharacters = parseInt(characterCount.textContent);
+      const maxPosts = parseInt(postsCount.textContent);
+      
+      let currentStep = 0;
+      let charactersCreated = 0;
+      let postsCreated = 0;
+
+      const progressInterval = setInterval(() => {
+        // Update step progress
+        if (currentStep < steps.length) {
+          // Mark current step as complete
+          if (currentStep > 0) {
+            document.getElementById(steps[currentStep - 1]).classList.add('completed');
+          }
+          // Activate next step
+          if (currentStep < steps.length) {
+            document.getElementById(steps[currentStep]).classList.add('active');
+          }
+          currentStep++;
+        }
+
+        // Update character progress
+        if (charactersCreated < maxCharacters) {
+          charactersCreated += Math.floor(Math.random() * 3) + 1;
+          if (charactersCreated > maxCharacters) charactersCreated = maxCharacters;
+          
+          const charProgress = (charactersCreated / maxCharacters) * 100;
+          document.getElementById('characters-progress-fill').style.width = charProgress + '%';
+          document.getElementById('characters-progress-text').textContent = `${charactersCreated} / ${maxCharacters}`;
+        }
+
+        // Update posts progress
+        if (postsCreated < maxPosts) {
+          postsCreated += Math.floor(Math.random() * 5) + 1;
+          if (postsCreated > maxPosts) postsCreated = maxPosts;
+          
+          const postsProgress = (postsCreated / maxPosts) * 100;
+          document.getElementById('posts-progress-fill').style.width = postsProgress + '%';
+          document.getElementById('posts-progress-text').textContent = `${postsCreated} / ${maxPosts}`;
+        }
+
+        // Complete generation
+        if (currentStep >= steps.length && charactersCreated >= maxCharacters && postsCreated >= maxPosts) {
+          clearInterval(progressInterval);
+          
+          // Mark last step as complete
+          document.getElementById(steps[steps.length - 1]).classList.add('completed');
+          
+          // Redirect to world feed after delay
+          setTimeout(() => {
+            window.location.href = 'world-feed.html?id=new-world';
+          }, 2000);
+        }
+      }, 1500);
+    }
+
+    // Cancel generation
+    function cancelGeneration() {
+      if (confirm('Are you sure you want to cancel world generation?')) {
+        window.location.reload();
+      }
+    }
+  </script>
+</body>
+</html>

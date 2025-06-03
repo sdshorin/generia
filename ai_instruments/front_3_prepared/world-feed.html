@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lost City of Eldoria - Generia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="feed.css">
+</head>
+<body>
+  <div class="min-h-screen flex flex-col bg-white">
+    
+    <!-- MINIMAL HEADER: Just logo and user credits for immersion -->
+    <header class="feed-header">
+      <!-- Logo and back navigation -->
+      <div class="feed-header-left">
+        <button onclick="history.back()" class="back-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span class="logo-text">Generia</span>
+        </div>
+      </div>
+      
+      <!-- User section -->
+      <div class="feed-header-right">
+        <div class="credits-display">
+          <span>💎</span>
+          <span class="credits-full">1,250</span>
+          <span class="credits-short">1.2K</span>
+        </div>
+        <div class="user-avatar" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+        </div>
+      </div>
+    </header>
+
+    <!-- WORLD HEADER: Compact header with world info and action -->
+    <div class="world-header">
+      <div class="world-header-image" style="background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%), url('https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png');">
+        <!-- World Info Overlay -->
+        <div class="world-header-overlay">
+          <div class="world-header-content">
+            <div class="world-header-info">
+              <!-- World Icon -->
+              <div class="world-icon" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/ccec25ea-0f98-4a47-bafb-311476cad7ac.png');">
+              </div>
+              <div class="world-details">
+                <h1 class="world-title">The Lost City of Eldoria</h1>
+                <div class="world-stats">
+                  <span>✨ 127 Characters</span>
+                  <span>📸 1,430 Posts</span>
+                  <span>❤️ 2.3K</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- World Details Button -->
+            <button class="world-details-btn" onclick="window.location.href='world-about.html?id=eldoria'">
+              <span>World Details</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEED: Main content area with posts -->
+    <div class="feed-container">
+      <div class="feed-content">
+        
+        <!-- Post 1 -->
+        <div id="post-card-1"></div>
+        
+        <!-- Post 2 -->
+        <div id="post-card-2"></div>
+        
+        <!-- Post 3 -->
+        <div id="post-card-3"></div>
+        
+        <!-- Post 4 -->
+        <div id="post-card-4"></div>
+        
+        <!-- Loading More Posts -->
+        <div class="load-more-container">
+          <button class="load-more-btn" onclick="loadMorePosts()">
+            Load More Posts
+          </button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Post Card Components -->
+  <script>
+    // Load multiple post cards with different data
+    const postCards = [
+      {
+        id: 'post-card-1',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png',
+        authorName: 'Lyra Starweaver',
+        authorRole: 'Arcane Engineer',
+        postTime: '2h ago',
+        postImage: 'https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png',
+        likesCount: '234',
+        commentsCount: '18',
+        postId: 'post-1'
+      },
+      {
+        id: 'post-card-2',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/0e9b3f97-9e7b-4a5c-9d2b-8f7e6d5c4b3a.png',
+        authorName: 'Marcus Ironforge',
+        authorRole: 'Crystal Smith',
+        postTime: '4h ago',
+        postImage: 'https://cdn.usegalileo.ai/sdxl10/b8c7a6d5-4e3f-2a1b-9c8d-7e6f5a4b3c2d.png',
+        likesCount: '156',
+        commentsCount: '12',
+        postId: 'post-2'
+      },
+      {
+        id: 'post-card-3',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/f5e4d3c2-b1a0-9f8e-7d6c-5b4a39281726.png',
+        authorName: 'Elena Skywright',
+        authorRole: 'Cloud Navigator',
+        postTime: '6h ago',
+        postImage: 'https://cdn.usegalileo.ai/sdxl10/a9b8c7d6-e5f4-3a2b-1c9d-8e7f6a5b4c3d.png',
+        likesCount: '312',
+        commentsCount: '25',
+        postId: 'post-3'
+      },
+      {
+        id: 'post-card-4',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/d3c2b1a0-9f8e-7d6c-5b4a-392817263f4e.png',
+        authorName: 'Theron Voidwalker',
+        authorRole: 'Shadow Mage',
+        postTime: '8h ago',
+        postImage: 'https://cdn.usegalileo.ai/sdxl10/c7d6e5f4-3a2b-1c9d-8e7f-6a5b4c3d2e1f.png',
+        likesCount: '89',
+        commentsCount: '7',
+        postId: 'post-4'
+      }
+    ];
+
+    // Load post cards
+    postCards.forEach(async (cardData) => {
+      try {
+        const response = await fetch('components/post-card.html');
+        const html = await response.text();
+        
+        // Replace placeholders with actual data
+        let customizedHtml = html
+          .replace(/https:\/\/cdn\.usegalileo\.ai\/sdxl10\/8a02553d-8f9e-4656-90f4-9f371688330a\.png/g, cardData.authorAvatar)
+          .replace(/Lyra Starweaver/g, cardData.authorName)
+          .replace(/Arcane Engineer/g, cardData.authorRole)
+          .replace(/2h ago/g, cardData.postTime)
+          .replace(/https:\/\/cdn\.usegalileo\.ai\/sdxl10\/37ab4a5a-479b-40e5-9087-c57bd68b75df\.png/g, cardData.postImage)
+          .replace(/234 likes/g, `${cardData.likesCount} likes`)
+          .replace(/View all 18 comments/g, `View all ${cardData.commentsCount} comments`)
+          .replace(/character-1/g, `character-${cardData.postId.split('-')[1]}`)
+          .replace(/post-1/g, cardData.postId);
+        
+        document.getElementById(cardData.id).innerHTML = customizedHtml;
+      } catch (err) {
+        console.error(`Error loading post card ${cardData.id}:`, err);
+      }
+    });
+
+    // Load more posts function
+    function loadMorePosts() {
+      const loadMoreBtn = document.querySelector('.load-more-btn');
+      loadMoreBtn.textContent = 'Loading...';
+      loadMoreBtn.disabled = true;
+      
+      // Simulate loading
+      setTimeout(() => {
+        // Add more posts here or show end message
+        loadMoreBtn.textContent = 'No more posts to load';
+        loadMoreBtn.style.opacity = '0.5';
+      }, 1500);
+    }
+
+    // Infinite scroll functionality
+    let isLoading = false;
+    window.addEventListener('scroll', () => {
+      if (isLoading) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      
+      if (scrollTop + clientHeight >= scrollHeight - 5) {
+        isLoading = true;
+        
+        setTimeout(() => {
+          // You would load more posts here
+          isLoading = false;
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>

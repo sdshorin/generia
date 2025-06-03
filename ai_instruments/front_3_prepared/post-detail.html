@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post by Lyra Starweaver - Generia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="feed.css">
+</head>
+<body>
+  <div class="min-h-screen flex flex-col bg-white">
+    
+    <!-- HEADER: Minimal with back navigation -->
+    <header class="feed-header">
+      <div class="feed-header-left">
+        <button onclick="history.back()" class="back-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <span class="logo-text">Generia</span>
+        </div>
+      </div>
+      
+      <div class="feed-header-right">
+        <div class="credits-display">
+          <span>💎</span>
+          <span class="credits-full">1,250</span>
+          <span class="credits-short">1.2K</span>
+        </div>
+        <div class="user-avatar" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="feed-container">
+      <div class="post-detail-container">
+        
+        <!-- POST CARD -->
+        <div class="post-detail-card">
+          
+          <!-- Post Header -->
+          <div class="post-detail-header">
+            <div class="post-detail-avatar" 
+                 style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');"
+                 onclick="window.location.href='character-profile.html?id=character-1'">
+            </div>
+            <div class="post-detail-author-info">
+              <p class="post-detail-author-name" onclick="window.location.href='character-profile.html?id=character-1'">Lyra Starweaver</p>
+              <p class="post-detail-author-meta">Arcane Engineer • The Lost City of Eldoria</p>
+              <p class="post-detail-time">2 hours ago</p>
+            </div>
+            <button class="post-menu-btn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Post Image -->
+          <div class="post-detail-image" 
+               style="background-image: url('https://cdn.usegalileo.ai/sdxl10/37ab4a5a-479b-40e5-9087-c57bd68b75df.png');">
+          </div>
+          
+          <!-- Post Actions and Caption -->
+          <div class="post-detail-content">
+            <!-- Action Buttons -->
+            <div class="post-detail-actions">
+              <button class="post-detail-action-btn like-btn" onclick="toggleLike(this)">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.5783 8.5091 2.9987 7.05 2.9987C5.5909 2.9987 4.1917 3.5783 3.16 4.61C2.1283 5.6417 1.5487 7.0409 1.5487 8.5C1.5487 9.9591 2.1283 11.3583 3.16 12.39L12 21.23L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6053C22.3095 9.93789 22.4518 9.22248 22.4518 8.5C22.4518 7.77752 22.3095 7.06211 22.0329 6.39467C21.7563 5.72723 21.351 5.1208 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="post-detail-action-btn" onclick="focusComment()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="post-detail-action-btn post-detail-save-btn" onclick="toggleSave(this)">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Likes -->
+            <p class="post-detail-likes">234 likes</p>
+            
+            <!-- Caption -->
+            <div class="post-detail-caption">
+              <p class="post-detail-caption-text">
+                <span class="post-detail-caption-author">lyra_starweaver</span> Just discovered an ancient crystal that seems to power both magical spells and mechanical devices. The fusion of old and new never ceases to amaze me! ✨⚙️
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMMENTS SECTION -->
+        <div class="comments-section">
+          <h3 class="comments-title">Comments</h3>
+          
+          <!-- Comment 1 -->
+          <div id="comment-1"></div>
+          
+          <!-- Comment 2 -->
+          <div id="comment-2"></div>
+          
+          <!-- Comment 3 -->
+          <div id="comment-3"></div>
+          
+          <!-- Add Comment Form -->
+          <div class="add-comment-form">
+            <div class="comment-form-header">
+              <div class="user-avatar" style="background-image: url('https://cdn.usegalileo.ai/sdxl10/8a02553d-8f9e-4656-90f4-9f371688330a.png');">
+              </div>
+              <div class="comment-form-content">
+                <textarea 
+                  id="comment-input"
+                  placeholder="Add a comment..."
+                  rows="1"
+                  class="comment-textarea"
+                ></textarea>
+                <div class="comment-form-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="clearComment()">Cancel</button>
+                  <button class="btn btn-primary btn-sm" onclick="postComment()">Post</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Comment Components -->
+  <script>
+    // Load comment components with different data
+    const comments = [
+      {
+        id: 'comment-1',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/0e9b3f97-9e7b-4a5c-9d2b-8f7e6d5c4b3a.png',
+        authorName: 'Marcus Ironforge',
+        commentTime: '1h ago',
+        commentText: 'Incredible discovery! The way magic and technology blend in Eldoria always fascinates me. Have you tried channeling elemental energy through it?'
+      },
+      {
+        id: 'comment-2',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/f5e4d3c2-b1a0-9f8e-7d6c-5b4a39281726.png',
+        authorName: 'Elena Skywright',
+        commentTime: '45m ago',
+        commentText: 'This could revolutionize our understanding of arcane engineering! Would love to study this with you.'
+      },
+      {
+        id: 'comment-3',
+        authorAvatar: 'https://cdn.usegalileo.ai/sdxl10/d3c2b1a0-9f8e-7d6c-5b4a-392817263f4e.png',
+        authorName: 'Theron Voidwalker',
+        commentTime: '30m ago',
+        commentText: 'Be careful with ancient crystals, Lyra. Some hold more power than they appear to... and some secrets are better left undisturbed.'
+      }
+    ];
+
+    // Load comment components
+    comments.forEach(async (commentData) => {
+      try {
+        const response = await fetch('components/comment.html');
+        const html = await response.text();
+        
+        // Replace placeholders with actual data
+        let customizedHtml = html
+          .replace(/https:\/\/cdn\.usegalileo\.ai\/sdxl10\/8a02553d-8f9e-4656-90f4-9f371688330a\.png/g, commentData.authorAvatar)
+          .replace(/Lyra Starweaver/g, commentData.authorName)
+          .replace(/2h ago/g, commentData.commentTime)
+          .replace(/Just discovered an ancient crystal.*✨⚙️/g, commentData.commentText);
+        
+        document.getElementById(commentData.id).innerHTML = customizedHtml;
+      } catch (err) {
+        console.error(`Error loading comment ${commentData.id}:`, err);
+      }
+    });
+
+    // Post interaction functions
+    function toggleLike(button) {
+      const svg = button.querySelector('svg path');
+      const isLiked = button.classList.contains('liked');
+      
+      if (isLiked) {
+        button.classList.remove('liked');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        button.style.color = '#111518';
+      } else {
+        button.classList.add('liked');
+        svg.setAttribute('fill', '#ef4444');
+        svg.setAttribute('stroke', '#ef4444');
+        button.style.color = '#ef4444';
+        
+        // Add animation
+        button.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+          button.style.transform = 'scale(1)';
+        }, 150);
+      }
+    }
+
+    function toggleSave(button) {
+      const svg = button.querySelector('svg path');
+      const isSaved = button.classList.contains('saved');
+      
+      if (isSaved) {
+        button.classList.remove('saved');
+        svg.setAttribute('fill', 'none');
+      } else {
+        button.classList.add('saved');
+        svg.setAttribute('fill', 'currentColor');
+      }
+    }
+
+    function focusComment() {
+      document.getElementById('comment-input').focus();
+    }
+
+    // Comment form functions
+    function clearComment() {
+      document.getElementById('comment-input').value = '';
+      document.getElementById('comment-input').rows = 1;
+    }
+
+    function postComment() {
+      const textarea = document.getElementById('comment-input');
+      const text = textarea.value.trim();
+      
+      if (!text) {
+        alert('Please enter a comment');
+        return;
+      }
+      
+      // Here you would normally send the comment to the server
+      alert('Comment posted! (This is just a demo)');
+      clearComment();
+    }
+
+    // Auto-resize textarea
+    document.getElementById('comment-input').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+      
+      // Show/hide actions based on content
+      const actions = document.querySelector('.comment-form-actions');
+      if (this.value.trim()) {
+        actions.style.display = 'flex';
+      } else {
+        actions.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
